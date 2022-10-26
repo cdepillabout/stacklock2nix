@@ -1,6 +1,6 @@
-{}:
+{...}:
 
-# Nixpkgs with overlays for purescript2nix.  This is convenient to use with
+# Nixpkgs with overlays for stacklock2nix.  This is convenient to use with
 # `nix repl`:
 #
 # $ nix repl ./nix

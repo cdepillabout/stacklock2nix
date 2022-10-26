@@ -30,13 +30,13 @@
 
       # defaultPackage = forAllSystems (system: self.packages.${system}.hello);
 
-      devShells = forAllSystems (system: {
-        # This purescript development shell just contains dhall, purescript,
-        # and spago.  This is convenient for making changes to
-        # ./example-purescript-package. But most users can ignore this.
-        inherit (nixpkgsFor.${system}) purescript-dev-shell;
-      });
+      # devShells = forAllSystems (system: {
+      #   # This purescript development shell just contains dhall, purescript,
+      #   # and spago.  This is convenient for making changes to
+      #   # ./example-purescript-package. But most users can ignore this.
+      #   inherit (nixpkgsFor.${system}) purescript-dev-shell;
+      # });
 
-      devShell = forAllSystems (system: self.devShells.${system}.purescript-dev-shell);
+      # devShell = forAllSystems (system: self.devShells.${system}.purescript-dev-shell);
     };
 }
