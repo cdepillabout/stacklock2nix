@@ -1,5 +1,5 @@
 
-{ callPackage, fetchurl, lib, stdenv, remarshal, runCommand }:
+{ callPackage, fetchurl, lib, haskell, stdenv, remarshal, runCommand }:
 
 # This is the main purescript2nix function.  See ../../overlay.nix for an
 # example of how this can be used.
@@ -51,6 +51,38 @@ let
   };
 
   resolverParsed = readYAML resolverRawYaml;
+
+  resolverPackagesToOverlay = resolverPackages: hfinal: hprev:
+    let
+      resolverPkgToNixHaskPkg = resolverPkg:
+        let
+          # example: "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
+          hackageStr = resolverPkg.hackage;
+          pkgNameAndVersion = builtins.elemAt (builtins.split "@" hackageStr) 0;
+          pkgName = lib.getName pkgNameAndVersion;
+          pkgVersion = lib.getVersion pkgNameAndVersion;
+        in
+        {
+          name = pkgName;
+          value =
+            hfinal.callHackageDirect
+              {
+                pkg = pkgName;
+                ver = pkgVersion;
+                # TODO: Hash doesn't match up
+                sha256 = resolverPkg.pantry-tree.sha256;
+              }
+              {};
+        };
+    in
+    builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
+
+  haskPkgs = haskell.packages.ghc902.override (oldAttrs: {
+    overrides =
+      lib.composeExtensions
+        (oldAttrs.overrides or (_: _: {}))
+        (resolverPackagesToOverlay resolverParsed.packages);
+  });
 
 
   ## This is the `spago.dhall` file translated to Nix.
@@ -138,4 +170,5 @@ in
 # stackYamlLockParsed
 # snapshotInfo
 # resolverRawYaml
-resolverParsed
+# resolverParsed
+haskPkgs
