@@ -38,9 +38,12 @@ let
         let
           # example: "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
           hackageStr = resolverPkg.hackage;
-          pkgNameAndVersion = builtins.elemAt (builtins.split "@" hackageStr) 0;
+          splitHackageStr = builtins.split "(.*)@sha256:(.*)," hackageStr;
+          hackageStrMatches = builtins.elemAt splitHackageStr 1;
+          pkgNameAndVersion = builtins.elemAt hackageStrMatches 0;
           pkgName = lib.getName pkgNameAndVersion;
           pkgVersion = lib.getVersion pkgNameAndVersion;
+          pkgHash = builtins.elemAt hackageStrMatches 1;
         in
         {
           name = pkgName;
@@ -50,7 +53,7 @@ let
                 pkg = pkgName;
                 ver = pkgVersion;
                 # TODO: Hash doesn't match up
-                sha256 = resolverPkg.pantry-tree.sha256;
+                sha256 = pkgHash;
               }
               {};
         };
