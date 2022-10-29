@@ -17,6 +17,8 @@ final: prev: {
     stack-yaml-lock = ../example-haskell-package/stack.yaml.lock;
   };
 
+  readYAML = final.callPackage ./build-support/yaml.nix {};
+
   # # This is a simple develpoment shell with purescript and spago.  This can be
   # # used for building the ../example-purescript-package repo using purs and
   # # spago.

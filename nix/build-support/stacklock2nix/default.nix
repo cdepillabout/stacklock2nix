@@ -1,5 +1,5 @@
 
-{ callPackage, fetchurl, lib, haskell, stdenv, remarshal, runCommand }:
+{ callPackage, fetchurl, lib, haskell, stdenv, readYAML, remarshal, runCommand }:
 
 # This is the main purescript2nix function.  See ../../overlay.nix for an
 # example of how this can be used.
@@ -17,26 +17,6 @@
 }:
 
 let
-
-  fromYAML = rawYamlStr:
-    let
-      jsonOutputDrv =
-        runCommand
-          "from-yaml"
-          { inherit rawYamlStr; nativeBuildInputs = [ remarshal ]; }
-          "remarshal -if yaml -i <(echo \"$rawYamlStr\") -of json -o \"$out\"";
-    in
-    builtins.fromJSON (builtins.readFile jsonOutputDrv);
-
-  readYAML = path:
-    let
-      jsonOutputDrv =
-        runCommand
-          "from-yaml"
-          { nativeBuildInputs = [ remarshal ]; }
-          "remarshal -if yaml -i \"${path}\" -of json -o \"$out\"";
-    in
-    builtins.fromJSON (builtins.readFile jsonOutputDrv);
 
   stackYamlLockParsed = readYAML stack-yaml-lock;
 
