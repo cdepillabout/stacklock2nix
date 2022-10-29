@@ -32,30 +32,39 @@ let
 
   resolverParsed = readYAML resolverRawYaml;
 
+  fetchCabalFileRevision = callPackage ./fetchCabalFileRevision.nix {};
+
+  overrideCabalFileRevision = pkgName: pkgVersion: pkgCabalFileHash: haskPkgDrv:
+    let
+      cabalFileRevInfo = fetchCabalFileRevision {
+        name = pkgName;
+        version = pkgVersion;
+        hash = pkgCabalFileHash;
+      };
+    in
+    [];
+
   resolverPackagesToOverlay = resolverPackages: hfinal: hprev:
     let
       resolverPkgToNixHaskPkg = resolverPkg:
         let
           # example: "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
           hackageStr = resolverPkg.hackage;
-          splitHackageStr = builtins.split "(.*)@sha256:(.*)," hackageStr;
+          splitHackageStr = builtins.split "(.*)@sha256:(.*),(.*)" hackageStr;
           hackageStrMatches = builtins.elemAt splitHackageStr 1;
           pkgNameAndVersion = builtins.elemAt hackageStrMatches 0;
           pkgName = lib.getName pkgNameAndVersion;
           pkgVersion = lib.getVersion pkgNameAndVersion;
-          pkgHash = builtins.elemAt hackageStrMatches 1;
+          pkgCabalFileHash = builtins.elemAt hackageStrMatches 1;
+          pkgCabalFileLen = builtins.elemAt hackageStrMatches 2;
+          # TODO: My idea for a hacky cabal file fetcher:
+          # just try downloading revisions from 0, and look for the first one
+          # that has a matching hash.
         in
         {
           name = pkgName;
           value =
-            hfinal.callHackageDirect
-              {
-                pkg = pkgName;
-                ver = pkgVersion;
-                # TODO: Hash doesn't match up
-                sha256 = pkgHash;
-              }
-              {};
+            overrideCabalFileRevision pkgName pkgVersion pkgCabalFileHash (hfinal.callHackage pkgName pkgVersion {});
         };
     in
     builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
@@ -154,4 +163,5 @@ in
 # snapshotInfo
 # resolverRawYaml
 # resolverParsed
-haskPkgs
+# haskPkgs
+fetchCabalFileRevision
