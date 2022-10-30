@@ -28,6 +28,8 @@
 
 let
 
+  readYAML = callPackage ./yaml.nix {};
+
   stackYamlParsed = readYAML stack-yaml;
 
   stackYamlLockParsed = readYAML stack-yaml-lock;
