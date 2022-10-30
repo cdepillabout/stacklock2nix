@@ -67,9 +67,13 @@ let
           pkgCabalFileHash = builtins.elemAt hackageStrMatches 1;
           pkgCabalFileLen = builtins.elemAt hackageStrMatches 2;
           additionalArgs =
+            if pkgName == "gi-glib" then { glib = pkgs.glib; } else
             if pkgName == "gi-gmodule" then { gmodule = null; } else
             if pkgName == "gi-harfbuzz" then { harfbuzz-gobject = null; } else
             if pkgName == "gi-vte" then { vte_291 = pkgs.vte; } else
+            if pkgName == "glib" then { glib = pkgs.glib; } else
+            if pkgName == "haskell-gi" then { glib = pkgs.glib; gobject-introspection = pkgs.gobject-introspection; } else
+            if pkgName == "haskell-gi-base" then { glib = pkgs.glib; } else
             if pkgName == "splitmix" then { testu01 = null; } else
             if pkgName == "termonad" then { vte_291 = pkgs.vte; } else
             if pkgName == "zlib" then { zlib = pkgs.zlib; } else
@@ -78,7 +82,11 @@ let
         {
           name = pkgName;
           value =
-            overrideCabalFileRevision pkgName pkgVersion pkgCabalFileHash (hfinal.callHackage pkgName pkgVersion additionalArgs);
+            overrideCabalFileRevision
+              pkgName
+              pkgVersion
+              pkgCabalFileHash
+              (hfinal.callHackage pkgName pkgVersion additionalArgs);
         };
     in
     builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
@@ -131,6 +139,14 @@ let
     clock = haskell.lib.dontCheck hprev.clock;
     colour = haskell.lib.dontCheck hprev.colour;
     doctest = haskell.lib.dontCheck hprev.doctest;
+    doctest-parallel = haskell.lib.dontCheck hprev.doctest-parallel;
+    # glib =
+    #   lib.pipe
+    #     hprev.glib
+    #     [ (haskell.lib.compose.disableHardening ["fortify"])
+    #       # (haskell.lib.compose.addPkgconfigDepend pkgs.glib)
+    #       # (haskell.lib.compose.addBuildTool hfinal.gtk2hs-buildtools)
+    #     ];
     hashable = haskell.lib.dontCheck hprev.hashable;
     hspec = haskell.lib.dontCheck hprev.hspec;
     hspec-core = haskell.lib.dontCheck hprev.hspec-core;
@@ -139,6 +155,8 @@ let
     mockery = haskell.lib.dontCheck hprev.mockery;
     nanospec = haskell.lib.dontCheck hprev.nanospec;
     random = haskell.lib.dontCheck hprev.random;
+    # Disabling doctests.
+    regex-tdfa = haskell.lib.compose.overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
     smallcheck = haskell.lib.dontCheck hprev.smallcheck;
     splitmix = haskell.lib.dontCheck hprev.splitmix;
     syb = haskell.lib.dontCheck hprev.syb;
