@@ -16,6 +16,6 @@ cabal2nixArgsOverrides {
   "haskell-gi" = ver: { glib = pkgs.glib; gobject-introspection = pkgs.gobject-introspection; };
   "haskell-gi-base" = ver: { glib = pkgs.glib; };
   "splitmix" = ver: { testu01 = null; };
-  "termonad" = ver: { vte_291 = pkgs.vte; };
+  "termonad" = ver: { vte_291 = pkgs.vte; gtk3 = pkgs.gtk3; pcre2 = pkgs.pcre2;};
   "zlib" = ver: { zlib = pkgs.zlib; };
 }

@@ -17,9 +17,9 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: nightly-2022-10-18
-# resolver:
-#   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/30.yaml
+# resolver: nightly-2022-10-18
+resolver:
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/30.yaml
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -41,27 +41,27 @@ packages:
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
-# extra-deps: []
-extra-deps:
+extra-deps: []
+# extra-deps:
 
-  # dep from hackage
-  - unagi-streams-0.2.7
+#   # dep from hackage
+#   - unagi-streams-0.2.7
 
-  # git dep
-  - git: https://github.com/haskell-servant/servant-cassava
-    commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
+#   # git dep
+#   - git: https://github.com/haskell-servant/servant-cassava
+#     commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
 
-  # git dep with subdir
-  - git: https://github.com/haskell-servant/servant
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    subdir: servant-client
+#   # git dep with subdir
+#   - git: https://github.com/haskell-servant/servant
+#     commit: 1fba9dc6048cea6184964032b861b052cd54878c
+#     subdir: servant-client
 
-  # git dep with multiple subdirs
-  - git: https://github.com/haskell-servant/servant
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    subdirs:
-      - servant
-      - servant-server
+#   # git dep with multiple subdirs
+#   - git: https://github.com/haskell-servant/servant
+#     commit: 1fba9dc6048cea6184964032b861b052cd54878c
+#     subdirs:
+#       - servant
+#       - servant-server
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

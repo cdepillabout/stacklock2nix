@@ -162,6 +162,7 @@ let
           # dyre's tests appear to be trying to directly call GHC.
           dontCheck
         ];
+    focuslist = dontCheck hprev.focuslist;
     glib =
       lib.pipe
         hprev.glib
