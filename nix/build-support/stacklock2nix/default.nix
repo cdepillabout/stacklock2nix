@@ -1,5 +1,15 @@
 
-{ callPackage, fetchurl, lib, haskell, stdenv, readYAML, remarshal, runCommand, pkgs }:
+{ cabal2nixArgsOverrides ? (args: args)
+, callPackage
+, fetchurl
+, haskell
+, lib
+, pkgs
+, readYAML
+, remarshal
+, runCommand
+, stdenv
+}:
 
 # This is the main purescript2nix function.  See ../../overlay.nix for an
 # example of how this can be used.
@@ -53,7 +63,9 @@ let
       })
       haskPkgDrv;
 
-  cabal2nixArgsForPkg = callPackage ./cabal2nixArgsForPkg.nix {};
+  cabal2nixArgsForPkg = callPackage ./cabal2nixArgsForPkg.nix {
+    inherit cabal2nixArgsOverrides;
+  };
 
   resolverPackagesToOverlay = resolverPackages: hfinal: hprev:
     let
