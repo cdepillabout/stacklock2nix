@@ -134,13 +134,6 @@ let
     colour = dontCheck hprev.colour;
     doctest = dontCheck hprev.doctest;
     doctest-parallel = dontCheck hprev.doctest-parallel;
-    glib =
-      lib.pipe
-        hprev.glib
-        [ (disableHardening ["fortify"])
-          (addPkgconfigDepend pkgs.glib.dev)
-          # (addBuildTool hfinal.gtk2hs-buildtools)
-        ];
     dyre =
       lib.pipe
         hprev.dyre
@@ -157,7 +150,16 @@ let
           # dyre's tests appear to be trying to directly call GHC.
           dontCheck
         ];
+    glib =
+      lib.pipe
+        hprev.glib
+        [ (disableHardening ["fortify"])
+          (addPkgconfigDepend pkgs.glib.dev)
+          # (addBuildTool hfinal.gtk2hs-buildtools)
+        ];
     hashable = dontCheck hprev.hashable;
+    # This propagates this to everything depending on haskell-gi-base
+    haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
     hspec = dontCheck hprev.hspec;
     hspec-core = dontCheck hprev.hspec-core;
     logging-facade = dontCheck hprev.logging-facade;
