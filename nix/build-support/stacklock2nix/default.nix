@@ -4,8 +4,6 @@
 , haskell
 , lib
 , pkgs
-, readYAML
-, remarshal
 , runCommand
 , stdenv
 }:
@@ -28,7 +26,7 @@
 
 let
 
-  readYAML = callPackage ./yaml.nix {};
+  readYAML = callPackage ./read-yaml.nix {};
 
   stackYamlParsed = readYAML stack-yaml;
 
@@ -192,7 +190,7 @@ let
     test-framework = dontCheck hprev.test-framework;
   };
 
-  haskPkgs = haskell.packages.ghc902.override (oldAttrs: {
+  haskPkgs = haskell.packages.ghc924.override (oldAttrs: {
     overrides = lib.composeManyExtensions [
       (oldAttrs.overrides or (_: _: {}))
       (resolverPackagesToOverlay resolverParsed.packages)
