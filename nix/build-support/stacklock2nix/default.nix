@@ -67,35 +67,86 @@ let
     inherit cabal2nixArgsOverrides;
   };
 
+  # example: "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
+  parseHackageStr = hackageStr:
+    let
+      splitHackageStr = builtins.split "(.*)@sha256:(.*),(.*)" hackageStr;
+      hackageStrMatches = builtins.elemAt splitHackageStr 1;
+      pkgNameAndVersion = builtins.elemAt hackageStrMatches 0;
+    in
+    { name = lib.getName pkgNameAndVersion;
+      version = lib.getVersion pkgNameAndVersion;
+      cabalFileHash = builtins.elemAt hackageStrMatches 1;
+      cabalFileLen = builtins.elemAt hackageStrMatches 2;
+    };
+
+  getAdditionalCabal2nixArgs = pkgName: pkgVersion:
+    if builtins.hasAttr pkgName cabal2nixArgsForPkg then
+      (builtins.getAttr pkgName cabal2nixArgsForPkg) pkgVersion
+    else {};
+
+  pkgHackageInfoToNixHaskPkg = pkgHackageInfo: hfinal:
+    let
+      additionalArgs = getAdditionalCabal2nixArgs pkgHackageInfo.name pkgHackageInfo.version;
+    in
+    overrideCabalFileRevision
+      pkgHackageInfo.name
+      pkgHackageInfo.version
+      pkgHackageInfo.cabalFileHash
+      (hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs);
+
+  gitToNixHaskPkg = pkgName: pkgVersion: pkgSrc: hfinal:
+    hfinal.callCabal2nix pkgName pkgSrc (getAdditionalCabal2nixArgs pkgName pkgVersion);
+
   resolverPackagesToOverlay = resolverPackages: hfinal: hprev:
     let
       resolverPkgToNixHaskPkg = resolverPkg:
         let
-          # example: "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
           hackageStr = resolverPkg.hackage;
-          splitHackageStr = builtins.split "(.*)@sha256:(.*),(.*)" hackageStr;
-          hackageStrMatches = builtins.elemAt splitHackageStr 1;
-          pkgNameAndVersion = builtins.elemAt hackageStrMatches 0;
-          pkgName = lib.getName pkgNameAndVersion;
-          pkgVersion = lib.getVersion pkgNameAndVersion;
-          pkgCabalFileHash = builtins.elemAt hackageStrMatches 1;
-          pkgCabalFileLen = builtins.elemAt hackageStrMatches 2;
-          additionalArgs =
-            if builtins.hasAttr pkgName cabal2nixArgsForPkg then
-              (builtins.getAttr pkgName cabal2nixArgsForPkg) pkgVersion
-            else {};
-        in
-        {
-          name = pkgName;
-          value =
-            overrideCabalFileRevision
-              pkgName
-              pkgVersion
-              pkgCabalFileHash
-              (hfinal.callHackage pkgName pkgVersion additionalArgs);
+          pkgHackageInfo = parseHackageStr hackageStr;
+        in {
+          name = pkgHackageInfo.name;
+          value = pkgHackageInfoToNixHaskPkg pkgHackageInfo hfinal;
         };
     in
     builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
+
+  extraDepCreateNixHaskPkg = extraDep: hfinal: hprev:
+    let
+      extraHackageDep =
+        let
+          hackageStr = extraDep.hackage;
+          pkgHackageInfo = parseHackageStr hackageStr;
+        in {
+          name = pkgHackageInfo.name;
+          value = pkgHackageInfoToNixHaskPkg pkgHackageInfo hfinal;
+        };
+
+      extraGitDep =
+        let
+          src = builtins.fetchGit {
+            url = extraDep.git;
+            name = extraDep.name;
+            rev = extraDep.commit;
+          };
+        in {
+          name = extraDep.name;
+          value = gitToNixHaskPkg extraDep.name extraDep.version src hfinal;
+        };
+    in
+    if extraDep ? "hackage" then
+      extraHackageDep
+    else if extraDep ? "git" then
+      extraGitDep
+    else
+      builtins.throw "ERROR: unknown extraDep type: ${builtins.toString extraDep}";
+
+  extraDepsToOverlay = extraDepsPkgs: hfinal: hprev:
+    let
+      extraDepToNixHaskPkg = extraDepAttr:
+          extraDepCreateNixHaskPkg extraDepAttr.completed hfinal hprev;
+    in
+    builtins.listToAttrs (map extraDepToNixHaskPkg extraDepsPkgs);
 
   mkLocalPkg = localPkgPathStr:
     let
@@ -188,12 +239,15 @@ let
     tasty = dontCheck hprev.tasty;
     tasty-expected-failure = dontCheck hprev.tasty-expected-failure;
     test-framework = dontCheck hprev.test-framework;
+    unagi-chan = dontCheck hprev.unagi-chan;
+    vector = dontCheck hprev.vector;
   };
 
   haskPkgs = haskell.packages.ghc924.override (oldAttrs: {
     overrides = lib.composeManyExtensions [
       (oldAttrs.overrides or (_: _: {}))
       (resolverPackagesToOverlay resolverParsed.packages)
+      (extraDepsToOverlay stackYamlLockParsed.packages)
       localPkgsOverlay
       additionalOverrides
     ];
