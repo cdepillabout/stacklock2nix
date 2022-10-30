@@ -1,5 +1,5 @@
 
-{ callPackage, fetchurl, lib, haskell, stdenv, readYAML, remarshal, runCommand }:
+{ callPackage, fetchurl, lib, haskell, stdenv, readYAML, remarshal, runCommand, pkgs }:
 
 # This is the main purescript2nix function.  See ../../overlay.nix for an
 # example of how this can be used.
@@ -47,7 +47,7 @@ let
         editedCabalFile = null;
         revision = null;
         prePatch = ''
-          echo "Replace Cabal file with edited version from ${cabalFile}."
+          echo "stacklock2nix: replace Cabal file with revision from ${cabalFile}."
           cp "${cabalFile}" "${oldAttrs.pname}.cabal"
         '' + (oldAttrs.prePatch or "");
       })
@@ -66,10 +66,14 @@ let
           pkgVersion = lib.getVersion pkgNameAndVersion;
           pkgCabalFileHash = builtins.elemAt hackageStrMatches 1;
           pkgCabalFileLen = builtins.elemAt hackageStrMatches 2;
-          # TODO: My idea for a hacky cabal file fetcher:
-          # just try downloading revisions from 0, and look for the first one
-          # that has a matching hash.
-          additionalArgs = if pkgName == "splitmix" then { testu01 = null; } else {};
+          additionalArgs =
+            if pkgName == "gi-gmodule" then { gmodule = null; } else
+            if pkgName == "gi-harfbuzz" then { harfbuzz-gobject = null; } else
+            if pkgName == "gi-vte" then { vte_291 = pkgs.vte; } else
+            if pkgName == "splitmix" then { testu01 = null; } else
+            if pkgName == "termonad" then { vte_291 = pkgs.vte; } else
+            if pkgName == "zlib" then { zlib = pkgs.zlib; } else
+            {};
         in
         {
           name = pkgName;
@@ -80,36 +84,27 @@ let
     builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
 
   additionalOverrides = hfinal: hprev: {
-    doctest = haskell.lib.dontCheck hprev.doctest;
-    tasty = haskell.lib.dontCheck hprev.tasty;
-    syb = haskell.lib.dontCheck hprev.syb;
     HUnit = haskell.lib.dontCheck hprev.HUnit;
+    ansi-terminal = haskell.lib.dontCheck hprev.ansi-terminal;
+    async = haskell.lib.dontCheck hprev.async;
+    base-orphans = haskell.lib.dontCheck hprev.base-orphans;
+    clock = haskell.lib.dontCheck hprev.clock;
+    colour = haskell.lib.dontCheck hprev.colour;
+    doctest = haskell.lib.dontCheck hprev.doctest;
+    hashable = haskell.lib.dontCheck hprev.hashable;
     hspec = haskell.lib.dontCheck hprev.hspec;
     hspec-core = haskell.lib.dontCheck hprev.hspec-core;
-    nanospec = haskell.lib.dontCheck hprev.nanospec;
-    test-framework = haskell.lib.dontCheck hprev.test-framework;
-    smallcheck = haskell.lib.dontCheck hprev.smallcheck;
-    async = haskell.lib.dontCheck hprev.async;
-    ansi-terminal = haskell.lib.dontCheck hprev.ansi-terminal;
-    colour = haskell.lib.dontCheck hprev.colour;
-    clock = haskell.lib.dontCheck hprev.clock;
-    hashable = haskell.lib.dontCheck hprev.hashable;
-    logict = haskell.lib.dontCheck hprev.logict;
-    random = haskell.lib.dontCheck hprev.random;
-    base-orphans = haskell.lib.dontCheck hprev.base-orphans;
-    mockery = haskell.lib.dontCheck hprev.mockery;
     logging-facade = haskell.lib.dontCheck hprev.logging-facade;
-    splitmix =
-      haskell.lib.dontCheck
-        (haskell.lib.compose.overrideCabal
-          (_: {
-            testHaskellDepends = [];
-            testSystemDepends = [];
-          })
-          (hprev.splitmix.override {
-            testu01 = null;
-          })
-        );
+    logict = haskell.lib.dontCheck hprev.logict;
+    mockery = haskell.lib.dontCheck hprev.mockery;
+    nanospec = haskell.lib.dontCheck hprev.nanospec;
+    random = haskell.lib.dontCheck hprev.random;
+    smallcheck = haskell.lib.dontCheck hprev.smallcheck;
+    splitmix = haskell.lib.dontCheck hprev.splitmix;
+    syb = haskell.lib.dontCheck hprev.syb;
+    tasty = haskell.lib.dontCheck hprev.tasty;
+    tasty-expected-failure = haskell.lib.dontCheck hprev.tasty-expected-failure;
+    test-framework = haskell.lib.dontCheck hprev.test-framework;
   };
 
   haskPkgs = haskell.packages.ghc902.override (oldAttrs: {
