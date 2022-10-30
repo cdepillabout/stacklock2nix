@@ -18,6 +18,8 @@
 
 let
 
+  stackYamlParsed = readYAML stack-yaml;
+
   stackYamlLockParsed = readYAML stack-yaml-lock;
 
   snapshotInfo =
@@ -26,9 +28,7 @@ let
     in
     { inherit (fstSnapshot.completed) url sha256; };
 
-  resolverRawYaml = fetchurl {
-    inherit (snapshotInfo) url sha256;
-  };
+  resolverRawYaml = fetchurl { inherit (snapshotInfo) url sha256; };
 
   resolverParsed = readYAML resolverRawYaml;
 
@@ -83,6 +83,46 @@ let
     in
     builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
 
+  mkLocalPkg = localPkgPathStr:
+    let
+      pkgPath =
+        lib.cleanSourceWith {
+          src =
+            # TODO: I imagine it is not okay to just assume this package path is a
+            # relative path.
+            builtins.path { path = dirOf stack-yaml + ("/" + localPkgPathStr); };
+          # TODO: Create a better filter, plus make it overrideable for end-users.
+          filter = path: type: true;
+        };
+      justCabalFilePath = lib.cleanSourceWith {
+        src = pkgPath;
+        filter = path: type:
+          lib.hasSuffix ".cabal" path ||
+          baseNameOf path == "package.yaml";
+      };
+      cabalFileDir = builtins.readDir justCabalFilePath;
+      allPkgFiles = builtins.attrNames cabalFileDir;
+      cabalFileName =
+        lib.findSingle
+          (file: lib.hasSuffix ".cabal" file)
+          (throw "could not find any .cabal files in package ${localPkgPathStr}.  all files: ${toString allPkgFiles}")
+          (throw "found multiple .cabal files in package ${localPkgPathStr}, not sure how to proceed.  all files: ${toString allPkgFiles}")
+          allPkgFiles;
+      pkgName = lib.removeSuffix ".cabal" cabalFileName;
+    in
+    { inherit pkgPath pkgName; };
+
+  localPkgs = map mkLocalPkg stackYamlParsed.packages;
+
+  localPkgsOverlay = hfinal: hprev:
+    let
+      localPkgToOverlayAttr = { pkgName, pkgPath }: {
+        name = pkgName;
+        value = hfinal.callCabal2nix pkgName pkgPath {};
+      };
+    in
+    builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
+
   additionalOverrides = hfinal: hprev: {
     HUnit = haskell.lib.dontCheck hprev.HUnit;
     ansi-terminal = haskell.lib.dontCheck hprev.ansi-terminal;
@@ -105,12 +145,29 @@ let
     tasty = haskell.lib.dontCheck hprev.tasty;
     tasty-expected-failure = haskell.lib.dontCheck hprev.tasty-expected-failure;
     test-framework = haskell.lib.dontCheck hprev.test-framework;
+    dyre =
+      lib.pipe
+        hprev.dyre
+        [
+          # Dyre needs special support for reading the NIX_GHC env var.  This is
+          # available upstream in https://github.com/willdonnelly/dyre/pull/43, but
+          # hasn't been released to Hackage as of dyre-0.9.1.  Likely included in
+          # next version.
+          (haskell.lib.compose.appendPatch
+            (pkgs.fetchpatch {
+              url = "https://github.com/willdonnelly/dyre/commit/c7f29d321aae343d6b314f058812dffcba9d7133.patch";
+              sha256 = "10m22k35bi6cci798vjpy4c2l08lq5nmmj24iwp0aflvmjdgscdb";
+            }))
+          # dyre's tests appear to be trying to directly call GHC.
+          haskell.lib.compose.dontCheck
+        ];
   };
 
   haskPkgs = haskell.packages.ghc902.override (oldAttrs: {
     overrides = lib.composeManyExtensions [
       (oldAttrs.overrides or (_: _: {}))
       (resolverPackagesToOverlay resolverParsed.packages)
+      localPkgsOverlay
       additionalOverrides
     ];
     all-cabal-hashes = fetchurl {
@@ -128,3 +185,5 @@ in
 # resolverParsed
 haskPkgs
 # fetchCabalFileRevision
+# mkLocalPkg
+# localPkgs
