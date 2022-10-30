@@ -53,6 +53,8 @@ let
       })
       haskPkgDrv;
 
+  cabal2nixArgsForPkg = callPackage ./cabal2nixArgsForPkg.nix {};
+
   resolverPackagesToOverlay = resolverPackages: hfinal: hprev:
     let
       resolverPkgToNixHaskPkg = resolverPkg:
@@ -67,17 +69,9 @@ let
           pkgCabalFileHash = builtins.elemAt hackageStrMatches 1;
           pkgCabalFileLen = builtins.elemAt hackageStrMatches 2;
           additionalArgs =
-            if pkgName == "gi-glib" then { glib = pkgs.glib; } else
-            if pkgName == "gi-gmodule" then { gmodule = null; } else
-            if pkgName == "gi-harfbuzz" then { harfbuzz-gobject = null; } else
-            if pkgName == "gi-vte" then { vte_291 = pkgs.vte; } else
-            if pkgName == "glib" then { glib = pkgs.glib; } else
-            if pkgName == "haskell-gi" then { glib = pkgs.glib; gobject-introspection = pkgs.gobject-introspection; } else
-            if pkgName == "haskell-gi-base" then { glib = pkgs.glib; } else
-            if pkgName == "splitmix" then { testu01 = null; } else
-            if pkgName == "termonad" then { vte_291 = pkgs.vte; } else
-            if pkgName == "zlib" then { zlib = pkgs.zlib; } else
-            {};
+            if builtins.hasAttr pkgName cabal2nixArgsForPkg then
+              (builtins.getAttr pkgName cabal2nixArgsForPkg) pkgVersion
+            else {};
         in
         {
           name = pkgName;
@@ -131,22 +125,22 @@ let
     in
     builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
 
-  additionalOverrides = hfinal: hprev: {
-    HUnit = haskell.lib.dontCheck hprev.HUnit;
-    ansi-terminal = haskell.lib.dontCheck hprev.ansi-terminal;
-    async = haskell.lib.dontCheck hprev.async;
-    base-orphans = haskell.lib.dontCheck hprev.base-orphans;
-    clock = haskell.lib.dontCheck hprev.clock;
-    colour = haskell.lib.dontCheck hprev.colour;
-    doctest = haskell.lib.dontCheck hprev.doctest;
-    doctest-parallel = haskell.lib.dontCheck hprev.doctest-parallel;
-    # glib =
-    #   lib.pipe
-    #     hprev.glib
-    #     [ (haskell.lib.compose.disableHardening ["fortify"])
-    #       # (haskell.lib.compose.addPkgconfigDepend pkgs.glib)
-    #       # (haskell.lib.compose.addBuildTool hfinal.gtk2hs-buildtools)
-    #     ];
+  additionalOverrides = hfinal: hprev: with haskell.lib.compose; {
+    HUnit = dontCheck hprev.HUnit;
+    ansi-terminal = dontCheck hprev.ansi-terminal;
+    async = dontCheck hprev.async;
+    base-orphans = dontCheck hprev.base-orphans;
+    clock = dontCheck hprev.clock;
+    colour = dontCheck hprev.colour;
+    doctest = dontCheck hprev.doctest;
+    doctest-parallel = dontCheck hprev.doctest-parallel;
+    glib =
+      lib.pipe
+        hprev.glib
+        [ (disableHardening ["fortify"])
+          (addPkgconfigDepend pkgs.glib.dev)
+          # (addBuildTool hfinal.gtk2hs-buildtools)
+        ];
     dyre =
       lib.pipe
         hprev.dyre
@@ -155,30 +149,30 @@ let
           # available upstream in https://github.com/willdonnelly/dyre/pull/43, but
           # hasn't been released to Hackage as of dyre-0.9.1.  Likely included in
           # next version.
-          (haskell.lib.compose.appendPatch
+          (appendPatch
             (pkgs.fetchpatch {
               url = "https://github.com/willdonnelly/dyre/commit/c7f29d321aae343d6b314f058812dffcba9d7133.patch";
               sha256 = "10m22k35bi6cci798vjpy4c2l08lq5nmmj24iwp0aflvmjdgscdb";
             }))
           # dyre's tests appear to be trying to directly call GHC.
-          haskell.lib.compose.dontCheck
+          dontCheck
         ];
-    hashable = haskell.lib.dontCheck hprev.hashable;
-    hspec = haskell.lib.dontCheck hprev.hspec;
-    hspec-core = haskell.lib.dontCheck hprev.hspec-core;
-    logging-facade = haskell.lib.dontCheck hprev.logging-facade;
-    logict = haskell.lib.dontCheck hprev.logict;
-    mockery = haskell.lib.dontCheck hprev.mockery;
-    nanospec = haskell.lib.dontCheck hprev.nanospec;
-    random = haskell.lib.dontCheck hprev.random;
+    hashable = dontCheck hprev.hashable;
+    hspec = dontCheck hprev.hspec;
+    hspec-core = dontCheck hprev.hspec-core;
+    logging-facade = dontCheck hprev.logging-facade;
+    logict = dontCheck hprev.logict;
+    mockery = dontCheck hprev.mockery;
+    nanospec = dontCheck hprev.nanospec;
+    random = dontCheck hprev.random;
     # Disabling doctests.
-    regex-tdfa = haskell.lib.compose.overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
-    smallcheck = haskell.lib.dontCheck hprev.smallcheck;
-    splitmix = haskell.lib.dontCheck hprev.splitmix;
-    syb = haskell.lib.dontCheck hprev.syb;
-    tasty = haskell.lib.dontCheck hprev.tasty;
-    tasty-expected-failure = haskell.lib.dontCheck hprev.tasty-expected-failure;
-    test-framework = haskell.lib.dontCheck hprev.test-framework;
+    regex-tdfa = overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
+    smallcheck = dontCheck hprev.smallcheck;
+    splitmix = dontCheck hprev.splitmix;
+    syb = dontCheck hprev.syb;
+    tasty = dontCheck hprev.tasty;
+    tasty-expected-failure = dontCheck hprev.tasty-expected-failure;
+    test-framework = dontCheck hprev.test-framework;
   };
 
   haskPkgs = haskell.packages.ghc902.override (oldAttrs: {
