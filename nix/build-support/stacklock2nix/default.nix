@@ -1,6 +1,5 @@
 
-{ cabal2nixArgsOverrides ? (args: args)
-, callPackage
+{ callPackage
 , fetchurl
 , haskell
 , lib
@@ -24,6 +23,7 @@
   version ? ""
 , stack-yaml
 , stack-yaml-lock
+, cabal2nixArgsOverrides ? (args: args)
 }:
 
 let
