@@ -147,22 +147,6 @@ let
     #       # (haskell.lib.compose.addPkgconfigDepend pkgs.glib)
     #       # (haskell.lib.compose.addBuildTool hfinal.gtk2hs-buildtools)
     #     ];
-    hashable = haskell.lib.dontCheck hprev.hashable;
-    hspec = haskell.lib.dontCheck hprev.hspec;
-    hspec-core = haskell.lib.dontCheck hprev.hspec-core;
-    logging-facade = haskell.lib.dontCheck hprev.logging-facade;
-    logict = haskell.lib.dontCheck hprev.logict;
-    mockery = haskell.lib.dontCheck hprev.mockery;
-    nanospec = haskell.lib.dontCheck hprev.nanospec;
-    random = haskell.lib.dontCheck hprev.random;
-    # Disabling doctests.
-    regex-tdfa = haskell.lib.compose.overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
-    smallcheck = haskell.lib.dontCheck hprev.smallcheck;
-    splitmix = haskell.lib.dontCheck hprev.splitmix;
-    syb = haskell.lib.dontCheck hprev.syb;
-    tasty = haskell.lib.dontCheck hprev.tasty;
-    tasty-expected-failure = haskell.lib.dontCheck hprev.tasty-expected-failure;
-    test-framework = haskell.lib.dontCheck hprev.test-framework;
     dyre =
       lib.pipe
         hprev.dyre
@@ -179,6 +163,22 @@ let
           # dyre's tests appear to be trying to directly call GHC.
           haskell.lib.compose.dontCheck
         ];
+    hashable = haskell.lib.dontCheck hprev.hashable;
+    hspec = haskell.lib.dontCheck hprev.hspec;
+    hspec-core = haskell.lib.dontCheck hprev.hspec-core;
+    logging-facade = haskell.lib.dontCheck hprev.logging-facade;
+    logict = haskell.lib.dontCheck hprev.logict;
+    mockery = haskell.lib.dontCheck hprev.mockery;
+    nanospec = haskell.lib.dontCheck hprev.nanospec;
+    random = haskell.lib.dontCheck hprev.random;
+    # Disabling doctests.
+    regex-tdfa = haskell.lib.compose.overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
+    smallcheck = haskell.lib.dontCheck hprev.smallcheck;
+    splitmix = haskell.lib.dontCheck hprev.splitmix;
+    syb = haskell.lib.dontCheck hprev.syb;
+    tasty = haskell.lib.dontCheck hprev.tasty;
+    tasty-expected-failure = haskell.lib.dontCheck hprev.tasty-expected-failure;
+    test-framework = haskell.lib.dontCheck hprev.test-framework;
   };
 
   haskPkgs = haskell.packages.ghc902.override (oldAttrs: {
