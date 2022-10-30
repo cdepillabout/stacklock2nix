@@ -17,8 +17,9 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/30.yaml
+resolver: nightly-2022-10-18
+# resolver:
+#   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/30.yaml
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -61,8 +62,6 @@ extra-deps:
     subdirs:
       - servant
       - servant-server
-
-
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
