@@ -36,13 +36,22 @@ let
 
   overrideCabalFileRevision = pkgName: pkgVersion: pkgCabalFileHash: haskPkgDrv:
     let
-      cabalFileRevInfo = fetchCabalFileRevision {
+      cabalFile = fetchCabalFileRevision {
         name = pkgName;
         version = pkgVersion;
         hash = pkgCabalFileHash;
       };
     in
-    [];
+    haskell.lib.compose.overrideCabal
+      (oldAttrs: {
+        editedCabalFile = null;
+        revision = null;
+        prePatch = ''
+          echo "Replace Cabal file with edited version from ${cabalFile}."
+          cp "${cabalFile}" "${oldAttrs.pname}.cabal"
+        '' + (oldAttrs.prePatch or "");
+      })
+      haskPkgDrv;
 
   resolverPackagesToOverlay = resolverPackages: hfinal: hprev:
     let
@@ -60,102 +69,61 @@ let
           # TODO: My idea for a hacky cabal file fetcher:
           # just try downloading revisions from 0, and look for the first one
           # that has a matching hash.
+          additionalArgs = if pkgName == "splitmix" then { testu01 = null; } else {};
         in
         {
           name = pkgName;
           value =
-            overrideCabalFileRevision pkgName pkgVersion pkgCabalFileHash (hfinal.callHackage pkgName pkgVersion {});
+            overrideCabalFileRevision pkgName pkgVersion pkgCabalFileHash (hfinal.callHackage pkgName pkgVersion additionalArgs);
         };
     in
     builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
 
+  additionalOverrides = hfinal: hprev: {
+    doctest = haskell.lib.dontCheck hprev.doctest;
+    tasty = haskell.lib.dontCheck hprev.tasty;
+    syb = haskell.lib.dontCheck hprev.syb;
+    HUnit = haskell.lib.dontCheck hprev.HUnit;
+    hspec = haskell.lib.dontCheck hprev.hspec;
+    hspec-core = haskell.lib.dontCheck hprev.hspec-core;
+    nanospec = haskell.lib.dontCheck hprev.nanospec;
+    test-framework = haskell.lib.dontCheck hprev.test-framework;
+    smallcheck = haskell.lib.dontCheck hprev.smallcheck;
+    async = haskell.lib.dontCheck hprev.async;
+    ansi-terminal = haskell.lib.dontCheck hprev.ansi-terminal;
+    colour = haskell.lib.dontCheck hprev.colour;
+    clock = haskell.lib.dontCheck hprev.clock;
+    hashable = haskell.lib.dontCheck hprev.hashable;
+    logict = haskell.lib.dontCheck hprev.logict;
+    random = haskell.lib.dontCheck hprev.random;
+    base-orphans = haskell.lib.dontCheck hprev.base-orphans;
+    mockery = haskell.lib.dontCheck hprev.mockery;
+    logging-facade = haskell.lib.dontCheck hprev.logging-facade;
+    splitmix =
+      haskell.lib.dontCheck
+        (haskell.lib.compose.overrideCabal
+          (_: {
+            testHaskellDepends = [];
+            testSystemDepends = [];
+          })
+          (hprev.splitmix.override {
+            testu01 = null;
+          })
+        );
+  };
+
   haskPkgs = haskell.packages.ghc902.override (oldAttrs: {
-    overrides =
-      lib.composeExtensions
-        (oldAttrs.overrides or (_: _: {}))
-        (resolverPackagesToOverlay resolverParsed.packages);
+    overrides = lib.composeManyExtensions [
+      (oldAttrs.overrides or (_: _: {}))
+      (resolverPackagesToOverlay resolverParsed.packages)
+      additionalOverrides
+    ];
+    all-cabal-hashes = fetchurl {
+      name = "all-cabal-hashes";
+      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/9ab160f48cb535719783bc43c0fbf33e6d52fa99.tar.gz";
+      sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
+    };
   });
-
-
-  ## This is the `spago.dhall` file translated to Nix.
-  ##
-  ## Example:
-  ##
-  ##   {
-  ##     name = "purescript-strings";
-  ##     dependencies = [ "console", "effect", "foldable-traversable", "prelude", "psci-support" ];
-  ##     packages = {
-  ##       abides = {
-  ##         dependencies = [ "enums", "foldable-traversable" ];
-  ##         hash = "sha256-nrZiUeIY7ciHtD4+4O5PB5GMJ+ZxAletbtOad/tXPWk=";
-  ##         repo = "https://github.com/athanclark/purescript-abides.git";
-  ##         version = "v0.0.1";
-  ##       };
-  ##       ...
-  ##     };
-  ##     sources = [ "src/**/*.purs", "test/**/*.purs" ];
-  ##   }
-  #spagoDhall = dhallDirectoryToNix { inherit src; file = "spago.dhall"; };
-
-  ## `spagoDhallDeps` is a list of all transitive dependencies of the package defined
-  ## in `spagoDhall`.
-  ##
-  ## In the above example, you can see that `console` is a direct dependency of
-  ## `purescript-strings`.  The first package in the following list is `console`.
-  ## This list of packages of course also contains all the transitive dependencies
-  ## of `console`:
-  ##
-  ## Example:
-  ##
-  ##   [
-  ##     {
-  ##       dependencies = [ "effect" "prelude" ];
-  ##       hash = "sha256-gh81AQOF9o1zGyUNIF8Ticqaz8Nr+pz72DOUE2wadrA=";
-  ##       name = "console";
-  ##       repo = "https://github.com/purescript/purescript-console.git";
-  ##       version = "v5.0.0";
-  ##     }
-  ##     ...
-  ##   ]
-  ##
-  ## The dependency graph is determined by figuring out the transitive
-  ## dependencies of `spagoDhall.dependencies` using the data in
-  ## `spagoDhall.packages`.
-  #spagoDhallDeps = import ./spagoDhallDependencyClosure.nix spagoDhall;
-
-  #purescriptPackageToFOD = callPackage ./purescriptPackageToFOD.nix {};
-
-  ## List of derivations of the `spagoDhallDeps` source code.
-  #spagoDhallDepDrvs = map purescriptPackageToFOD spagoDhallDeps;
-
-  ## List of globs matching the source code for each of the transitive
-  ## dependencies from `spagoDhallDepDrvs`.
-  ##
-  ## Example:
-  ##   [
-  ##     "\"/nix/store/1sjyzw92sxil3yp5cndhaicl55m1djal-console-v5.0.0/src/**/*.purs\""
-  ##     "\"/nix/store/vhshp8vh061pfnkwwcvgx6zsrq8l0v3a-effect-v3.0.0/src/**/*.purs\""
-  ##     ...
-  ##   ]
-  #sourceGlobs = map (dep: ''"${dep}/src/**/*.purs"'') spagoDhallDepDrvs;
-
-  #builtPureScriptCode = stdenv.mkDerivation {
-  #  inherit pname version src;
-
-  #  nativeBuildInputs = [
-  #    purescript
-  #  ];
-
-  #  installPhase = ''
-  #    mkdir -p "$out"
-  #    cd "$out"
-  #    purs compile ${toString sourceGlobs} "$src/src/**/*.purs"
-  #  '';
-  #};
-
-#in
-
-#builtPureScriptCode
 
 in
 
@@ -163,5 +131,5 @@ in
 # snapshotInfo
 # resolverRawYaml
 # resolverParsed
-# haskPkgs
-fetchCabalFileRevision
+haskPkgs
+# fetchCabalFileRevision
