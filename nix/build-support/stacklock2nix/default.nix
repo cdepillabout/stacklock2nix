@@ -124,11 +124,19 @@ let
 
       extraGitDep =
         let
-          src = builtins.fetchGit {
+          srcName = extraDep.name + "-git-repo";
+          rawSrc = builtins.fetchGit {
             url = extraDep.git;
-            name = extraDep.name;
+            name = srcName;
             rev = extraDep.commit;
           };
+          src =
+            if extraDep ? "subdir" then
+              runCommand (srcName + "-get-subdir-" + extraDep.subdir) {} ''
+                cp -r "${rawSrc}/${extraDep.subdir}" "$out"
+              ''
+            else
+              src;
         in {
           name = extraDep.name;
           value = gitToNixHaskPkg extraDep.name extraDep.version src hfinal;
