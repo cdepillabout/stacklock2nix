@@ -109,7 +109,7 @@ let
                 cp -r "${rawSrc}/${haskPkgLock.subdir}" "$out"
               ''
             else
-              src;
+              rawSrc;
         in {
           name = haskPkgLock.name;
           value =
@@ -168,6 +168,8 @@ let
     ansi-terminal = dontCheck hprev.ansi-terminal;
     async = dontCheck hprev.async;
     base-orphans = dontCheck hprev.base-orphans;
+    # doctests fail
+    bsb-http-chunked = dontCheck hprev.bsb-http-chunked;
     clock = dontCheck hprev.clock;
     colour = dontCheck hprev.colour;
     doctest = dontCheck hprev.doctest;
@@ -199,6 +201,7 @@ let
     hashable = dontCheck hprev.hashable;
     # This propagates this to everything depending on haskell-gi-base
     haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
+    hourglass = dontCheck hprev.hourglass;
     hspec = dontCheck hprev.hspec;
     hspec-core = dontCheck hprev.hspec-core;
     # Due to tests restricting base in 0.8.0.0 release
@@ -220,6 +223,8 @@ let
     test-framework = dontCheck hprev.test-framework;
     unagi-chan = dontCheck hprev.unagi-chan;
     vector = dontCheck hprev.vector;
+    # http://hydra.cryp.to/build/501073/nixlog/5/raw
+    warp = dontCheck hprev.warp;
   };
 
   stackYamlResolverOverlay = haskPkgLocksToOverlay resolverParsed.packages;
