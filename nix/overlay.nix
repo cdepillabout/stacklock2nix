@@ -15,6 +15,14 @@ final: prev: {
         final._stacklock2nix-example-haskell-package.stackYamlExtraDepsOverlay
         final._stacklock2nix-example-haskell-package.stackYamlLocalPkgsOverlay
         final._stacklock2nix-example-haskell-package.suggestedOverlay
+        (hfinal: hprev: {
+          servant-cassava =
+            final.haskell.lib.compose.overrideCabal
+              { editedCabalFile = null;
+                revision = null;
+              }
+              hprev.servant-cassava;
+        })
       ];
       all-cabal-hashes = final.fetchurl {
         name = "all-cabal-hashes";
