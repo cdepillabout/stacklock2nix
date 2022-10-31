@@ -95,27 +95,11 @@ let
       pkgHackageInfo.cabalFileHash
       (hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs);
 
-  gitToNixHaskPkg = pkgName: pkgVersion: pkgSrc: hfinal:
-    hfinal.callCabal2nix pkgName pkgSrc (getAdditionalCabal2nixArgs pkgName pkgVersion);
-
-  resolverPackagesToOverlay = resolverPackages: hfinal: hprev:
-    let
-      resolverPkgToNixHaskPkg = resolverPkg:
-        let
-          hackageStr = resolverPkg.hackage;
-          pkgHackageInfo = parseHackageStr hackageStr;
-        in {
-          name = pkgHackageInfo.name;
-          value = pkgHackageInfoToNixHaskPkg pkgHackageInfo hfinal;
-        };
-    in
-    builtins.listToAttrs (map resolverPkgToNixHaskPkg resolverPackages);
-
-  extraDepCreateNixHaskPkg = extraDep: hfinal: hprev:
+  extraDepCreateNixHaskPkg = hfinal: haskPkgLock:
     let
       extraHackageDep =
         let
-          hackageStr = extraDep.hackage;
+          hackageStr = haskPkgLock.hackage;
           pkgHackageInfo = parseHackageStr hackageStr;
         in {
           name = pkgHackageInfo.name;
@@ -124,37 +108,40 @@ let
 
       extraGitDep =
         let
-          srcName = extraDep.name + "-git-repo";
+          srcName = haskPkgLock.name + "-git-repo";
           rawSrc = builtins.fetchGit {
-            url = extraDep.git;
+            url = haskPkgLock.git;
             name = srcName;
-            rev = extraDep.commit;
+            rev = haskPkgLock.commit;
           };
           src =
-            if extraDep ? "subdir" then
-              runCommand (srcName + "-get-subdir-" + extraDep.subdir) {} ''
-                cp -r "${rawSrc}/${extraDep.subdir}" "$out"
+            if haskPkgLock ? "subdir" then
+              runCommand (srcName + "-get-subdir-" + haskPkgLock.subdir) {} ''
+                cp -r "${rawSrc}/${haskPkgLock.subdir}" "$out"
               ''
             else
               src;
         in {
-          name = extraDep.name;
-          value = gitToNixHaskPkg extraDep.name extraDep.version src hfinal;
+          name = haskPkgLock.name;
+          value =
+            hfinal.callCabal2nix
+              haskPkgLock.name
+              src
+              (getAdditionalCabal2nixArgs haskPkgLock.name haskPkgLock.version);
         };
     in
-    if extraDep ? "hackage" then
+    if haskPkgLock ? "hackage" then
       extraHackageDep
-    else if extraDep ? "git" then
+    else if haskPkgLock ? "git" then
       extraGitDep
     else
-      builtins.throw "ERROR: unknown extraDep type: ${builtins.toString extraDep}";
+      builtins.throw "ERROR: unknown haskPkgLock type: ${builtins.toString haskPkgLock}";
+
+  haskPkgLocksToOverlay = haskPkgLocks: hfinal: hprev:
+    builtins.listToAttrs (map (extraDepCreateNixHaskPkg hfinal) haskPkgLocks);
 
   extraDepsToOverlay = extraDepsPkgs: hfinal: hprev:
-    let
-      extraDepToNixHaskPkg = extraDepAttr:
-          extraDepCreateNixHaskPkg extraDepAttr.completed hfinal hprev;
-    in
-    builtins.listToAttrs (map extraDepToNixHaskPkg extraDepsPkgs);
+    haskPkgLocksToOverlay (map (pkg: pkg.completed) extraDepsPkgs) hfinal hprev;
 
   mkLocalPkg = localPkgPathStr:
     let
@@ -254,7 +241,7 @@ let
   haskPkgs = haskell.packages.ghc924.override (oldAttrs: {
     overrides = lib.composeManyExtensions [
       (oldAttrs.overrides or (_: _: {}))
-      (resolverPackagesToOverlay resolverParsed.packages)
+      (haskPkgLocksToOverlay resolverParsed.packages)
       (extraDepsToOverlay stackYamlLockParsed.packages)
       localPkgsOverlay
       additionalOverrides
