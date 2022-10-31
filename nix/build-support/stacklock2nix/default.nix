@@ -8,18 +8,7 @@
 , stdenv
 }:
 
-# This is the main purescript2nix function.  See ../../overlay.nix for an
-# example of how this can be used.
-
-{ # Package name.  Should be a string.
-  #
-  # Example: "aeson"
-  pname
-, # Package version.  Should be a string.
-  #
-  # Example: "1.2.3.4"
-  version ? ""
-, stack-yaml
+{ stack-yaml
 , stack-yaml-lock
 , cabal2nixArgsOverrides ? (args: args)
 }:
@@ -174,16 +163,7 @@ let
 
   localPkgs = map mkLocalPkg stackYamlParsed.packages;
 
-  localPkgsOverlay = hfinal: hprev:
-    let
-      localPkgToOverlayAttr = { pkgName, pkgPath }: {
-        name = pkgName;
-        value = hfinal.callCabal2nix pkgName pkgPath {};
-      };
-    in
-    builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
-
-  additionalOverrides = hfinal: hprev: with haskell.lib.compose; {
+  suggestedOverlay = hfinal: hprev: with haskell.lib.compose; {
     HUnit = dontCheck hprev.HUnit;
     ansi-terminal = dontCheck hprev.ansi-terminal;
     async = dontCheck hprev.async;
@@ -221,10 +201,14 @@ let
     haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
     hspec = dontCheck hprev.hspec;
     hspec-core = dontCheck hprev.hspec-core;
+    # Due to tests restricting base in 0.8.0.0 release
+    http-media = doJailbreak hprev.http-media;
     logging-facade = dontCheck hprev.logging-facade;
     logict = dontCheck hprev.logict;
     mockery = dontCheck hprev.mockery;
     nanospec = dontCheck hprev.nanospec;
+    # test suite doesn't build
+    nothunks = dontCheck hprev.nothunks;
     random = dontCheck hprev.random;
     # Disabling doctests.
     regex-tdfa = overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
@@ -238,28 +222,24 @@ let
     vector = dontCheck hprev.vector;
   };
 
-  haskPkgs = haskell.packages.ghc924.override (oldAttrs: {
-    overrides = lib.composeManyExtensions [
-      (oldAttrs.overrides or (_: _: {}))
-      (haskPkgLocksToOverlay resolverParsed.packages)
-      (extraDepsToOverlay stackYamlLockParsed.packages)
-      localPkgsOverlay
-      additionalOverrides
-    ];
-    all-cabal-hashes = fetchurl {
-      name = "all-cabal-hashes";
-      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/9ab160f48cb535719783bc43c0fbf33e6d52fa99.tar.gz";
-      sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
-    };
-  });
+  stackYamlResolverOverlay = haskPkgLocksToOverlay resolverParsed.packages;
+
+  stackYamlExtraDepsOverlay = extraDepsToOverlay stackYamlLockParsed.packages;
+
+  stackYamlLocalPkgsOverlay = hfinal: hprev:
+    let
+      localPkgToOverlayAttr = { pkgName, pkgPath }: {
+        name = pkgName;
+        value = hfinal.callCabal2nix pkgName pkgPath {};
+      };
+    in
+    builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
 
 in
 
-# stackYamlLockParsed
-# snapshotInfo
-# resolverRawYaml
-# resolverParsed
-haskPkgs
-# fetchCabalFileRevision
-# mkLocalPkg
-# localPkgs
+{ inherit
+    stackYamlResolverOverlay
+    stackYamlExtraDepsOverlay
+    stackYamlLocalPkgsOverlay
+    suggestedOverlay;
+}
