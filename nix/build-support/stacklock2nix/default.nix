@@ -22,7 +22,10 @@
   # If `null`, guess the path of the `stack.yaml.lock` file from the
   # `stack-yaml` value.
   stack-yaml-lock ? null
-, #
+, # A function that can be used to override the values passed to
+  # `callHackage` and `callCabal2nix` in the generated overlays.
+  # See the comment in `./cabal2nixArgsForPkg.nix` for an explanation
+  # of what this is.
   cabal2nixArgsOverrides ? (args: args)
 }:
 
@@ -46,13 +49,13 @@ let
 
   readYAML = callPackage ./read-yaml.nix {};
 
-  # The `stack.yaml` file read in as a Nix datatype.
+  # The `stack.yaml` file read in as a Nix value.
   stackYamlParsed = readYAML stack-yaml-real;
 
-  # The `stack.yaml.lock` file read in as a Nix datatype.
+  # The `stack.yaml.lock` file read in as a Nix value.
   stackYamlLockParsed = readYAML stack-yaml-lock-real;
 
-  # The URL and sha256 for the snapshot from the stack.yaml.lock file.
+  # The URL and sha256 for the snapshot from the `stack.yaml.lock` file.
   #
   # Example:
   # ```
@@ -71,6 +74,8 @@ let
 
   resolverRawYaml = fetchurl { inherit (snapshotInfo) url sha256; };
 
+  # The Nix value for the Stackage snapshot specified in the `stack.yaml.lock`
+  # file.
   resolverParsed = readYAML resolverRawYaml;
 
   fetchCabalFileRevision = callPackage ./fetchCabalFileRevision.nix {};
