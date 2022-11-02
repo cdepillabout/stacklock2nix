@@ -80,6 +80,24 @@ let
 
   fetchCabalFileRevision = callPackage ./fetchCabalFileRevision.nix {};
 
+  # Replace the `.cabal` file in a given Haskell package with the revision
+  # specified by the given hash.
+  #
+  # overrideCabalFileRevision :: String -> String -> String -> HaskellPkgDrv -> HaskellPkgDrv
+  #
+  # Example:
+  # ```
+  # overrideCabalFileRevision
+  #   "lens"
+  #   "5.0.1"
+  #   "63ed57e4d54c583ae2873d6892ef690942d90030864d0b772413a1458e98159f"
+  #   (callHackage "lens" "5.0.1" {})
+  # ```
+  #
+  # This is helpful because the reivison that `callHackage` picks may be an
+  # older revision than specified by the revision hash.  For instance, in the
+  # above example, `callHackage` may pick revision 5, while the stackage
+  # snapshot uses revision 3.
   overrideCabalFileRevision = pkgName: pkgVersion: pkgCabalFileHash: haskPkgDrv:
     let
       cabalFile = fetchCabalFileRevision {
@@ -103,7 +121,22 @@ let
     inherit cabal2nixArgsOverrides;
   };
 
-  # example: "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
+  # Parse a Haskell package Hackage lock into the name, version, and hash info.
+  #
+  # parseHackageStr :: String -> { name :: String, version :: String, cabalFileHash :: String, cabalFileLen :: String }
+  #
+  # Example:
+  # ```
+  # > parseHackageStr "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
+  # { name = "cassava";
+  #   version = "0.5.3.0";
+  #   cabalFileHash = "06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29";
+  #   cabalFileLen = "6083";
+  # }
+  # ```
+  #
+  # These hackage lock strings can be found both in the Stackage snapshot, and
+  # in the `stack.yaml.lock` file.
   parseHackageStr = hackageStr:
     let
       splitHackageStr = builtins.split "(.*)@sha256:(.*),(.*)" hackageStr;
@@ -116,12 +149,42 @@ let
       cabalFileLen = builtins.elemAt hackageStrMatches 2;
     };
 
+  # Get additional Cabal2nix arguments for a given package and version.
+  #
+  # See `./cabal2nixArgsForPkg.nix` for why this is necessary.
+  #
+  # Example:
+  # ```
+  # > getAdditionalCabal2nixArgs "gi-vte" "3.0.27"
+  # { vte_291 = pkgs.vte; }
+  # ```
   getAdditionalCabal2nixArgs = pkgName: pkgVersion:
     if builtins.hasAttr pkgName cabal2nixArgsForPkg then
       (builtins.getAttr pkgName cabal2nixArgsForPkg) pkgVersion
     else
       {};
 
+  # Take the Hackage lock info for a given package, and turn it into an actual
+  # Haskell package derivation.
+  #
+  # pkgHackageInfoToNixHaskPkg
+  #   :: { name :: String, version :: String, cabalFileHash :: String, cabalFileLen :: String }
+  #   -> HaskellPkgSet
+  #   -> HaskellPkgDrv
+  #
+  # Example:
+  # ```
+  # pkgHackageInfoToNixHaskPkg
+  #   { name = "cassava";
+  #     version = "0.5.3.0";
+  #     cabalFileHash = "06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29";
+  #     cabalFileLen = "6083";
+  #   }
+  #   hfinal
+  # ```
+  #
+  # This takes care of replaces the `.cabal` file from Hackage with the correct revision
+  # specified in the Hackage lock info.
   pkgHackageInfoToNixHaskPkg = pkgHackageInfo: hfinal:
     let
       additionalArgs = getAdditionalCabal2nixArgs pkgHackageInfo.name pkgHackageInfo.version;
@@ -132,6 +195,36 @@ let
       pkgHackageInfo.cabalFileHash
       (hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs);
 
+  # Return a derivation for a Haskell package for the given Haskell package
+  # lock info.
+  #
+  # extraDepCreateNixHaskPkg :: HaskellPkgSet -> HaskellPkgLock -> HaskellPkgDrv
+  #
+  # where
+  #
+  # data HaskellPkgLock
+  #   = HackageDep { hackage :: String }
+  #   | GitDep { name :: String, git :: String, commit :: String, subdir :: String }
+  #
+  # In `GitDep`, `subdir` can be left out.
+  #
+  # Example:
+  # ```
+  # extraDepCreateNixHaskPkg
+  #   hfinal
+  #   { hackage = "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"; }
+  # ```
+  #
+  # Another Example:
+  # ```
+  # extraDepCreateNixHaskPkg
+  #   hfinal
+  #   { name = "servant-client";
+  #     git = "https://github.com/haskell-servant/servant";
+  #     commit = "1fba9dc6048cea6184964032b861b052cd54878c";
+  #     subdir = "servant-client";
+  #   }
+  # ```
   extraDepCreateNixHaskPkg = hfinal: haskPkgLock:
     let
       extraHackageDep =
@@ -174,12 +267,67 @@ let
     else
       builtins.throw "ERROR: unknown haskPkgLock type: ${builtins.toString haskPkgLock}";
 
+  # Turn a list of Haskell package locks into an overlay for a Haskell package
+  # set.
+  #
+  # haskPkgLocksToOverlay
+  #  :: [ { hackage :: String } ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #
+  # Example:
+  # ```
+  # haskPkgLocksToOverlay
+  #   [ { hackage = "lens-5.0.1@sha256:63ed57e4d54c583ae2873d6892ef690942d90030864d0b772413a1458e98159f,15544"; }
+  #     { hackage = "conduit-1.3.4.3@sha256:c32a5f3ee2daff364de2807afeec45996e5633f9a5010c8504472a930ac7153e,5129"; }
+  #   ]
+  #   hfinal
+  #   hprev
+  # ```
+  #
+  # This roughly returns an overlay that looks like the following:
+  # ```
+  # { lens = callHackage "lens" "5.0.1" {};
+  #   conduit = callHackage "conduit" "5.0.1" {};
+  # }
+  # ```
   haskPkgLocksToOverlay = haskPkgLocks: hfinal: hprev:
     builtins.listToAttrs (map (extraDepCreateNixHaskPkg hfinal) haskPkgLocks);
 
+  # Similar to `haskPkgLocksToOverlay`, but takes in both Hackage locks and Git
+  # locks (so the `HaskellPkgLock` type) from above.
+  #
+  # extraDepsToOverlay ::
+  #   [ HaskellPkgLock ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #
+  # Example:
+  # ```
+  # haskPkgLocksToOverlay
+  #   [ { hackage = "lens-5.0.1@sha256:63ed57e4d54c583ae2873d6892ef690942d90030864d0b772413a1458e98159f,15544"; }
+  #     { name = "servant-client";
+  #       git = "https://github.com/haskell-servant/servant";
+  #       commit = "1fba9dc6048cea6184964032b861b052cd54878c";
+  #       subdir = "servant-client";
+  #     }
+  #   ]
+  #   hfinal
+  #   hprev
+  # ```
   extraDepsToOverlay = extraDepsPkgs: hfinal: hprev:
     haskPkgLocksToOverlay (map (pkg: pkg.completed) extraDepsPkgs) hfinal hprev;
 
+  # Figure out the name of a local package from the stack.yaml file and its path.
+  #
+  # mkLocalPkg :: String -> { pkgPath :: Path, pkgName :: String }
+  #
+  # Example:
+  # ```
+  # > mkLocalPkg "."
+  # { pkgPath = /some/path/to/my-hask-pkg;
+  #   pkgName = "hask-pkg"
+  # }
+  # ```
+  #
+  # Note that the basename of the `pkgPath` may be different than the actual
+  # Haskell package name.
   mkLocalPkg = localPkgPathStr:
     let
       pkgPath =
@@ -209,14 +357,29 @@ let
     in
     { inherit pkgPath pkgName; };
 
+  # Call `mkLocalPkg` for each local package from the `stack.yaml` file.
+  #
+  # localPkgs :: [ { pkgPath :: Path, pkgName :: String } ]
   localPkgs = map mkLocalPkg stackYamlParsed.packages;
 
   suggestedOverlay = callPackage ./suggestedOverlay.nix {};
 
+  # A Haskell package set overlay that adds all the packages from your Stackage
+  # snapshot / resolver.
+  #
+  # stackYamlResolverOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
   stackYamlResolverOverlay = haskPkgLocksToOverlay resolverParsed.packages;
 
+  # A Haskell package set overlay that adds all the packages from the `extraDeps`
+  # in your `stack.yaml`.
+  #
+  # stackYamlExtraDepsOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
   stackYamlExtraDepsOverlay = extraDepsToOverlay stackYamlLockParsed.packages;
 
+  # A Haskell package set overlay that adds all the packages from the `extraDeps`
+  # in your `stack.yaml`.
+  #
+  # stackYamlExtraDepsOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
   stackYamlLocalPkgsOverlay = hfinal: hprev:
     let
       localPkgToOverlayAttr = { pkgName, pkgPath }: {
@@ -226,6 +389,7 @@ let
     in
     builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
 
+  # A selector for picking only local packages from a package set.
   localPkgsSelector = haskPkgs:
     map (localPkg: haskPkgs.${localPkg.pkgName}) localPkgs;
 in
@@ -244,6 +408,7 @@ in
   _internal = {
     inherit
       snapshotInfo
+      resolverParsed
       ;
   };
 }

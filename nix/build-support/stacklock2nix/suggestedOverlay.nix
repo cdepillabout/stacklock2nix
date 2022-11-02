@@ -1,6 +1,34 @@
 
 { haskell, lib, pkgs }:
 
+# This is an Haskell package set overlay of suggested overrides to Haskell
+# packages.  Most users will likely want to use this.
+#
+# These overrides are very similar to the overrides from
+# `pkgs/development/haskell/configuration-common.nix` and
+# `pkgs/development/haskell/configuration-nix.nix` in Nixpkgs.  You may even
+# want to try using those two overlays instead of this file.
+#
+# If there are additional overrides that need to be copied over from one of the
+# above files, please feel free to send a PR to stacklock2nix.
+#
+# The benefit of having this file in the stacklock2nix sources is that we can
+# have Haskell package version-specific overrides, similar to the overrides
+# from poetry2nix.  The two above files from Nixpkgs mostly only work with
+# a single Haskell package version.
+#
+# For instance, stacklock2nix should provide overrides similar to the following:
+#
+# ```
+# lens =
+#   if lib.versionOlder hprev.lens.version "5.0" then
+#     # lens tests are broken on all versions before 5.0
+#     dontCheck hprev.lens
+#   else hprev.lens;
+# ```
+#
+# These will be maintained on a best-effort basis.  Again, please send PRs.
+
 hfinal: hprev: with haskell.lib.compose; {
   HUnit = dontCheck hprev.HUnit;
   ansi-terminal = dontCheck hprev.ansi-terminal;
