@@ -1,14 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.7.
---
--- see: https://github.com/sol/hpack
-
-name:           example-haskell-package
+name:           my-example-haskell-lib
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/cdepillabout/example-haskell-package#readme>
-homepage:       https://github.com/cdepillabout/example-haskell-package#readme
-bug-reports:    https://github.com/cdepillabout/example-haskell-package/issues
+description:    Please see the README on GitHub at <https://github.com/cdepillabout/stacklock2nix#readme>
+homepage:       https://github.com/cdepillabout/stacklock2nix#readme
+bug-reports:    https://github.com/cdepillabout/stacklock2nix/issues
 author:         Dennis Gosnell
 maintainer:     cdep.illabout@gmail.com
 copyright:      Copyright (c) 2018 Dennis Gosnell
@@ -21,13 +17,13 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/cdepillabout/example-haskell-package
+  location: https://github.com/cdepillabout/stacklock2nix
 
 library
   exposed-modules:
       Lib
   other-modules:
-      Paths_example_haskell_package
+      Paths_my_example_haskell_lib
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
@@ -35,27 +31,27 @@ library
       base >=4.7 && <5
   default-language: Haskell2010
 
-executable example-haskell-package-exe
+executable my-example-haskell-lib-exe
   main-is: Main.hs
   other-modules:
-      Paths_example_haskell_package
+      Paths_my_example_haskell_lib
   hs-source-dirs:
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
-    , example-haskell-package
+    , my-example-haskell-lib
   default-language: Haskell2010
 
-test-suite example-haskell-package-test
+test-suite my-example-haskell-lib-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_example_haskell_package
+      Paths_my_example_haskell_lib
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
-    , example-haskell-package
+    , my-example-haskell-lib
   default-language: Haskell2010
