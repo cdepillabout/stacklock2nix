@@ -11,13 +11,32 @@ final: prev: {
   ## Easy example ##
   ##################
 
+  _stacklock-example-easy = final.stacklock2nix {
+    stackYaml = ../my-example-haskell-lib/stack.yaml;
+    baseHaskellPkgSet = final.haskell.packages.ghc924;
+    additionalHaskellPkgSetOverrides = hfinal: hprev: {};
+    additionalDevShellNativeBuildInputs = [];
+    all-cabal-hashes = final.fetchurl {
+      name = "all-cabal-hashes";
+      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/9ab160f48cb535719783bc43c0fbf33e6d52fa99.tar.gz";
+      sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
+    };
+  };
+
+  _stacklock-my-example-haskell-lib-easy =
+    final._stacklock-example-easy.pkgSet.my-example-haskell-lib;
+
+  # You can also easily create a development shell for hacking on your local
+  # packages with `cabal`.
+  _stacklock-my-example-dev-shell-easy = final._stacklock-example-easy.devShell;
+
   ######################
   ## Advanced Example ##
   ######################
 
   # First, call stacklock2nix and pass it the `stack.yaml` for your project.
   _stacklock-example-advanced = final.stacklock2nix {
-    stack-yaml = ../my-example-haskell-lib/stack.yaml;
+    stackYaml = ../my-example-haskell-lib/stack.yaml;
   };
 
   # Then, apply the Haskell package overlays provided by stacklock2nix to the
@@ -71,12 +90,12 @@ final: prev: {
   # Finally, you can pulling out the Haskell package you're interested in and
   # build it with Nix.  This will normally be one of your local packages.
   # This example corresponds to the ../my-example-haskell-lib package.
-  _stacklock-my-example-haskell-lib =
+  _stacklock-my-example-haskell-lib-advanced =
     final._stacklock-example-pkg-set.my-example-haskell-lib;
 
   # You can also easily create a development shell for hacking on your local
   # packages with `cabal`.
-  _stacklock-my-example-dev-shell =
+  _stacklock-my-example-dev-shell-advanced =
     final._stacklock-example-pkg-set.shellFor {
       packages = haskPkgs: final._stacklock-example.localPkgsSelector haskPkgs;
       # Additional packages that should be available for development.

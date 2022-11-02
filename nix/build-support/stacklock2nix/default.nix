@@ -13,47 +13,51 @@
   # Example: `./some/path/to/stack.yaml`
   #
   # If `null`, guess the path of the `stack.yaml` file from the
-  # `stack-yaml-lock` value.
-  stack-yaml ? null
+  # `stackYamlLock` value.
+  stackYaml ? null
 , # The path to your stack.yaml.lock file.
   #
   # Example: `./some/path/to/stack.yaml.lock`
   #
   # If `null`, guess the path of the `stack.yaml.lock` file from the
-  # `stack-yaml` value.
-  stack-yaml-lock ? null
+  # `stackYaml` value.
+  stackYamlLock ? null
 , # A function that can be used to override the values passed to
   # `callHackage` and `callCabal2nix` in the generated overlays.
   # See the comment in `./cabal2nixArgsForPkg.nix` for an explanation
   # of what this is.
   cabal2nixArgsOverrides ? (args: args)
+, baseHaskellPkgSet ? null
+, additionalHaskellPkgSetOverrides ? hfinal: hprev: {}
+, additionalDevShellNativeBuildInputs ? []
+, all-cabal-hashes ? null
 }:
 
 # The stack.yaml path can be computed from the stack.yaml.lock path, or
 # vice-versa.  But both can't be null.
-assert stack-yaml != null || stack-yaml-lock != null;
+assert stackYaml != null || stackYamlLock != null;
 
 let
-  stack-yaml-real =
-    if stack-yaml == null then
+  stackYamlReal =
+    if stackYaml == null then
       builtins.throw
         "ERROR: logic for inferring the stack.yaml path from stack.yaml.lock path has not yet been implemented.  Please send a PR!"
     else
-      stack-yaml;
+      stackYaml;
 
-  stack-yaml-lock-real =
-    if stack-yaml-lock == null then
-      stack-yaml + ".lock"
+  stackYamlLockReal =
+    if stackYamlLock == null then
+      stackYaml + ".lock"
     else
-      stack-yaml-lock;
+      stackYamlLock;
 
   readYAML = callPackage ./read-yaml.nix {};
 
   # The `stack.yaml` file read in as a Nix value.
-  stackYamlParsed = readYAML stack-yaml-real;
+  stackYamlParsed = readYAML stackYamlReal;
 
   # The `stack.yaml.lock` file read in as a Nix value.
-  stackYamlLockParsed = readYAML stack-yaml-lock-real;
+  stackYamlLockParsed = readYAML stackYamlLockReal;
 
   # The URL and sha256 for the snapshot from the `stack.yaml.lock` file.
   #
@@ -335,7 +339,7 @@ let
           src =
             # TODO: I imagine it is not okay to just assume this package path is a
             # relative path.
-            builtins.path { path = dirOf stack-yaml-real + ("/" + localPkgPathStr); };
+            builtins.path { path = dirOf stackYamlReal + ("/" + localPkgPathStr); };
           # TODO: Create a better filter, plus make it overrideable for end-users.
           filter = path: type: true;
         };
@@ -405,6 +409,36 @@ let
   # ```
   localPkgsSelector = haskPkgs:
     map (localPkg: haskPkgs.${localPkg.pkgName}) localPkgs;
+
+
+  pkgSet =
+    if baseHaskellPkgSet == null then
+      null
+    else
+      baseHaskellPkgSet.override (oldAttrs: {
+        overrides = lib.composeManyExtensions [
+          # Make sure not to lose any old overrides.
+          (oldAttrs.overrides or (_: _: {}))
+          stackYamlResolverOverlay
+          stackYamlExtraDepsOverlay
+          stackYamlLocalPkgsOverlay
+          suggestedOverlay
+          additionalHaskellPkgSetOverrides
+        ];
+      } //
+      lib.optionalAttrs (all-cabal-hashes != null) {
+        inherit all-cabal-hashes;
+      });
+
+  devShell =
+    if pkgSet === null then
+      null
+    else
+      pkgsSet.shellFor {
+        packages = localPkgsSelector;
+        nativeBuildInputs = additionalDevShellNativeBuildInputs;
+      };
+
 in
 
 { inherit
@@ -413,6 +447,8 @@ in
     stackYamlLocalPkgsOverlay
     suggestedOverlay
     localPkgsSelector
+    pkgSet
+    devShell
     ;
 
   # This is a bunch of internal attributes, used for testing.
