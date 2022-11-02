@@ -27,10 +27,29 @@
   # See the comment in `./cabal2nixArgsForPkg.nix` for an explanation
   # of what this is.
   cabal2nixArgsOverrides ? (args: args)
-, baseHaskellPkgSet ? null
-, additionalHaskellPkgSetOverrides ? hfinal: hprev: {}
-, additionalDevShellNativeBuildInputs ? []
-, all-cabal-hashes ? null
+, # A base Haskell package set to apply all the stacklock overlays
+  # on top of.
+  #
+  # baseHaskellPkgSet :: HaskellPkgSet
+  #
+  # If this is null, then the output attributes `pkgSet` and `devShell` will
+  # also be null.
+  baseHaskellPkgSet ? null
+, # A Haskell package set overlay to apply last on top of
+  # `baseHaskellPkgSet`.
+  #
+  # additionalHaskellPkgSetOverrides :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #
+  # This is unused if `baseHaskellPkgSet` is null.
+  additionalHaskellPkgSetOverrides ? hfinal: hprev: {}
+, # Additional nativeBuildInputs to provide in the devShell.
+  #
+  # additionalDevShellNativeBuildInputs :: [ Drv ]
+  #
+  # This is unused if `baseHaskellPkgSet` is null.
+  additionalDevShellNativeBuildInputs ? (stacklockHaskellPkgSet: [])
+,
+  all-cabal-hashes ? null
 }:
 
 # The stack.yaml path can be computed from the stack.yaml.lock path, or
@@ -431,12 +450,12 @@ let
       });
 
   devShell =
-    if pkgSet === null then
+    if pkgSet == null then
       null
     else
-      pkgsSet.shellFor {
+      pkgSet.shellFor {
         packages = localPkgsSelector;
-        nativeBuildInputs = additionalDevShellNativeBuildInputs;
+        nativeBuildInputs = additionalDevShellNativeBuildInputs pkgSet;
       };
 
 in
