@@ -389,7 +389,20 @@ let
     in
     builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
 
-  # A selector for picking only local packages from a package set.
+  # A selector for picking only local packages defined in a `stack.yaml` from a Haskell package set.
+  #
+  # localPkgs :: HaskellPkgSet -> [ HaskellPkgDrv ]
+  #
+  # Example: `my-stacklock-pkg-set.ghcWithPackages my-stacklock.localPkgsSelector`
+  #
+  # Another Example:
+  # ```
+  # my-stacklock-pkg-set.shellFor {
+  #   packages = my-stacklock-pkg-set.localPkgsSelector;
+  #   withHoogle = true;
+  #   buildInputs = [ pkgs.python pkgs.cabal-install ];
+  # }
+  # ```
   localPkgsSelector = haskPkgs:
     map (localPkg: haskPkgs.${localPkg.pkgName}) localPkgs;
 in
