@@ -4,7 +4,7 @@ final: prev: {
 
   _stacklock-example = final.stacklock2nix {
     stack-yaml = ../my-example-haskell-lib/stack.yaml;
-    stack-yaml-lock = ../my-example-haskell-lib/stack.yaml.lock;
+    # stack-yaml-lock = ../my-example-haskell-lib/stack.yaml.lock;
   };
 
   _stacklock-example-pkg-set =

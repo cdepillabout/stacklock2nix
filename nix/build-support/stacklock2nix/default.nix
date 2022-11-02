@@ -8,19 +8,61 @@
 , stdenv
 }:
 
-{ stack-yaml
-, stack-yaml-lock
-, cabal2nixArgsOverrides ? (args: args)
+{ # The path to your stack.yaml file.
+  #
+  # Example: `./some/path/to/stack.yaml`
+  #
+  # If `null`, guess the path of the `stack.yaml` file from the
+  # `stack-yaml-lock` value.
+  stack-yaml ? null
+, # The path to your stack.yaml.lock file.
+  #
+  # Example: `./some/path/to/stack.yaml.lock`
+  #
+  # If `null`, guess the path of the `stack.yaml.lock` file from the
+  # `stack-yaml` value.
+  stack-yaml-lock ? null
+, #
+  cabal2nixArgsOverrides ? (args: args)
 }:
 
+# The stack.yaml path can be computed from the stack.yaml.lock path, or
+# vice-versa.  But both can't be null.
+assert stack-yaml != null || stack-yaml-lock != null;
+
 let
+  stack-yaml-real =
+    if stack-yaml == null then
+      builtins.throw
+        "ERROR: logic for inferring the stack.yaml path from stack.yaml.lock path has not yet been implemented.  Please send a PR!"
+    else
+      stack-yaml;
+
+  stack-yaml-lock-real =
+    if stack-yaml-lock == null then
+      stack-yaml + ".lock"
+    else
+      stack-yaml-lock;
 
   readYAML = callPackage ./read-yaml.nix {};
 
-  stackYamlParsed = readYAML stack-yaml;
+  # The `stack.yaml` file read in as a Nix datatype.
+  stackYamlParsed = readYAML stack-yaml-real;
 
-  stackYamlLockParsed = readYAML stack-yaml-lock;
+  # The `stack.yaml.lock` file read in as a Nix datatype.
+  stackYamlLockParsed = readYAML stack-yaml-lock-real;
 
+  # The URL and sha256 for the snapshot from the stack.yaml.lock file.
+  #
+  # Example:
+  # ```
+  # { sha256 = "895204e9116cba1f32047525ec5bad7423216587706e5df044c4a7c191a5d8cb";
+  #   url = "https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2022/10/18.yaml";
+  # }
+  # ```
+  #
+  # TODO: This function assumes there is only one resolver snapshot in the
+  # stack.yaml.lock file.  Can there be multiple??  How should this be handled?
   snapshotInfo =
     let
       fstSnapshot = builtins.elemAt stackYamlLockParsed.snapshots 0;
@@ -72,7 +114,8 @@ let
   getAdditionalCabal2nixArgs = pkgName: pkgVersion:
     if builtins.hasAttr pkgName cabal2nixArgsForPkg then
       (builtins.getAttr pkgName cabal2nixArgsForPkg) pkgVersion
-    else {};
+    else
+      {};
 
   pkgHackageInfoToNixHaskPkg = pkgHackageInfo: hfinal:
     let
@@ -139,7 +182,7 @@ let
           src =
             # TODO: I imagine it is not okay to just assume this package path is a
             # relative path.
-            builtins.path { path = dirOf stack-yaml + ("/" + localPkgPathStr); };
+            builtins.path { path = dirOf stack-yaml-real + ("/" + localPkgPathStr); };
           # TODO: Create a better filter, plus make it overrideable for end-users.
           filter = path: type: true;
         };
@@ -163,69 +206,7 @@ let
 
   localPkgs = map mkLocalPkg stackYamlParsed.packages;
 
-  suggestedOverlay = hfinal: hprev: with haskell.lib.compose; {
-    HUnit = dontCheck hprev.HUnit;
-    ansi-terminal = dontCheck hprev.ansi-terminal;
-    async = dontCheck hprev.async;
-    base-orphans = dontCheck hprev.base-orphans;
-    # doctests fail
-    bsb-http-chunked = dontCheck hprev.bsb-http-chunked;
-    clock = dontCheck hprev.clock;
-    colour = dontCheck hprev.colour;
-    doctest = dontCheck hprev.doctest;
-    doctest-parallel = dontCheck hprev.doctest-parallel;
-    dyre =
-      lib.pipe
-        hprev.dyre
-        [
-          # Dyre needs special support for reading the NIX_GHC env var.  This is
-          # available upstream in https://github.com/willdonnelly/dyre/pull/43, but
-          # hasn't been released to Hackage as of dyre-0.9.1.  Likely included in
-          # next version.
-          (appendPatch
-            (pkgs.fetchpatch {
-              url = "https://github.com/willdonnelly/dyre/commit/c7f29d321aae343d6b314f058812dffcba9d7133.patch";
-              sha256 = "10m22k35bi6cci798vjpy4c2l08lq5nmmj24iwp0aflvmjdgscdb";
-            }))
-          # dyre's tests appear to be trying to directly call GHC.
-          dontCheck
-        ];
-    focuslist = dontCheck hprev.focuslist;
-    glib =
-      lib.pipe
-        hprev.glib
-        [ (disableHardening ["fortify"])
-          (addPkgconfigDepend pkgs.glib.dev)
-          # (addBuildTool hfinal.gtk2hs-buildtools)
-        ];
-    hashable = dontCheck hprev.hashable;
-    # This propagates this to everything depending on haskell-gi-base
-    haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
-    hourglass = dontCheck hprev.hourglass;
-    hspec = dontCheck hprev.hspec;
-    hspec-core = dontCheck hprev.hspec-core;
-    # Due to tests restricting base in 0.8.0.0 release
-    http-media = doJailbreak hprev.http-media;
-    logging-facade = dontCheck hprev.logging-facade;
-    logict = dontCheck hprev.logict;
-    mockery = dontCheck hprev.mockery;
-    nanospec = dontCheck hprev.nanospec;
-    # test suite doesn't build
-    nothunks = dontCheck hprev.nothunks;
-    random = dontCheck hprev.random;
-    # Disabling doctests.
-    regex-tdfa = overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
-    smallcheck = dontCheck hprev.smallcheck;
-    splitmix = dontCheck hprev.splitmix;
-    syb = dontCheck hprev.syb;
-    tasty = dontCheck hprev.tasty;
-    tasty-expected-failure = dontCheck hprev.tasty-expected-failure;
-    test-framework = dontCheck hprev.test-framework;
-    unagi-chan = dontCheck hprev.unagi-chan;
-    vector = dontCheck hprev.vector;
-    # http://hydra.cryp.to/build/501073/nixlog/5/raw
-    warp = dontCheck hprev.warp;
-  };
+  suggestedOverlay = callPackage ./suggestedOverlay.nix {};
 
   stackYamlResolverOverlay = haskPkgLocksToOverlay resolverParsed.packages;
 
@@ -249,5 +230,15 @@ in
     stackYamlExtraDepsOverlay
     stackYamlLocalPkgsOverlay
     suggestedOverlay
-    localPkgsSelector;
+    localPkgsSelector
+    ;
+
+  # This is a bunch of internal attributes, used for testing.
+  # End-users should not rely on these.  Treat these similar to
+  # `.Internal` modules in Haskell.
+  _internal = {
+    inherit
+      snapshotInfo
+      ;
+  };
 }
