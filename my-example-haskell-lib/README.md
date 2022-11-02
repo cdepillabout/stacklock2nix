@@ -1,1 +1,1 @@
-# example-haskell-package
+# my-example-haskell-lib
