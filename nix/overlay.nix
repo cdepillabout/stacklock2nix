@@ -2,19 +2,19 @@ final: prev: {
 
   stacklock2nix = final.callPackage ./build-support/stacklock2nix {};
 
-  _stacklock2nix-example-haskell-package = final.stacklock2nix {
-    stack-yaml = ../example-haskell-package/stack.yaml;
-    stack-yaml-lock = ../example-haskell-package/stack.yaml.lock;
+  _stacklock-my-example-haskell-lib = final.stacklock2nix {
+    stack-yaml = ../my-example-haskell-lib/stack.yaml;
+    stack-yaml-lock = ../my-example-haskell-lib/stack.yaml.lock;
   };
 
-  _stacklock2nix-example-haskell-package-set =
+  _stacklock-my-example-haskell-lib-package-set =
     final.haskell.packages.ghc924.override (oldAttrs: {
       overrides = final.lib.composeManyExtensions [
         (oldAttrs.overrides or (_: _: {}))
-        final._stacklock2nix-example-haskell-package.stackYamlResolverOverlay
-        final._stacklock2nix-example-haskell-package.stackYamlExtraDepsOverlay
-        final._stacklock2nix-example-haskell-package.stackYamlLocalPkgsOverlay
-        final._stacklock2nix-example-haskell-package.suggestedOverlay
+        final._stacklock-my-example-haskell-lib.stackYamlResolverOverlay
+        final._stacklock-my-example-haskell-lib.stackYamlExtraDepsOverlay
+        final._stacklock-my-example-haskell-lib.stackYamlLocalPkgsOverlay
+        final._stacklock-my-example-haskell-lib.suggestedOverlay
         (hfinal: hprev: {
           servant-cassava =
             final.haskell.lib.compose.overrideCabal
@@ -30,4 +30,7 @@ final: prev: {
         sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
       };
     });
+
+  _stacklock2nix-my-example-haskell-lib =
+    final._stacklock-my-example-haskell-lib-package-set.my-example-haskell-lib;
 }
