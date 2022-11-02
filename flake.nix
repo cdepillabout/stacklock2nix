@@ -6,6 +6,8 @@
   outputs = { self, nixpkgs }:
     let
       # System types to support.
+      #
+      # TODO: Add more systems to this list.
       supportedSystems = [
         "x86_64-linux"
         # "x86_64-darwin"
@@ -25,7 +27,7 @@
       overlay = import ./nix/overlay.nix;
 
       packages = forAllSystems (system: {
-        inherit (nixpkgsFor.${system}) example-haskell-package;
+        my-example-haskell-lib = nixpkgsFor.${system}._stacklock-my-example-haskell-lib;
       });
 
       # defaultPackage = forAllSystems (system: self.packages.${system}.hello);
