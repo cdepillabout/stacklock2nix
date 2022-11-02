@@ -1,9 +1,27 @@
 
 { curl, coreutils, lib, stdenvNoCC, writeShellScript }:
 
-{ name
-, version
-, hash
+# Fetch the revision of a `.cabal` file for a given Haskell package from
+# Hackage.
+
+{ # Haskell package.
+  #
+  # name :: String
+  #
+  # Example: `"lens"`
+  name
+, # Version
+  #
+  # version :: String
+  #
+  # Example: `"5.0.1"`
+  version
+, # Hash of the revised `.cabal` file from Hackage.
+  #
+  # hash :: String
+  #
+  # Example: "63ed57e4d54c583ae2873d6892ef690942d90030864d0b772413a1458e98159f"
+  hash
 }:
 
 stdenvNoCC.mkDerivation {
@@ -38,6 +56,23 @@ stdenvNoCC.mkDerivation {
         --user-agent "curl/$curlVersion Nixpkgs/$nixpkgsVersion"
         --insecure
     )
+
+    # This is pretty dumb.
+    #
+    # The snapshot/resolver specified in a stack.yaml contains the hash of the
+    # revised `.cabal` file that should be used for each package, but it
+    # doesn't contain the _number_ of the revision the hash belongs to.
+    # Unfortunately, Hackage only provides a way to download a `.cabal` file
+    # based on a revision number (not a revised `.cabal` file given a hash).
+    #
+    # So the following code attempts to download each revised `.cabal` file for
+    # a version of a package, one-by-one, hash it, and check whether the hash
+    # matches the hash we are looking for.  If it does, we're good to go.
+    #
+    # In theory, this should always succeed, since the Stackage snapshots
+    # will only reference `.cabal` file revisions from Hackage.  In practice,
+    # I've never seen this fail to find a revision, but who knows what weird
+    # things go on in edge-cases of Hackage.
 
     found="no"
 
