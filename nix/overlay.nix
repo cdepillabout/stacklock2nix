@@ -7,7 +7,7 @@ final: prev: {
     stack-yaml-lock = ../my-example-haskell-lib/stack.yaml.lock;
   };
 
-  _stacklock-example-package-set =
+  _stacklock-example-pkg-set =
     final.haskell.packages.ghc924.override (oldAttrs: {
       overrides = final.lib.composeManyExtensions [
         (oldAttrs.overrides or (_: _: {}))
@@ -32,7 +32,11 @@ final: prev: {
     });
 
   _stacklock-my-example-haskell-lib =
-    final._stacklock-example-package-set.my-example-haskell-lib;
+    final._stacklock-example-pkg-set.my-example-haskell-lib;
 
-  # _stacklock-
+  _stacklock-my-example-dev-shell =
+    final._stacklock-example-pkg-set.shellFor {
+      packages = haskPkgs: final._stacklock-example.localPkgsSelector haskPkgs;
+      buildInputs = [ final.cabal-install ];
+    };
 }

@@ -17,7 +17,8 @@
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
 
       # Nixpkgs instantiated for supported system types.
-      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; overlays = [ self.overlay ]; });
+      nixpkgsFor =
+        forAllSystems (system: import nixpkgs { inherit system; overlays = [ self.overlay ]; });
 
     in
 
@@ -27,18 +28,18 @@
       overlay = import ./nix/overlay.nix;
 
       packages = forAllSystems (system: {
-        my-example-haskell-lib = nixpkgsFor.${system}._stacklock-my-example-haskell-lib;
+        my-example-haskell-lib =
+          nixpkgsFor.${system}._stacklock-my-example-haskell-lib;
       });
 
       # defaultPackage = forAllSystems (system: self.packages.${system}.hello);
 
-      # devShells = forAllSystems (system: {
-      #   # This purescript development shell just contains dhall, purescript,
-      #   # and spago.  This is convenient for making changes to
-      #   # ./example-purescript-package. But most users can ignore this.
-      #   inherit (nixpkgsFor.${system}) purescript-dev-shell;
-      # });
+      devShells = forAllSystems (system: {
+        my-example-haskell-lib-devshell =
+          nixpkgsFor.${system}._stacklock-my-example-dev-shell;
+      });
 
-      # devShell = forAllSystems (system: self.devShells.${system}.purescript-dev-shell);
+      devShell =
+        forAllSystems (system: self.devShells.${system}.my-example-haskell-lib-devshell);
     };
 }

@@ -240,11 +240,14 @@ let
     in
     builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
 
+  localPkgsSelector = haskPkgs:
+    map (localPkg: haskPkgs.${localPkg.pkgName}) localPkgs;
 in
 
 { inherit
     stackYamlResolverOverlay
     stackYamlExtraDepsOverlay
     stackYamlLocalPkgsOverlay
-    suggestedOverlay;
+    suggestedOverlay
+    localPkgsSelector;
 }
