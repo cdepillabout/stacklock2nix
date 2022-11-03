@@ -27,7 +27,7 @@ final: prev: {
 
     # Additional packages that should be available for development.
     additionalDevShellNativeBuildInputs = stacklockHaskellPkgSet: [
-      # Some Haskell tools (like cabal-install) can be taken from the
+      # Some Haskell tools (like cabal-install and ghcid) can be taken from the
       # top-level of Nixpkgs.
       final.cabal-install
       final.ghcid
@@ -35,8 +35,9 @@ final: prev: {
       # you used to define your stacklock2nix Haskell package set.  Be
       # careful not to pull these packages from your stacklock2nix Haskell
       # package set, since transitive dependency versions may have been
-      # carefully setup in Nixpkgs, and your stacklock2nix Haskell package
-      # set will likely contain different versions.
+      # carefully setup in Nixpkgs so that the tool will compile, and your
+      # stacklock2nix Haskell package set will likely contain different
+      # versions.
       final.haskell.packages.ghc924.haskell-language-server
       # Other Haskell tools may need to be taken from the stacklock2nix
       # Haskell package set, and compiled with the example same dependency
@@ -124,7 +125,7 @@ final: prev: {
   # packages with `cabal`.
   _stacklock-my-example-dev-shell-advanced =
     final._stacklock-example-pkg-set-advanced.shellFor {
-      packages = haskPkgs: final._stacklock-example.localPkgsSelector haskPkgs;
+      packages = haskPkgs: final._stacklock-example-advanced.localPkgsSelector haskPkgs;
       # Additional packages that should be available for development.
       nativeBuildInputs = [
         # Some Haskell tools (like cabal-install) can be taken from the
@@ -135,8 +136,9 @@ final: prev: {
         # you used to define your stacklock2nix Haskell package set.  Be
         # careful not to pull these packages from your stacklock2nix Haskell
         # package set, since transitive dependency versions may have been
-        # carefully setup in Nixpkgs, and your stacklock2nix Haskell package
-        # set will likely contain different versions.
+        # carefully setup in Nixpkgs so that the tool will compile, and your
+        # stacklock2nix Haskell package set will likely contain different
+        # versions.
         final.haskell.packages.ghc924.haskell-language-server
         # Other Haskell tools may need to be taken from the stacklock2nix
         # Haskell package set, and compiled with the example same dependency

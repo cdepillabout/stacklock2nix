@@ -45,6 +45,6 @@
       });
 
       devShell =
-        forAllSystems (system: self.devShells.${system}.my-example-haskell-lib-dev-shell-advanced);
+        forAllSystems (system: self.devShells.${system}.my-example-haskell-lib-devShell-advanced);
     };
 }
