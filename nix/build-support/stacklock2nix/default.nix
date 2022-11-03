@@ -48,7 +48,30 @@
   #
   # This is unused if `baseHaskellPkgSet` is null.
   additionalDevShellNativeBuildInputs ? (stacklockHaskellPkgSet: [])
-,
+, # When creating your own Haskell package set from the stacklock2nix
+  # output, you may need to specify a newer all-cabal-hashes.
+  #
+  # This is necessary when you are using a Stackage snapshot/resolver or
+  # `extraDeps` in your `stack.yaml` file that is _newer_ than the
+  # `all-cabal-hashes` derivation from the Nixpkgs you are using.
+  #
+  # If you are using the latest nixpkgs-unstable and an old Stackage
+  # resolver, then it is usually not necessary to override
+  # `all-cabal-hashes`.
+  #
+  # If you are using a very recent Stackage resolver and an old Nixpkgs,
+  # it is almost always necessary to override `all-cabal-hashes`.
+  #
+  # all-cabal-hashes :: Drv
+  #
+  # Example:
+  # ```
+  # final.fetchurl {
+  #   name = "all-cabal-hashes";
+  #   url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/9ab160f48cb535719783bc43c0fbf33e6d52fa99.tar.gz";
+  #   sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
+  # };
+  # ```
   all-cabal-hashes ? null
 }:
 
@@ -397,12 +420,32 @@ let
   # in your `stack.yaml`.
   #
   # stackYamlExtraDepsOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #
+  # If you have `extraDeps` in your `stack.yaml` that look like the following:
+  #
+  # ```
+  # extra-deps:
+  #   - unagi-streams-0.2.7
+  #   - git: https://github.com/haskell-servant/servant-cassava
+  #     commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
+  # ```
+  #
+  # then `stackYamlExtraDepsOverlay` ends up looking roughly like the following:
+  #
+  # ```
+  # hfinal: hprev: {
+  #   unagi-streams = hfinal.callHackage "unagi-streams" "0.2.7" {}
+  #   servant-cassava = hfinal.callCabal2nix "servant-cassava" (builtins.fetchGit ...) {}
+  # }
+  # ```
+  #
+  # In practice it is more complicated, but this is a good first-order approximation.
   stackYamlExtraDepsOverlay = extraDepsToOverlay stackYamlLockParsed.packages;
 
   # A Haskell package set overlay that adds all the packages from the `extraDeps`
   # in your `stack.yaml`.
   #
-  # stackYamlExtraDepsOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  # stackYamlLocalPkgsOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
   stackYamlLocalPkgsOverlay = hfinal: hprev:
     let
       localPkgToOverlayAttr = { pkgName, pkgPath }: {
