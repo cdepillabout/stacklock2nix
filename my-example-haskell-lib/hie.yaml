@@ -1,2 +1,10 @@
 cradle:
-    cabal:
+  cabal:
+    - path: "test"
+      component: "my-example-haskell-lib:test:my-example-haskell-lib-test"
+
+    - path: "app"
+      component: "my-example-haskell-lib:exe:my-example-haskell-lib-exe"
+
+    - path: "src"
+      component: "lib:my-example-haskell-lib"
