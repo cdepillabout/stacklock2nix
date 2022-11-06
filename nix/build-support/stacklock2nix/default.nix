@@ -472,6 +472,20 @@ let
   localPkgsSelector = haskPkgs:
     map (localPkg: haskPkgs.${localPkg.pkgName}) localPkgs;
 
+  # A single overlay that combines the following overlays:
+  # - the packages from the stack.yaml resolver
+  # - the `extraDeps` from your stack.yaml file
+  # - the local `packages` from your stack.yaml file
+  # - a set of suggested overrides from stacklock2nix
+  #
+  # combinedOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  combinedOverlay =
+    lib.composeManyExtensions [
+      stackYamlResolverOverlay
+      stackYamlExtraDepsOverlay
+      stackYamlLocalPkgsOverlay
+      suggestedOverlay
+    ];
 
   pkgSet =
     if baseHaskellPkgSet == null then
@@ -508,6 +522,7 @@ in
     stackYamlExtraDepsOverlay
     stackYamlLocalPkgsOverlay
     suggestedOverlay
+    combinedOverlay
     localPkgsSelector
     pkgSet
     devShell
