@@ -22,6 +22,7 @@ jobs:
           are_same=$(nix eval --impure --expr 'let easy-rev = (builtins.fromJSON (builtins.readFile ./my-example-haskell-lib-easy/flake.lock)).nodes.nixpkgs.locked.rev; advanced-rev = (builtins.fromJSON (builtins.readFile ./my-example-haskell-lib-advanced/flake.lock)).nodes.nixpkgs.locked.rev; in easy-rev == advanced-rev')
           if [ "$are_same" != "true" ]; then
             echo "ERROR: The ./my-example-haskell-lib-easy/flake.lock and ./my-example-haskell-lib-advanced/flake.lock files are locked to different versions of Nixpkgs"
+            exit 1
           fi
 
       - name: Update flake stacklock2nix input
