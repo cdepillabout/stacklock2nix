@@ -3,19 +3,18 @@
 
   # This is a flake reference to the stacklock2nix repo.
   #
-  # CHANGEME: Note that in a real repo, this will need to be changed to
-  # something like the following:
+  # Note that if you copy the `./flake.lock` to your own repo, you'll likely
+  # want to update the commit that this stacklock2nix reference points to:
   #
-  # inputs.stacklock2nix.url = "github:cdepillabout/stacklock2nix/main";
-  inputs.stacklock2nix.url = "path:../.";
+  # $ nix flake lock --update-input stacklock2nix
+  #
+  # You may also want to lock stacklock2nix to a specific release:
+  #
+  # inputs.stacklock2nix.url = "github:cdepillabout/stacklock2nix/v1.5.0";
+  inputs.stacklock2nix.url = "github:cdepillabout/stacklock2nix/main";
 
   # This is a flake reference to Nixpkgs.
-  #
-  # CHANGEME: Note that in a real repo, this will need to be changed to
-  # something like the following:
-  #
-  # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  inputs.nixpkgs.follows = "stacklock2nix/nixpkgs";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
   outputs = { self, nixpkgs, stacklock2nix }:
     let
