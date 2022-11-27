@@ -115,7 +115,7 @@ final: prev: {
       };
     });
 
-  # Finally, you can pulling out the Haskell package you're interested in and
+  # Finally, you can pull out the Haskell package you're interested in and
   # build it with Nix.  This will normally be one of your local packages.
   # This example corresponds to the ../my-example-haskell-lib package.
   _stacklock-my-example-haskell-lib-advanced =

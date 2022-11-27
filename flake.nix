@@ -6,11 +6,11 @@
   outputs = { self, nixpkgs }:
     let
       # System types to support.
-      #
-      # TODO: Add more systems to this list.
       supportedSystems = [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-darwin"
         "x86_64-linux"
-        # "x86_64-darwin"
       ];
 
       # Helper function to generate an attrset '{ x86_64-linux = f "x86_64-linux"; ... }'.
@@ -19,9 +19,7 @@
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor =
         forAllSystems (system: import nixpkgs { inherit system; overlays = [ self.overlay ]; });
-
     in
-
     {
       # A Nixpkgs overlay.  This contains the stacklock2nix function that
       # end-users will want to use.

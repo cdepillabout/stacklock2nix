@@ -20,12 +20,13 @@ Nixpkgs-compatible Haskell package set from a `stack.yaml` and `stack.yaml.lock`
 ## Quickstart
 
 You can get started with `stacklock2nix` by either adding this repo as a flake
-input, and applying the exposed `.overlay` attribute, or just directly importing
+input and applying the exposed `.overlay` attribute, or just directly importing
 and applying the [`./nix/overlay.nix`](./nix/overlay.nix) file.
 
 This overlay exposes a top-level `stacklock2nix` function.  Here's an example of
-using this function.  This assumes you have a Haskell package in a directory
-`./my-example-haskell-lib/` with a `stack.yaml` and `stack.yaml.lock` file:
+using this `stacklock2nix` function.  This assumes you have a Haskell package
+in a directory `./my-example-haskell-lib/` with a `stack.yaml` and
+`stack.yaml.lock` file:
 
 `default.nix`:
 
@@ -64,7 +65,6 @@ let
 in
 my-example-haskell-lib-stacklock.pkgSet.my-example-haskell-lib
 ```
-
 
 # things to talk about
 
