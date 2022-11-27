@@ -25,10 +25,15 @@ jobs:
             exit 1
           fi
 
+      # The ./my-example-haskell-lib-easy/flake.nix is locked to the main
+      # branch of stacklock2nix, but we want to use the stacklock2nix that is
+      # currently being tested here in CI.
       - name: Update flake stacklock2nix input
         run: |
           sed -i -e 's|^  inputs.stacklock2nix.url = .*$|  inputs.stacklock2nix.url = "path:'"$(realpath ..)"'";|' ./flake.nix
           cat ./flake.nix
+          nix flake lock --update-input stacklock2nix
+          cat ./flake.lock
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Easy Example with Nix
