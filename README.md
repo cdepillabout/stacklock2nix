@@ -90,13 +90,52 @@ different features of `stacklock2nix`:
     $ stack --nix build
     ```
 
-## `stacklock2nix` arguments and return values
+## `stacklock2nix` Arguments and Return Values
 
 The arguments to `stacklock2nix` and return values are documented in
 [`./nix/build-support/stacklock2nix/default.nix`](nix/build-support/stacklock2nix/default.nix).
 
 Please open an issue or send a PR for anything that is not sufficiently
 documented.
+
+## How to Generate `stack.yaml` and `stack.yaml.lock`
+
+If you're not already a Stack user, you'll need to generate a `stack.yaml` and
+`stack.yaml.lock` file for your Haskell project before you can use
+`stacklock2nix`.
+
+In order to generate a `stack.yaml` file, you will need to make `stack`
+available and run `stack init`:
+
+```console
+$ nix-shell -p stack --command "stack init"
+```
+
+One unfortunate thing about `stack` is that if you're on NixOS, `stack` tries
+to re-exec itself in a `nix-shell` with GHC available (run
+`stack --verbose init` and look for `nix-shell` to see exactly what `stack`
+is trying to do). `stack` will try to take GHC from your current Nix channel.
+However, it is possible that `stack` will try to use a GHC version that is not
+available in your current Nix channel.
+
+In order to deal with this, you can force stack to use a `NIX_PATH` with
+a different channel available.  You should pick a channel (or Nixpkgs commit) that
+contains the GHC version `stack` is trying to use.  For example, here's a
+shortcut for forcing `stack` to use the latest commit from the
+`nixpkgs-unstable` channel:
+
+```console
+$ nix-shell -p stack --command "stack --nix-path nixpkgs=channel:nixpkgs-unstable init"
+```
+
+Once you have a `stack.yaml` available, you can generate a `stack.yaml.lock` file
+with the following command:
+
+```console
+$ nix-shell -p stack --command "stack query"
+```
+
+Note that the `--nix-path` argument may be necessary here as well.
 
 # things to talk about
 
