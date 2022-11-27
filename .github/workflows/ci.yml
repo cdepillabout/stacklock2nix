@@ -28,6 +28,7 @@ jobs:
       - name: Update flake stacklock2nix input
         run: |
           sed -i -e 's|^  inputs.stacklock2nix.url = (.*)$|  inputs.stacklock2nix.url = "path:'"$(realpath ..)"'";|' ./flake.nix
+          cat ./flake.nix
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Easy Example with Nix
