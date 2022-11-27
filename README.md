@@ -152,6 +152,8 @@ This is especially important if you're trying to introduce Nix into a
 professional setting.  Not having to locally build transitive dependencies is a
 big selling-point for doing Haskell development with Nix.
 
+## `stacklock2nix` vs haskell.nix
+
 ## Contributions and Where to Get Help
 
 Contributions are highly appreciated.  If there is something you would like to
