@@ -17,6 +17,13 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
+      - name: Check that easy project and advanced project are locked to same Nixpkgs
+        run: |
+          are_same=$(nix eval --impure --expr 'let easy-rev = (builtins.fromJSON (builtins.readFile ./my-example-haskell-lib-easy/flake.lock)).nodes.nixpkgs.locked.rev; advanced-rev = (builtins.fromJSON (builtins.readFile ./my-example-haskell-lib-advanced/flake.lock)).nodes.nixpkgs.locked.rev; in easy-rev == advanced-rev')
+          if [ "$are_same" != "true" ]; then
+            echo "ERROR: The ./my-example-haskell-lib-easy/flake.lock and ./my-example-haskell-lib-advanced/flake.lock files are locked to different versions of Nixpkgs"
+          fi
+
       - name: Update flake stacklock2nix input
         run: |
           sed -i -e 's|^  inputs.stacklock2nix.url = |  inputs.stacklock2nix.url = "path:'"$(realpath ..)"'";|' ./flake.nix
