@@ -31,7 +31,9 @@ resolver: nightly-2022-10-18
 #   - auto-update
 #   - wai
 packages:
-- .
+  - ./my-example-haskell-lib-1
+  - ./my-example-haskell-app
+
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
@@ -44,19 +46,19 @@ packages:
 # extra-deps: []
 extra-deps:
 
-  # dep from hackage
+  # example dep from hackage
   - unagi-streams-0.2.7
 
-  # git dep
+  # example git dep
   - git: https://github.com/haskell-servant/servant-cassava
     commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
 
-  # git dep with subdir
+  # example git dep with single subdir
   - git: https://github.com/haskell-servant/servant
     commit: 1fba9dc6048cea6184964032b861b052cd54878c
     subdir: servant-client
 
-  # git dep with multiple subdirs
+  # example git dep with multiple subdirs
   - git: https://github.com/haskell-servant/servant
     commit: 1fba9dc6048cea6184964032b861b052cd54878c
     subdirs:

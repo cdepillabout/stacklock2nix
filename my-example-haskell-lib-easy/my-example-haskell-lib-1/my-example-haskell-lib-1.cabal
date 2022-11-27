@@ -24,6 +24,10 @@ library
   build-depends: base >=4.7 && <5
                , conduit
                , lens
+               , servant
+               , servant-cassava
+               , servant-client
+               , servant-server
   default-language: Haskell2010
 
 test-suite my-example-haskell-lib-1-test
