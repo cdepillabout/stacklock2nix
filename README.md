@@ -1,7 +1,8 @@
 # stacklock2nix
 
-This repository provides a Nix function, `stacklock2nix`, that generates a
-Nixpkgs-compatible Haskell package set from a `stack.yaml` and `stack.yaml.lock` file.
+This repository provides a Nix function: `stacklock2nix`. This function
+generates a Nixpkgs-compatible Haskell package set from a `stack.yaml` and
+`stack.yaml.lock` file.
 
 `stacklock2nix` will be most helpful in the following two cases:
 
@@ -15,56 +16,87 @@ Nixpkgs-compatible Haskell package set from a `stack.yaml` and `stack.yaml.lock`
 
     At any given time, the main Haskell package set in Nixpkgs only supports a single
     version of GHC. If you have a complex project that needs an older or newer version of
-    GHC, `stacklock2nix` can easily generate a package set that is known to compile.
+    GHC, `stacklock2nix` can easily generate a package set that is likely to compile.
 
 ## Quickstart
 
 You can get started with `stacklock2nix` by either adding this repo as a flake
 input and applying the exposed `.overlay` attribute, or just directly importing
-and applying the [`./nix/overlay.nix`](./nix/overlay.nix) file.
+and applying the [`./nix/overlay.nix`](./nix/overlay.nix) file. This overlay
+exposes a top-level `stacklock2nix` function.
 
-This overlay exposes a top-level `stacklock2nix` function.  Here's an example of
-using this `stacklock2nix` function.  This assumes you have a Haskell package
-in a directory `./my-example-haskell-lib/` with a `stack.yaml` and
-`stack.yaml.lock` file:
+This repo contains two example projects showing how to use `stacklock2nix`.
+Both of these projects contain the same Haskell code, but they use
+different features of `stacklock2nix`:
 
-`default.nix`:
+-   [Easy example](./my-example-haskell-lib-easy/)
 
-```nix
-let
-  nixpkgs-src = builtins.fetchTarball {
-    # nixos-unstable from 2022-10-25 (you may want to update this to something more recent!)
-    url = "https://github.com/nixos/nixpkgs/archive/f994293d1eb8812f032e8919e10a594567cf6ef7.tar.gz";
-    sha256 = "0j81pv6i6psq37250m0x1hjizykfdxmnh90561gkvyskb0klq2hv";
-  };
+    This is an easy example to get started with using `stacklock2nix`.  This
+    method is recommended for people that want to play around with
+    `stacklock2nix`, or just easily build their Stack-based projects with Nix.
+    All the interesting code is documented in the
+    [`flake.nix`](./my-example-haskell-lib-easy/flake.nix) file.
 
-  stacklock2nix-src = builtins.fetchTarball {
-    # stacklock2nix from 2022-11-06 (you definitely want to update this to something more recent!!)
-    url = "https://github.com/cdepillabout/stacklock2nix/archive/f8a3860a904037b029126c1de9287676002a3e5f.tar.gz";
-    sha256 = "02jvliii3grfcwdqnvwqma9zmzr7gzwdz6kjx14wm38qfyx629hx";
-  };
+    From the [`./my-example-haskell-lib-easy`](./my-example-haskell-lib-easy)
+    directory, you can build the Haskell app with the command:
 
-  nixpkgs = import nixpkgs-src { overlays = [ (import "${stacklock2nix-src}/nix/overlay.nix") ]; };
+    ```console
+    $ nix build
+    ```
 
-  my-example-haskell-lib-stacklock = nixpkgs.stacklock2nix {
-    stackYaml = ./my-example-haskell-lib/stack.yaml;
-    baseHaskellPkgSet = nixpkgs.haskell.packages.ghc924;
-    additionalHaskellPkgSetOverrides = hfinal: hprev: {
-      lens = nixpkgs.haskell.lib.compose.dontCheck hprev.lens;
-    };
-    additionalDevShellNativeBuildInputs = stacklockHaskellPkgSet: [
-      nixpkgs.cabal-install
-      nixpkgs.ghcid
-      nixpkgs.haskell.packages.ghc924.haskell-language-server
-    ];
-    all-cabal-hashes = nixpkgs.fetchurl {
-      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/9ab160f48cb535719783bc43c0fbf33e6d52fa99.tar.gz";
-      sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
-    };
-  };
-in
-my-example-haskell-lib-stacklock.pkgSet.my-example-haskell-lib
-```
+    You can get into a development shell with the command:
+
+    ```console
+    $ nix develop
+    ```
+
+    From this development shell, you can use `cabal` to build your project like
+    normal:
+
+    ```console
+    $ cabal build all
+    ```
+
+    Development tools like `haskell-language-server` are also available.
+
+-   [Advanced example](./my-example-haskell-lib-advanced/)
+
+    This is an example that uses more of the advanced features of
+    `stacklock2nix`.  This method is recommended for people that need extra
+    flexibility, or people who also want to use `stack` for development.  The
+    interesting code is spread out between the
+    [`flake.nix`](./my-example-haskell-lib-advanced/flake.nix) file, and the
+    [`overlay.nix`](./my-example-haskell-lib-advanced/nix/overlay.nix) file.
+
+    Just like the above, you can run `nix build` to build the application, and
+    `nix develop` to get into a development shell.  From the development shell,
+    you can run `cabal` commands.
+
+    In addition, you can also use the old-style Nix commands.  To build the application:
+
+    ```console
+    $ nix-build
+    ```
+
+    To get into a development shell:
+
+    ```console
+    $ nix-shell
+    ```
+
+    You can also use `stack` to build your application:
+
+    ```console
+    $ stack --nix build
+    ```
+
+## `stacklock2nix` arguments and return values
+
+The arguments to `stacklock2nix` and return values are documented in
+[`./nix/build-support/stacklock2nix/default.nix`](nix/build-support/stacklock2nix/default.nix).
+
+Please open an issue or send a PR for anything that is not sufficiently
+documented.
 
 # things to talk about
 
