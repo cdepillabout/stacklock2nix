@@ -13,26 +13,28 @@
   # Example: `./some/path/to/stack.yaml`
   #
   # If `null`, guess the path of the `stack.yaml` file from the
-  # `stackYamlLock` value.
+  # `stackYamlLock` value.  Note that either the `stackYaml` or
+  # `stackYamlLock` argument must not be `null`.
   stackYaml ? null
 , # The path to your stack.yaml.lock file.
   #
   # Example: `./some/path/to/stack.yaml.lock`
   #
   # If `null`, guess the path of the `stack.yaml.lock` file from the
-  # `stackYaml` value.
+  # `stackYaml` value.  Note that either the `stackYaml` or
+  # `stackYamlLock` argument must not be `null`.
   stackYamlLock ? null
 , # A function that can be used to override the values passed to
   # `callHackage` and `callCabal2nix` in the generated overlays.
   # See the comment in `./cabal2nixArgsForPkg.nix` for an explanation
-  # of what this is.
+  # of how this can be used.
   cabal2nixArgsOverrides ? (args: args)
 , # A base Haskell package set to apply all the stacklock overlays
   # on top of.
   #
   # baseHaskellPkgSet :: HaskellPkgSet
   #
-  # If this is null, then the output attributes `pkgSet` and `devShell` will
+  # If `baseHaskellPkgSet is null, then the output attributes `pkgSet` and `devShell` will
   # also be null.
   baseHaskellPkgSet ? null
 , # A Haskell package set overlay to apply last on top of
@@ -40,13 +42,13 @@
   #
   # additionalHaskellPkgSetOverrides :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
   #
-  # This is unused if `baseHaskellPkgSet` is null.
+  # `additionalHaskellPkgSetOverrides` is unused if `baseHaskellPkgSet` is null.
   additionalHaskellPkgSetOverrides ? hfinal: hprev: {}
 , # Additional nativeBuildInputs to provide in the devShell.
   #
   # additionalDevShellNativeBuildInputs :: [ Drv ]
   #
-  # This is unused if `baseHaskellPkgSet` is null.
+  # `additionalDevShellNativeBuildInputs` is unused if `baseHaskellPkgSet` is null.
   additionalDevShellNativeBuildInputs ? (stacklockHaskellPkgSet: [])
 , # When creating your own Haskell package set from the stacklock2nix
   # output, you may need to specify a newer all-cabal-hashes.
@@ -72,6 +74,8 @@
   #   sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
   # };
   # ```
+  #
+  # This is not used if `baseHaskellPkgSet` is `null`.
   all-cabal-hashes ? null
 }:
 
@@ -464,7 +468,7 @@ let
   # Another Example:
   # ```
   # my-stacklock-pkg-set.shellFor {
-  #   packages = my-stacklock-pkg-set.localPkgsSelector;
+  #   packages = p: my-stacklock-pkg-set.localPkgsSelector p;
   #   withHoogle = true;
   #   buildInputs = [ pkgs.python pkgs.cabal-install ];
   # }
@@ -487,6 +491,28 @@ let
       suggestedOverlay
     ];
 
+  # `pkgSet` is the Nixpkgs Haskell package set passed-in as
+  # `baseHaskellPkgSet`, but overridden with `combinedOverlay` and
+  # `additionalHaskellPkgSetOverrides`.
+  #
+  # pkgSet :: HaskellPkgSet
+  #
+  # `pkgSet` will contain local packages.  For instance, if you have a local
+  # package called `my-haskell-pkg`:
+  #
+  # Example: `pkgSet.my-haskell-pkg`
+  #
+  # `pkgSet` will also contain packages in your stack.yaml resolver. For
+  # instance:
+  #
+  # Example: `pkgSet.lens`
+  #
+  # `pkgSet` will also contain packages from the underlying Haskell package
+  # set.  For instance, `termonad` is not available in Stackage, but you can
+  # access it like the following because it is available in the main Nixpkgs
+  # Haskell package set.
+  #
+  # Example: `pkgSet.termonad`
   pkgSet =
     if baseHaskellPkgSet == null then
       null
@@ -495,10 +521,7 @@ let
         overrides = lib.composeManyExtensions [
           # Make sure not to lose any old overrides.
           (oldAttrs.overrides or (_: _: {}))
-          stackYamlResolverOverlay
-          stackYamlExtraDepsOverlay
-          stackYamlLocalPkgsOverlay
-          suggestedOverlay
+          combinedOverlay
           additionalHaskellPkgSetOverrides
         ];
       } //
@@ -506,6 +529,13 @@ let
         inherit all-cabal-hashes;
       });
 
+  # A development shell created by passing all your local packages (from
+  # `localPkgsSelector`) to `pkgSet.shellFor`.
+  #
+  # devShell :: Drv
+  #
+  # Note that this derivation is specifically meant to be passed to `nix
+  # develop` or `nix-shell`.
   devShell =
     if pkgSet == null then
       null
@@ -528,7 +558,7 @@ in
     devShell
     ;
 
-  # This is a bunch of internal attributes, used for testing.
+  # These are a bunch of internal attributes, used for testing.
   # End-users should not rely on these.  Treat these similar to
   # `.Internal` modules in Haskell.
   _internal = {

@@ -72,7 +72,7 @@ stdenvNoCC.mkDerivation {
     # In theory, this should always succeed, since the Stackage snapshots
     # will only reference `.cabal` file revisions from Hackage.  In practice,
     # I've never seen this fail to find a revision, but who knows what weird
-    # things go on in edge-cases of Hackage.
+    # things go on in the edge-cases of Hackage.
 
     found="no"
 
