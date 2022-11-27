@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
-name:           my-example-haskell-lib-1
+name:           my-example-haskell-lib
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/cdepillabout/stacklock2nix#readme>
 homepage:       https://github.com/cdepillabout/stacklock2nix#readme
@@ -30,12 +30,12 @@ library
                , servant-server
   default-language: Haskell2010
 
-test-suite my-example-haskell-lib-1-test
+test-suite my-example-haskell-lib-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   hs-source-dirs: test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends: base >=4.7 && <5
                , hspec
-               , my-example-haskell-lib-1
+               , my-example-haskell-lib
   default-language: Haskell2010
