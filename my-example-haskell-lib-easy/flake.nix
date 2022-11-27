@@ -24,6 +24,8 @@
     {
       # A Nixpkgs overlay.
       overlay = final: prev: {
+        # This is a top-level attribute that contains the result from calling
+        # stacklock2nix.
         my-example-haskell-stacklock = final.stacklock2nix {
           stackYaml = ./stack.yaml;
 
@@ -81,6 +83,7 @@
           };
         };
 
+        # One of our local packages.
         my-example-haskell-app = final.my-example-haskell-stacklock.pkgSet.my-example-haskell-app;
 
         # You can also easily create a development shell for hacking on your local
