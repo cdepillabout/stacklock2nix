@@ -28,7 +28,7 @@ jobs:
       # The ./my-example-haskell-lib-easy/flake.nix is locked to the main
       # branch of stacklock2nix, but we want to use the stacklock2nix that is
       # currently being tested here in CI.
-      - name: Update flake stacklock2nix input
+      - name: Update Easy Example Flake stacklock2nix Input
         run: |
           sed -i -e 's|^  inputs.stacklock2nix.url = .*$|  inputs.stacklock2nix.url = "path:'"$(realpath ..)"'";|' ./flake.nix
           cat ./flake.nix
@@ -36,9 +36,13 @@ jobs:
           cat ./flake.lock
         working-directory: "./my-example-haskell-lib-easy/"
 
-      - name: Build Easy Example with Nix
-        run: nix build
-        working-directory: "./my-example-haskell-lib-easy/"
+      - name: Update Advanced Example Flake stacklock2nix Input
+        run: |
+          sed -i -e 's|^  inputs.stacklock2nix.url = .*$|  inputs.stacklock2nix.url = "path:'"$(realpath ..)"'";|' ./flake.nix
+          cat ./flake.nix
+          nix flake lock --update-input stacklock2nix
+          cat ./flake.lock
+        working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Build Easy Example with Nix
         run: nix build
@@ -56,10 +60,10 @@ jobs:
         run: nix build
         working-directory: "./my-example-haskell-lib-advanced/"
 
-      - name: Build Easy Example with Cabal
+      - name: Build Advanced Example with Cabal
         run: "nix develop --command 'cabal build all'"
         working-directory: "./my-example-haskell-lib-advanced/"
 
-      - name: Test Easy Example with Cabal
+      - name: Test Advanced Example with Cabal
         run: "nix develop --command 'cabal test all'"
         working-directory: "./my-example-haskell-lib-advanced/"
