@@ -1,0 +1,3 @@
+
+packages: ./my-example-haskell-lib/my-example-haskell-lib.cabal
+          ./my-example-haskell-app/my-example-haskell-app.cabal

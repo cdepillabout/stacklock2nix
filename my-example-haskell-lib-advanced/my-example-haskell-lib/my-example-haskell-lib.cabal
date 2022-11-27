@@ -1,0 +1,41 @@
+cabal-version: 1.12
+
+name:           my-example-haskell-lib
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/cdepillabout/stacklock2nix#readme>
+homepage:       https://github.com/cdepillabout/stacklock2nix#readme
+bug-reports:    https://github.com/cdepillabout/stacklock2nix/issues
+author:         Your Name Here
+maintainer:     you@example.com
+copyright:      Copyright (c) 2018 You
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files: README.md
+
+source-repository head
+  type: git
+  location: https://github.com/cdepillabout/stacklock2nix
+
+library
+  exposed-modules: Example1
+  hs-source-dirs: src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends: base >=4.7 && <5
+               , conduit
+               , lens
+               , servant
+               , servant-cassava
+               , servant-client
+               , servant-server
+  default-language: Haskell2010
+
+test-suite my-example-haskell-lib-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs: test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends: base >=4.7 && <5
+               , hspec
+               , my-example-haskell-lib
+  default-language: Haskell2010

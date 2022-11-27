@@ -1,0 +1,2 @@
+
+# my-example-haskell-lib
