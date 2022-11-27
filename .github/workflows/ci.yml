@@ -7,8 +7,38 @@ on:
     branches: [main]
 
 jobs:
-  nix:
-    name: nix / ubuntu-latest
+  # This workflow defines two different jobs that are very similar:
+  # nix-commit-from-ci and nix-commit-from-flake-lock.
+  #
+  # The difference is what version of stacklock2nix is used in the
+  # my-example-haskell-lib-easy/flake.lock and
+  # my-example-haskell-lib-advanced/flake.lock files.
+  #
+  # nix-commit-from-ci uses the stacklock2nix dependency from the code that is
+  # running through CI.  This is what you'd expect to be tested.
+  #
+  # nix-commit-from-flake-lock uses the version of stacklock2nix that is locked
+  # in the respective flake.lock files.
+  #
+  # This is only necessary because Nix's relative-path support for flakes is broken:
+  #
+  # - https://github.com/NixOS/nix/issues/3978
+  # - https://discourse.nixos.org/t/relative-path-support-for-nix-flakes/18795
+  #
+  # Because Nix's relative-path support for flakes is broken, the
+  # my-example-haskell-lib-easy/flake.lock and
+  # my-example-haskell-lib-advanced/flake.lock files are locked to
+  # the upstream stacklock2nix repo on GitHub, instead of just the repository top-level
+  # flake.nix.
+  #
+  # It is necessary to test these two Haskell projects against the version of
+  # stacklock2nix that is locked in the two flake.lock files because end-users
+  # might try to directly use one of the Haskell projects without updating the
+  # stacklock2nix to the latest version.  The expectation is that they will
+  # work as-is.
+
+  nix-commit-from-ci:
+    name: nix / ubuntu-latest / using stacklock2nix commit from CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -43,6 +73,40 @@ jobs:
           nix flake lock --update-input stacklock2nix
           cat ./flake.lock
         working-directory: "./my-example-haskell-lib-advanced/"
+
+      - name: Build Easy Example with Nix
+        run: nix build
+        working-directory: "./my-example-haskell-lib-easy/"
+
+      - name: Build Easy Example with Cabal
+        run: "nix develop --command 'cabal build all'"
+        working-directory: "./my-example-haskell-lib-easy/"
+
+      - name: Test Easy Example with Cabal
+        run: "nix develop --command 'cabal test all'"
+        working-directory: "./my-example-haskell-lib-easy/"
+
+      - name: Build Advanced Example with Nix
+        run: nix build
+        working-directory: "./my-example-haskell-lib-advanced/"
+
+      - name: Build Advanced Example with Cabal
+        run: "nix develop --command 'cabal build all'"
+        working-directory: "./my-example-haskell-lib-advanced/"
+
+      - name: Test Advanced Example with Cabal
+        run: "nix develop --command 'cabal test all'"
+        working-directory: "./my-example-haskell-lib-advanced/"
+
+  nix-commit-from-flake-lock:
+    name: nix / ubuntu-latest / using stacklock2nix commit from flake.lock
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: cachix/install-nix-action@v18
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Build Easy Example with Nix
         run: nix build
