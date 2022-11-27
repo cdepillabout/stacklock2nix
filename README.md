@@ -137,9 +137,40 @@ $ nix-shell -p stack --command "stack query"
 
 Note that the `--nix-path` argument may be necessary here as well.
 
+If you have any problems with Stack, make sure to check the
+[upstream Stack documentation](https://docs.haskellstack.org/en/stable/GUIDE/).
+You may also be interested in Stack's
+[Nix integration](https://docs.haskellstack.org/en/stable/nix_integration/).
+
+## Nix Cache
+
+Because of how `stacklock2nix` works, you won't be able to pull any pre-built
+Haskell packages from the shared NixOS Hydra cache. Its recommended that you
+use some sort of Nix cache, like [Cachix](https://www.cachix.org/).
+
+This is especially important if you're trying to introduce Nix into a
+professional setting.  Not having to locally build transitive dependencies is a
+big selling-point for doing Haskell development with Nix.
+
+## Contributions and Where to Get Help
+
+Contributions are highly appreciated.  If there is something you would like to
+add to `stacklock2nix`, or if you find a bug, please submit an
+[issue](https://github.com/cdepillabout/stacklock2nix/issues) or
+[PR](https://github.com/cdepillabout/stacklock2nix/pulls)!
+
+The easiest way to get help with `stacklock2nix` is to open an issue describing
+your problem.  If you link to a repository (even a simple example) that can
+be cloned and demonstrates your problem, it is much easier to help.
+
+## Sponsor `stacklock2nix`
+
+Sponsoring `stacklock2nix` enables me to spend more time fixing bugs, reviewing
+PRs, and helping people who run into problems.  I prioritize issues and PRs
+from people who are sponsors.
+
+You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
+
 # things to talk about
 
-- you probably want to setup a cache because you'll have to rebuild all haskell packages.
-- `stack query` to generate `stack.yaml.lock`
 - stacklock2nix vs haskell.nix, and stacklock2nix vs main nixpkgs haskell package set
-- sponsor
