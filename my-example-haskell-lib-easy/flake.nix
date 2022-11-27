@@ -46,6 +46,7 @@
             # top-level of Nixpkgs.
             final.cabal-install
             final.ghcid
+            final.stack
             # Some Haskell tools need to have been compiled with the same compiler
             # you used to define your stacklock2nix Haskell package set.  Be
             # careful not to pull these packages from your stacklock2nix Haskell

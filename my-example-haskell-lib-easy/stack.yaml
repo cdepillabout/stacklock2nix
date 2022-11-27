@@ -31,7 +31,7 @@ resolver: nightly-2022-10-18
 #   - auto-update
 #   - wai
 packages:
-  - ./my-example-haskell-lib-1
+  - ./my-example-haskell-lib
   - ./my-example-haskell-app
 
 # Dependency packages to be pulled from upstream that are not in the resolver.
