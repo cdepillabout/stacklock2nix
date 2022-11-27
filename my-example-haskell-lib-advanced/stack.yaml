@@ -31,8 +31,8 @@ resolver: nightly-2022-10-18
 #   - auto-update
 #   - wai
 packages:
-  - ./my-example-haskell-lib
-  - ./my-example-haskell-app
+  - "./my-example-haskell-lib"
+  - "./my-example-haskell-app"
 
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
@@ -45,26 +45,26 @@ packages:
 extra-deps:
 
   # example dep from hackage
-  - unagi-streams-0.2.7
+  - "unagi-streams-0.2.7"
 
   # example git dep
-  - git: https://github.com/haskell-servant/servant-cassava
-    commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
+  - git: "https://github.com/haskell-servant/servant-cassava"
+    commit: "f76308b42b9f93a6641c70847cec8ecafbad3abc"
 
   # example git dep with single subdir
-  - git: https://github.com/haskell-servant/servant
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    subdir: servant-client
+  - git: "https://github.com/haskell-servant/servant"
+    commit: "1fba9dc6048cea6184964032b861b052cd54878c"
+    subdir: "servant-client"
 
   # example git dep with multiple subdirs
-  - git: https://github.com/haskell-servant/servant
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
+  - git: "https://github.com/haskell-servant/servant"
+    commit: "1fba9dc6048cea6184964032b861b052cd54878c"
     subdirs:
-      - servant
-      - servant-server
+      - "servant"
+      - "servant-server"
 
 nix:
-  shell-file: nix/stack-shell.nix
+  shell-file: "./nix/stack-shell.nix"
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

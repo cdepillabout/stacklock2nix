@@ -16,8 +16,19 @@ let
     sha256 = flake-lock.nodes.nixpkgs.locked.narHash;
   };
 
+  # This is the stacklock2nix source code.
+  #
+  # CHANGEME: Note that in a real repo, this will need to be changed to
+  # something like the following:
+  #
+  # nixpkgs-src = builtins.fetchTarball {
+  #   url = "https://github.com/cdepillabout/stacklock2nix/archive/${flake-lock.nodes.stacklock2nix.locked.rev}.tar.gz";
+  #   sha256 = flake-lock.nodes.stacklock2nix.locked.narHash;
+  # };
+  stacklock2nix-src = ../../.;
+
   overlays = [
-    (import ../nix/overlay.nix) # stacklock2nix overlay
+    (import (stacklock2nix-src + "/nix/overlay.nix"))
     (import ./overlay.nix)
   ];
 
