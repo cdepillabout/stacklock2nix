@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
-name:           my-example-haskell-lib-1
+name:           my-example-haskell-app
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/cdepillabout/stacklock2nix#readme>
 homepage:       https://github.com/cdepillabout/stacklock2nix#readme
@@ -11,27 +11,19 @@ copyright:      Copyright (c) 2018 You
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
-extra-source-files: README.md
+extra-source-files:
+    README.md
 
 source-repository head
   type: git
   location: https://github.com/cdepillabout/stacklock2nix
 
-library
-  exposed-modules: Example1
-  hs-source-dirs: src
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends: base >=4.7 && <5
-               , conduit
-               , lens
-  default-language: Haskell2010
-
-test-suite my-example-haskell-lib-1-test
-  type: exitcode-stdio-1.0
-  main-is: Spec.hs
-  hs-source-dirs: test
+executable my-example-haskell-app
+  main-is: Main.hs
+  hs-source-dirs: app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
-  build-depends: base >=4.7 && <5
-               , hspec
-               , my-example-haskell-lib-1
+  build-depends:
+      base >=4.7 && <5
+    , my-example-haskell-lib-1
+    , optparse-applicative
   default-language: Haskell2010
