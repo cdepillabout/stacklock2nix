@@ -79,11 +79,11 @@ jobs:
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Easy Example with Cabal
-        run: "nix develop -L --command 'cabal build all'"
+        run: "nix develop -L --command cabal build all"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Test Easy Example with Cabal
-        run: "nix develop -L --command 'cabal test all'"
+        run: "nix develop -L --command cabal test all"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Advanced Example with Nix
@@ -91,11 +91,11 @@ jobs:
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Build Advanced Example with Cabal
-        run: "nix develop -L --command 'cabal build all'"
+        run: "nix develop -L --command cabal build all"
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Test Advanced Example with Cabal
-        run: "nix develop -L --command 'cabal test all'"
+        run: "nix develop -L --command cabal test all"
         working-directory: "./my-example-haskell-lib-advanced/"
 
   nix-commit-from-flake-lock:
@@ -113,11 +113,11 @@ jobs:
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Easy Example with Cabal
-        run: "nix develop -L --command 'cabal build all'"
+        run: "nix develop -L --command cabal build all"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Test Easy Example with Cabal
-        run: "nix develop -L --command 'cabal test all'"
+        run: "nix develop -L --command cabal test all"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Advanced Example with Nix
@@ -125,9 +125,9 @@ jobs:
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Build Advanced Example with Cabal
-        run: "nix develop -L --command 'cabal build all'"
+        run: "nix develop -L --command cabal build all"
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Test Advanced Example with Cabal
-        run: "nix develop -L --command 'cabal test all'"
+        run: "nix develop -L --command cabal test all"
         working-directory: "./my-example-haskell-lib-advanced/"
