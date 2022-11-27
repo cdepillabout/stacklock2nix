@@ -75,27 +75,27 @@ jobs:
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Build Easy Example with Nix
-        run: nix build
+        run: nix build -L
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Easy Example with Cabal
-        run: "nix develop --command 'cabal build all'"
+        run: "nix develop -L --command 'cabal build all'"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Test Easy Example with Cabal
-        run: "nix develop --command 'cabal test all'"
+        run: "nix develop -L --command 'cabal test all'"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Advanced Example with Nix
-        run: nix build
+        run: nix build -L
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Build Advanced Example with Cabal
-        run: "nix develop --command 'cabal build all'"
+        run: "nix develop -L --command 'cabal build all'"
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Test Advanced Example with Cabal
-        run: "nix develop --command 'cabal test all'"
+        run: "nix develop -L --command 'cabal test all'"
         working-directory: "./my-example-haskell-lib-advanced/"
 
   nix-commit-from-flake-lock:
@@ -109,25 +109,25 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Build Easy Example with Nix
-        run: nix build
+        run: nix build -L
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Easy Example with Cabal
-        run: "nix develop --command 'cabal build all'"
+        run: "nix develop -L --command 'cabal build all'"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Test Easy Example with Cabal
-        run: "nix develop --command 'cabal test all'"
+        run: "nix develop -L --command 'cabal test all'"
         working-directory: "./my-example-haskell-lib-easy/"
 
       - name: Build Advanced Example with Nix
-        run: nix build
+        run: nix build -L
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Build Advanced Example with Cabal
-        run: "nix develop --command 'cabal build all'"
+        run: "nix develop -L --command 'cabal build all'"
         working-directory: "./my-example-haskell-lib-advanced/"
 
       - name: Test Advanced Example with Cabal
-        run: "nix develop --command 'cabal test all'"
+        run: "nix develop -L --command 'cabal test all'"
         working-directory: "./my-example-haskell-lib-advanced/"
