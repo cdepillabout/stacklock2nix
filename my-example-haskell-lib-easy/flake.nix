@@ -1,5 +1,5 @@
 {
-  description = "Example of using stacklock2nix to build a Haskell project";
+  description = "Easy example of using stacklock2nix to build a Haskell project";
 
   inputs.stacklock2nix.url = "path:../.";
   inputs.nixpkgs.follows = "stacklock2nix/nixpkgs";
