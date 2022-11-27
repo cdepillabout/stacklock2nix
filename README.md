@@ -154,6 +154,39 @@ big selling-point for doing Haskell development with Nix.
 
 ## `stacklock2nix` vs haskell.nix
 
+If you want to build a Haskell project with Nix using a `stack.yaml` and
+`stack.yaml.lock` file as a single source of truth, your two main choices are
+`stacklock2nix` and [haskell.nix](https://github.com/input-output-hk/haskell.nix).
+
+haskell.nix is a much more comprehensive solution, but it also comes with much
+more complexity.  `stacklock2nix` is effectively just a small wrapper around
+existing functionality in the Haskell infrastructure in Nixpkgs.
+
+Advantages of haskell.nix:
+
+-   The ability to build a Haskell project without a `stack.yaml` file,
+    just using the Cabal solver to generate a package set.
+-   The ability to build a project based just on a `stack.yaml` file
+    (without also requiring a `stack.yaml.lock` file).
+-   A shared cache from IOHK.  (Although users commonly report not
+    getting cache hits for various reasons.)
+
+Advantages of `stacklock2nix`:
+
+-   Integrates with the Haskell infrastructure in Nixpkgs.  Easy to use if
+    you're already familiar with Nixpkgs.
+-   Code is simple and well-documented.
+-   Unlike haskell.nix, Nix evaluation is very fast (so you don't have to wait
+    10s of seconds to jump into a development shell).
+
+## Versioning
+
+`stacklock2nix` is versioned by [Semantic Versioning](https://semver.org/).
+It is recommended you pin to one of the
+[Release](https://github.com/cdepillabout/stacklock2nix/releases)
+versions instead of the `main` branch.  You may also be interested in
+the [`CHANGELOG.md`](./CHANGELOG.md) file.
+
 ## Contributions and Where to Get Help
 
 Contributions are highly appreciated.  If there is something you would like to
@@ -172,7 +205,3 @@ PRs, and helping people who run into problems.  I prioritize issues and PRs
 from people who are sponsors.
 
 You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
-
-# things to talk about
-
-- stacklock2nix vs haskell.nix, and stacklock2nix vs main nixpkgs haskell package set
