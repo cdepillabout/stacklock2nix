@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Example1
-import Network.AWS
+import Amazonka
 import Options.Applicative
 import System.IO.Streams.Concurrent.Unagi
 
