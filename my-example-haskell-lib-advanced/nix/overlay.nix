@@ -16,20 +16,28 @@ final: prev: {
         # Make sure not to lose any old overrides, although in most cases there
         # won't be any.
         (oldAttrs.overrides or (_: _: {}))
+
         # An overlay with Haskell packages from the Stackage snapshot.
         final.my-example-haskell-stacklock.stackYamlResolverOverlay
+
         # An overlay with `extraDeps` from `stack.yaml`.
         final.my-example-haskell-stacklock.stackYamlExtraDepsOverlay
+
         # An overlay with your local packages from `stack.yaml`.
         final.my-example-haskell-stacklock.stackYamlLocalPkgsOverlay
+
         # Suggested overrides for common problems.
         final.my-example-haskell-stacklock.suggestedOverlay
+
         # Any additional overrides you may want to add.
         (hfinal: hprev: {
+          # The servant-cassava.cabal file is malformed on GitHub:
+          # https://github.com/haskell-servant/servant-cassava/pull/29
           servant-cassava =
             final.haskell.lib.compose.overrideCabal
               { editedCabalFile = null; revision = null; }
               hprev.servant-cassava;
+
           # The amazon libraries try to access the network in tests,
           # so we disable them here.
           amazonka = final.haskell.lib.dontCheck hprev.amazonka;
