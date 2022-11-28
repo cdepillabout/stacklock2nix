@@ -65,6 +65,7 @@ hfinal: hprev: with haskell.lib.compose; {
         # (addBuildTool hfinal.gtk2hs-buildtools)
       ];
   hashable = dontCheck hprev.hashable;
+  haskeline = dontCheck hprev.haskeline;
   # This propagates this to everything depending on haskell-gi-base
   haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
   hourglass = dontCheck hprev.hourglass;
