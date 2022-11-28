@@ -70,6 +70,7 @@ extra-deps:
       - lib/amazonka
       - lib/amazonka-core
       - lib/services/amazonka-sso
+      - lib/services/amazonka-sts
 
 nix:
   shell-file: "./nix/stack-shell.nix"
