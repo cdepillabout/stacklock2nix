@@ -68,6 +68,7 @@ hfinal: hprev: with haskell.lib.compose; {
   # This propagates this to everything depending on haskell-gi-base
   haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
   hourglass = dontCheck hprev.hourglass;
+  hpack = dontCheck hprev.hpack;
   hspec = dontCheck hprev.hspec;
   hspec-core = dontCheck hprev.hspec-core;
   # Due to tests restricting base in 0.8.0.0 release
