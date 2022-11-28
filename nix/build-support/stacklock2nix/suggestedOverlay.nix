@@ -115,6 +115,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # Disabling doctests.
   regex-tdfa = overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
 
+  # https://github.com/ndmitchell/shake/issues/804
+  shake = dontCheck hprev.shake;
+
   smallcheck = dontCheck hprev.smallcheck;
 
   splitmix = dontCheck hprev.splitmix;
