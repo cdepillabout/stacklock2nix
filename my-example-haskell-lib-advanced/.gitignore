@@ -25,3 +25,7 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+
+# We want to ignore this one cabal file to test that packages can build with
+# just a package.yaml file.
+my-example-haskell-lib/my-example-haskell-lib.cabal
