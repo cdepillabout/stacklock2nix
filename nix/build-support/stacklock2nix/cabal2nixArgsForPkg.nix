@@ -4,6 +4,10 @@
   # cabal2nix arguments.
   #
   # cabal2nixArgsOverrides :: AttrSet (VersionString -> AttrSet) -> AttrSet (VersionString -> AttrSet)
+  #
+  # `VersionString` will be a string like `"0.1.2.3"`, but may also be `null`
+  # for local packages (since it is sometimes hard to figure out a version for
+  # a local package without parsing the .cabal file).
   cabal2nixArgsOverrides ? (args: args)
 }:
 

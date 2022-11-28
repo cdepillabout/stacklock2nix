@@ -199,9 +199,16 @@ let
       cabalFileLen = builtins.elemAt hackageStrMatches 2;
     };
 
-  # Get additional Cabal2nix arguments for a given package and version.
+  # Get additional Cabal2nix arguments for a given package and version
+  # from `cabal2nixArgsForPkg`.
   #
   # See `./cabal2nixArgsForPkg.nix` for why this is necessary.
+  #
+  # getAdditionalCabal2nixArgs :: String -> Maybe String -> AttrSet
+  #
+  # The `pkgVersion` argument may be `null`.  In this case, we don't
+  # know what the version of the package is.  This is mostly only
+  # used for local packages.
   #
   # Example:
   # ```
@@ -548,7 +555,11 @@ let
     let
       localPkgToOverlayAttr = { pkgName, pkgPath }: {
         name = pkgName;
-        value = hfinal.callCabal2nix pkgName pkgPath {};
+        value =
+          let
+            additionalArgs = getAdditionalCabal2nixArgs pkgName null;
+          in
+          hfinal.callCabal2nix pkgName pkgPath additionalArgs;
       };
     in
     builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
