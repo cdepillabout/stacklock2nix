@@ -110,6 +110,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # test suite doesn't build
   nothunks = dontCheck hprev.nothunks;
 
+  # tests require postgres running
+  pg-transact = dontCheck hprev.pg-transact;
+
   random = dontCheck hprev.random;
 
   # Disabling doctests.
@@ -138,6 +141,9 @@ hfinal: hprev: with haskell.lib.compose; {
   tasty-expected-failure = dontCheck hprev.tasty-expected-failure;
 
   test-framework = dontCheck hprev.test-framework;
+
+  # Flaky tests: https://github.com/jfischoff/tmp-postgres/issues/274
+  tmp-postgres = dontCheck hprev.tmp-postgres;
 
   unagi-chan = dontCheck hprev.unagi-chan;
 
