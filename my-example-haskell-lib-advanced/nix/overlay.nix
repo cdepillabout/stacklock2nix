@@ -30,6 +30,12 @@ final: prev: {
             final.haskell.lib.compose.overrideCabal
               { editedCabalFile = null; revision = null; }
               hprev.servant-cassava;
+          # The amazon libraries try to access the network in tests,
+          # so we disable them here.
+          amazonka = final.haskell.lib.dontCheck hprev.amazonka;
+          amazonka-core = final.haskell.lib.dontCheck hprev.amazonka-core;
+          amazonka-sso = final.haskell.lib.dontCheck hprev.amazonka-sso;
+          amazonka-sts = final.haskell.lib.dontCheck hprev.amazonka-sts;
         })
       ];
       all-cabal-hashes = final.fetchurl {
