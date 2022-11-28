@@ -31,6 +31,19 @@
 
 hfinal: hprev: with haskell.lib.compose; {
 
+  # the testsuite fails because of not finding tsc without some help
+  aeson-typescript = overrideCabal (drv: {
+    testToolDepends = drv.testToolDepends or [] ++ [ pkgs.nodePackages.typescript ];
+    # the testsuite assumes that tsc is in the PATH if it thinks it's in
+    # CI, otherwise trying to install it.
+    #
+    # https://github.com/codedownio/aeson-typescript/blob/ee1a87fcab8a548c69e46685ce91465a7462be89/test/Util.hs#L27-L33
+    preCheck = "export CI=true";
+    # Even with the above fixes, it appears that the test suite fails depending
+    # on what version of tsc you're using.
+    doCheck = false;
+  }) hprev.aeson-typescript;
+
   ansi-terminal = dontCheck hprev.ansi-terminal;
 
   async = dontCheck hprev.async;
@@ -66,6 +79,9 @@ hfinal: hprev: with haskell.lib.compose; {
       ];
 
   focuslist = dontCheck hprev.focuslist;
+
+  # Test suite uses git exe
+  githash = dontCheck hprev.githash;
 
   glib =
     lib.pipe
