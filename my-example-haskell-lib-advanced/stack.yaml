@@ -63,6 +63,13 @@ extra-deps:
       - "servant"
       - "servant-server"
 
+  # example of a github dep
+  - github: brendanhay/amazonka
+    commit: "43e8fb7e6e30e24adef11f66331ae6752642bffd"
+    subdirs:
+      - lib/amazonka
+      - lib/amazonka-core
+
 nix:
   shell-file: "./nix/stack-shell.nix"
 

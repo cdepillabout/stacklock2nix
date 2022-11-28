@@ -61,6 +61,32 @@ packages:
     commit: 1fba9dc6048cea6184964032b861b052cd54878c
     git: https://github.com/haskell-servant/servant
     subdir: servant-server
+- completed:
+    name: amazonka
+    pantry-tree:
+      sha256: f1ba46f355d47bd1494d01b4eb1002c8efdd666639aa3fd0163581409071b7b8
+      size: 1318
+    sha256: 3cc2cdb4add25e6ef36c5124301387039b2f71fb7a809732cfce182b830787b1
+    size: 30018929
+    subdir: lib/amazonka
+    url: https://github.com/brendanhay/amazonka/archive/43e8fb7e6e30e24adef11f66331ae6752642bffd.tar.gz
+    version: '2.0'
+  original:
+    subdir: lib/amazonka
+    url: https://github.com/brendanhay/amazonka/archive/43e8fb7e6e30e24adef11f66331ae6752642bffd.tar.gz
+- completed:
+    name: amazonka-core
+    pantry-tree:
+      sha256: 8707039e4fb7c575fbcd04906e4f541948ed152534da6d3830b9675badb4c71d
+      size: 3192
+    sha256: 3cc2cdb4add25e6ef36c5124301387039b2f71fb7a809732cfce182b830787b1
+    size: 30018929
+    subdir: lib/amazonka-core
+    url: https://github.com/brendanhay/amazonka/archive/43e8fb7e6e30e24adef11f66331ae6752642bffd.tar.gz
+    version: '2.0'
+  original:
+    subdir: lib/amazonka-core
+    url: https://github.com/brendanhay/amazonka/archive/43e8fb7e6e30e24adef11f66331ae6752642bffd.tar.gz
 snapshots:
 - completed:
     sha256: 895204e9116cba1f32047525ec5bad7423216587706e5df044c4a7c191a5d8cb
