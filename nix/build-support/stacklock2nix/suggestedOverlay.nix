@@ -30,7 +30,6 @@
 # These will be maintained on a best-effort basis.  Again, please send PRs.
 
 hfinal: hprev: with haskell.lib.compose; {
-  HUnit = dontCheck hprev.HUnit;
 
   ansi-terminal = dontCheck hprev.ansi-terminal;
 
@@ -92,8 +91,13 @@ hfinal: hprev: with haskell.lib.compose; {
 
   hspec-core = dontCheck hprev.hspec-core;
 
+  # Needs internet to run tests
+  HTTP = dontCheck hprev.HTTP;
+
   # Due to tests restricting base in 0.8.0.0 release
   http-media = doJailbreak hprev.http-media;
+
+  HUnit = dontCheck hprev.HUnit;
 
   logging-facade = dontCheck hprev.logging-facade;
 
