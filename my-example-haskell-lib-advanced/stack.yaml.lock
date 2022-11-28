@@ -87,6 +87,19 @@ packages:
   original:
     subdir: lib/amazonka-core
     url: https://github.com/brendanhay/amazonka/archive/43e8fb7e6e30e24adef11f66331ae6752642bffd.tar.gz
+- completed:
+    name: amazonka-sso
+    pantry-tree:
+      sha256: e9a165eda0567cdf0581d29d8b1e9fe2df543474d7c70590e04ec1047ebe6d48
+      size: 1869
+    sha256: 3cc2cdb4add25e6ef36c5124301387039b2f71fb7a809732cfce182b830787b1
+    size: 30018929
+    subdir: lib/services/amazonka-sso
+    url: https://github.com/brendanhay/amazonka/archive/43e8fb7e6e30e24adef11f66331ae6752642bffd.tar.gz
+    version: '2.0'
+  original:
+    subdir: lib/services/amazonka-sso
+    url: https://github.com/brendanhay/amazonka/archive/43e8fb7e6e30e24adef11f66331ae6752642bffd.tar.gz
 snapshots:
 - completed:
     sha256: 895204e9116cba1f32047525ec5bad7423216587706e5df044c4a7c191a5d8cb

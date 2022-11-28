@@ -69,6 +69,7 @@ extra-deps:
     subdirs:
       - lib/amazonka
       - lib/amazonka-core
+      - lib/services/amazonka-sso
 
 nix:
   shell-file: "./nix/stack-shell.nix"
