@@ -404,10 +404,21 @@ let
   # }
   # ```
   #
+  # Example:
+  # ```
+  # > mkLocalPkg "./foobar/my-local-hask-pkg"
+  # { pkgPath = /some/path/foobar/my-local-hask-pkg;
+  #   pkgName = "my-cool-pkg"
+  # }
+  # ```
+  #
   # Note that the basename of the `pkgPath` may be different than the actual
-  # Haskell package name.
+  # Haskell package name, which is why this function is needed.
   mkLocalPkg = localPkgPathStr:
     let
+      # Path to the Haskell package.
+      #
+      # pkgPath :: Path
       pkgPath =
         lib.cleanSourceWith {
           src =
@@ -417,21 +428,76 @@ let
           # TODO: Create a better filter, plus make it overrideable for end-users.
           filter = path: type: true;
         };
+
+      # This is `pkgPath`, but with everything removed except `.cabal` files
+      # and a `package.yaml` file.
+      #
+      # justCabalFilePath :: Path
       justCabalFilePath = lib.cleanSourceWith {
         src = pkgPath;
         filter = path: type:
           lib.hasSuffix ".cabal" path ||
           baseNameOf path == "package.yaml";
       };
+
       cabalFileDir = builtins.readDir justCabalFilePath;
+
       allPkgFiles = builtins.attrNames cabalFileDir;
+
+      # This returns the filename of the ".cabal" file in `allPkgFiles`.
+      #
+      # cabalFileName :: String
+      #
+      # Example: `"my-cool-pkg.cabal"`
       cabalFileName =
         lib.findSingle
           (file: lib.hasSuffix ".cabal" file)
-          (throw "could not find any .cabal files in package ${localPkgPathStr}.  all files: ${toString allPkgFiles}")
-          (throw "found multiple .cabal files in package ${localPkgPathStr}, not sure how to proceed.  all files: ${toString allPkgFiles}")
+          (throw
+            ("could not find any .cabal files in package ${localPkgPathStr}.  " +
+             "This is unexpected, since we know we should already have at least " +
+             "one .cabal file.  all files: ${toString allPkgFiles}"))
+          (throw
+            ("found multiple .cabal files in package ${localPkgPathStr}, not sure " +
+             "how to proceed.  all files: ${toString allPkgFiles}"))
           allPkgFiles;
-      pkgName = lib.removeSuffix ".cabal" cabalFileName;
+
+      # Package name from the package.yaml file.
+      #
+      # pkgNameFromPackageYaml :: String
+      #
+      # Example: `"my-cool-pkg"`
+      pkgNameFromPackageYaml =
+        let
+          packageYaml = readYAML (justCabalFilePath + "/package.yaml");
+        in
+        if packageYaml ? name then
+          packageYaml.name
+        else
+          throw
+            ("Could not find read a .name field from the package.yaml file in package ${localPkgPathStr}.  " +
+             "This is unexpected.  All package.yaml files should have a top-level .name field. " +
+             "package.yaml file: ${builtins.toJSON packageYaml}");
+
+      # Whether or not this package has at least one .cabal file.
+      #
+      # hasSingleCabalFile :: Bool
+      hasSingleCabalFile = lib.any (file: lib.hasSuffix ".cabal" file) allPkgFiles;
+
+      # Whether or not this package has a package.yaml file.
+      #
+      # hasSingleCabalFile :: Bool
+      hasSinglePackageYamlFile = lib.any (file: file == "package.yaml") allPkgFiles;
+
+      # pkgName = lib.removeSuffix ".cabal" cabalFileName;
+      pkgName =
+        if hasSingleCabalFile then
+          lib.removeSuffix ".cabal" cabalFileName
+        else if hasSinglePackageYamlFile then
+          pkgNameFromPackageYaml
+        else
+          throw
+            ("Could not find any .cabal files or a package.yaml file in package ${localPkgPathStr}.  " +
+             "all files: ${toString allPkgFiles}");
     in
     { inherit pkgPath pkgName; };
 
