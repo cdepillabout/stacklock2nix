@@ -320,7 +320,7 @@ let
       extraUrlDep =
         let
           srcName = haskPkgLock.name + "-url";
-          rawSrc = builtins.fetchTarball {
+          rawSrc = builtins.fetchurl {
             name = srcName;
             url = haskPkgLock.url;
             sha256 = haskPkgLock.sha256;
@@ -328,7 +328,11 @@ let
           src =
             if haskPkgLock ? "subdir" then
               runCommand (srcName + "-get-subdir-" + haskPkgLock.subdir) {} ''
-                cp -r "${rawSrc}/${haskPkgLock.subdir}" "$out"
+                # We are assuming the input file is a tarball.
+                # TODO: Is it okay to always assume this??
+                mkdir ./raw-input-source
+                tar -xf "${rawSrc}" -C ./raw-input-source --strip-components=1
+                cp -r "./raw-input-source/${haskPkgLock.subdir}" "$out"
               ''
             else
               rawSrc;
