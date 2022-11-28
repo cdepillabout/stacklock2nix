@@ -309,13 +309,41 @@ let
               src
               (getAdditionalCabal2nixArgs haskPkgLock.name haskPkgLock.version);
         };
+
+      extraUrlDep =
+        let
+          srcName = haskPkgLock.name + "-url";
+          rawSrc = builtins.fetchTarball {
+            name = srcName;
+            url = haskPkgLock.url;
+            sha256 = haskPkgLock.sha256;
+          };
+          src =
+            if haskPkgLock ? "subdir" then
+              runCommand (srcName + "-get-subdir-" + haskPkgLock.subdir) {} ''
+                cp -r "${rawSrc}/${haskPkgLock.subdir}" "$out"
+              ''
+            else
+              rawSrc;
+        in {
+          name = haskPkgLock.name;
+          value =
+            hfinal.callCabal2nix
+              haskPkgLock.name
+              src
+              (getAdditionalCabal2nixArgs haskPkgLock.name haskPkgLock.version);
+        };
     in
     if haskPkgLock ? "hackage" then
       extraHackageDep
     else if haskPkgLock ? "git" then
       extraGitDep
+    else if haskPkgLock ? "url" then
+      extraUrlDep
     else
-      builtins.throw "ERROR: unknown haskPkgLock type: ${builtins.toString haskPkgLock}";
+      # Nix can't call builtins.toString on haskPkgLock because it is an attrset
+      # (even though it knows how to print it in the repl...) :-\
+      builtins.throw "ERROR: unknown haskPkgLock type: ${builtins.toJSON haskPkgLock}";
 
   # Turn a list of Haskell package locks into an overlay for a Haskell package
   # set.
