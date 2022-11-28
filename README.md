@@ -26,7 +26,7 @@ and applying the [`./nix/overlay.nix`](./nix/overlay.nix) file. This overlay
 exposes a top-level `stacklock2nix` function.
 
 This repo contains two example projects showing how to use `stacklock2nix`.
-Both of these projects contain the same Haskell code, but they use
+Both of these projects contain mostly the same Haskell code, but they use
 different features of `stacklock2nix`:
 
 -   [Easy example](./my-example-haskell-lib-easy/)
