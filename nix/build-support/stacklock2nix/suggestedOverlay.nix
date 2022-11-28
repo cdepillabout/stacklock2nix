@@ -68,6 +68,7 @@ hfinal: hprev: with haskell.lib.compose; {
   # This propagates this to everything depending on haskell-gi-base
   haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
   hourglass = dontCheck hprev.hourglass;
+  # fails because tests don't expect a revised cabal file
   hpack = dontCheck hprev.hpack;
   hspec = dontCheck hprev.hspec;
   hspec-core = dontCheck hprev.hspec-core;
