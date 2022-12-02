@@ -170,6 +170,8 @@ Advantages of haskell.nix:
     (without also requiring a `stack.yaml.lock` file).
 -   A shared cache from IOHK.  (Although users commonly report not
     getting cache hits for various reasons.)
+-   The ability to cross-compile Haskell libraries.  (For instance,
+    building an ARM64 binary on an x86_64 machine.)
 
 Advantages of `stacklock2nix`:
 
