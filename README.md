@@ -207,3 +207,26 @@ PRs, and helping people who run into problems.  I prioritize issues and PRs
 from people who are sponsors.
 
 You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
+
+## FAQ
+
+-   **Is it possible to use `stacklock2nix` to build a statically-linked Haskell library?**
+
+    Recent versions (since mid-2022) of the Haskell infrastructure in Nixpkgs
+    have the ability to link Haskell executables completely statically.  An
+    easy way to test this out is to use the
+    [`pkgsStatic` subpackage set](https://functor.tokyo/blog/2021-10-20-nix-cross-static)
+    in Nixpkgs.
+
+    Instead of passing a value like `pkgs.haskell.packages.ghc924` to the
+    `baseHaskellPkgSet` of the `stacklock2nix` function, pass
+    `pkgs.pkgsStatic.haskell.packages.ghc924`:
+
+    ```nix
+    my-haskell-stacklock = final.stacklock2nix {
+      stackYaml = ./stack.yaml;
+      baseHaskellPkgSet = final.pkgsStatic.haskell.packages.ghc924;
+      callPackage = final.pkgsStatic.callPackage;
+      ...
+    };
+    ```
