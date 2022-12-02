@@ -3,7 +3,6 @@
 , fetchurl
 , haskell
 , lib
-, pkgs
 , runCommand
 , stdenv
 }:
