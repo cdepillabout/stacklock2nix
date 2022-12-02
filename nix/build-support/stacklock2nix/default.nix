@@ -76,6 +76,7 @@
   #
   # This is not used if `baseHaskellPkgSet` is `null`.
   all-cabal-hashes ? null
+, callPackage ? callPackage
 }:
 
 # The stack.yaml path can be computed from the stack.yaml.lock path, or
