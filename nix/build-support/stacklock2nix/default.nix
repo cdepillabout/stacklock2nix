@@ -3,10 +3,9 @@
 , fetchurl
 , haskell
 , lib
-, pkgs
 , runCommand
 , stdenv
-}:
+}@topargs:
 
 { # The path to your stack.yaml file.
   #
@@ -77,6 +76,7 @@
   #
   # This is not used if `baseHaskellPkgSet` is `null`.
   all-cabal-hashes ? null
+, callPackage ? topargs.callPackage
 }:
 
 # The stack.yaml path can be computed from the stack.yaml.lock path, or
