@@ -230,3 +230,17 @@ You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
       ...
     };
     ```
+
+-   **When using `stacklock2nix` do you ever need to compile GHC?**
+
+    In general, no.
+
+    `stacklock2nix` uses the Haskell infrastructure from Nixpkgs.  As long as
+    you're on a standard [Nixpkgs Channel](https://status.nixos.org/), you
+    should be able to pull any available version of GHC from the stanard
+    Nixpkgs/NixOS/Hydra cache.  `stacklock2nix` doesn't override the GHC
+    derivations in any way, so you should almost never have to recompile GHC.
+
+    `stacklock2nix` does override all the Haskell packages in your Stackage
+    resolver, so you _will_ have to compile all the Haskell packages you use
+    (similar to when you use `stack`).
