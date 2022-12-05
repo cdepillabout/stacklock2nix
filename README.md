@@ -189,6 +189,19 @@ It is recommended you pin to one of the
 versions instead of the `main` branch.  You may also be interested in
 the [`CHANGELOG.md`](./CHANGELOG.md) file.
 
+Note: `stacklock2nix` provides a Haskell package set overlay called
+`suggestedOverrides`.  This overlay contains overrides for various Haskell
+packages that are necessary for building with Nix.  For instance, some Haskell
+packages have tests that assume it is possible to access the internet. This
+overlay disables tests for these packages.  This overlay contains a bunch of
+fixes like this.
+
+This `suggestedOverrides` overlay is _not_ part of the Semantic Versioning
+guaranteed by `stacklock2nix`.  There may be overrides added to or removed from
+`suggestedOverrides` without bumping the version of `stacklock2nix`.
+(Although, this is unlikely to be much of a problem for most users in
+practice.)
+
 ## Contributions and Where to Get Help
 
 Contributions are highly appreciated.  If there is something you would like to
