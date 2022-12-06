@@ -27,5 +27,6 @@ executable my-example-haskell-app
     , amazonka
     , my-example-haskell-lib
     , optparse-applicative
+    , pretty-simple
     , unagi-streams
   default-language: Haskell2010
