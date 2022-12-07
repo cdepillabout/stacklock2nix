@@ -62,6 +62,17 @@ packages:
     git: https://github.com/haskell-servant/servant
     subdir: servant-server
 - completed:
+    name: pretty-simple
+    pantry-tree:
+      sha256: da2d314323affae4fa11f523bc2655ed0d5f27fd47f781654396d231673e0a68
+      size: 2200
+    sha256: aba1659b4c133b00b7a28837bcb413672823d72835bcee0f1594e0ba4e2ea4af
+    size: 101732
+    url: https://github.com/cdepillabout/pretty-simple/archive/d8ef1b3c2d913a05515b2d1c4fec0b52d2744434.tar.gz
+    version: 4.1.2.0
+  original:
+    url: https://github.com/cdepillabout/pretty-simple/archive/d8ef1b3c2d913a05515b2d1c4fec0b52d2744434.tar.gz
+- completed:
     name: amazonka
     pantry-tree:
       sha256: f1ba46f355d47bd1494d01b4eb1002c8efdd666639aa3fd0163581409071b7b8

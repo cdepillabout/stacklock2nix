@@ -326,16 +326,13 @@ let
             sha256 = haskPkgLock.sha256;
           };
           src =
-            if haskPkgLock ? "subdir" then
-              runCommand (srcName + "-get-subdir-" + haskPkgLock.subdir) {} ''
-                # We are assuming the input file is a tarball.
-                # TODO: Is it okay to always assume this??
-                mkdir ./raw-input-source
-                tar -xf "${rawSrc}" -C ./raw-input-source --strip-components=1
-                cp -r "./raw-input-source/${haskPkgLock.subdir}" "$out"
-              ''
-            else
-              rawSrc;
+            runCommand (srcName + "-unpacked" + lib.optionalString (haskPkgLock ? "subdir") ("-get-subdir-" + haskPkgLock.subdir)) {} ''
+              # We are assuming the input file is a tarball.
+              # TODO: Is it okay to always assume this??
+              mkdir ./raw-input-source
+              tar -xf "${rawSrc}" -C ./raw-input-source --strip-components=1
+              cp -r "./raw-input-source/${haskPkgLock.subdir or ""}" "$out"
+            '';
         in {
           name = haskPkgLock.name;
           value =

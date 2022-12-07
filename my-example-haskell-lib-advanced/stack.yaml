@@ -63,7 +63,11 @@ extra-deps:
       - "servant"
       - "servant-server"
 
-  # example of a github dep
+  # example of a GitHub dep without subdirs
+  - github: cdepillabout/pretty-simple
+    commit: "d8ef1b3c2d913a05515b2d1c4fec0b52d2744434"
+
+  # example of a GitHub dep with multiple subdirs
   - github: brendanhay/amazonka
     commit: "43e8fb7e6e30e24adef11f66331ae6752642bffd"
     subdirs:
