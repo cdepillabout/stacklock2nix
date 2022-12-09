@@ -1,7 +1,8 @@
 
-## next
+## 0.2.0
 
-*   Add a `callPackage` argument to `stacklock2nix` so that users can easily statically-compile Haskell packages.
+*   Add a `callPackage` argument to `stacklock2nix` so that users can easily
+    statically-compile Haskell packages.
 
     This could be used like the following:
 
@@ -12,6 +13,18 @@
       callPackage = final.pkgsStatic.callPackage;
       ...
     };
+    ```
+
+*   Make sure `github` types of `extra-deps` in `stack.yaml` are handled
+    correctly.  Previous version did not handle `github` deps correctly
+    when they had no subdirs.
+
+    `extra-deps` in `stack.yaml` like the following will now work:
+
+    ```yaml
+    extra-deps:
+      - github: "cdepillabout/pretty-simple"
+        commit: "d8ef1b3c2d913a05515b2d1c4fec0b52d2744434"
     ```
 
 ## 0.1.0
