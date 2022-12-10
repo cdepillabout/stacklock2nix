@@ -19,9 +19,9 @@ let
   # This is the stacklock2nix source code.
   #
   # CHANGEME: Note that in a real repo, this will need to be changed to
-  # something like the following:
+  # the following (or something like it):
   #
-  # nixpkgs-src = builtins.fetchTarball {
+  # stacklock2nix-src = builtins.fetchTarball {
   #   url = "https://github.com/cdepillabout/stacklock2nix/archive/${flake-lock.nodes.stacklock2nix.locked.rev}.tar.gz";
   #   sha256 = flake-lock.nodes.stacklock2nix.locked.narHash;
   # };
