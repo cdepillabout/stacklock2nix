@@ -146,6 +146,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   smallcheck = dontCheck hprev.smallcheck;
 
+  # Tests require node.
+  sourcemap = dontCheck hprev.sourcemap;
+
   splitmix = dontCheck hprev.splitmix;
 
   syb = dontCheck hprev.syb;
