@@ -107,6 +107,10 @@ hfinal: hprev: with haskell.lib.compose; {
 
   hspec-core = dontCheck hprev.hspec-core;
 
+  # hspec-discover tests rely on the hspec-meta package, which is not in Stackage, so
+  # frequently causes failed builds.
+  hspec-discover = dontCheck hprev.hspec-discover;
+
   # Needs internet to run tests
   HTTP = dontCheck hprev.HTTP;
 
