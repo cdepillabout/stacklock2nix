@@ -78,6 +78,9 @@ hfinal: hprev: with haskell.lib.compose; {
         dontCheck
       ];
 
+  # Tests have a dependency on a QuickCheck version that is not in Stackage.
+  edit-distance = dontCheck hprev.edit-distance;
+
   focuslist = dontCheck hprev.focuslist;
 
   # Test suite uses git exe
