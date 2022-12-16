@@ -16,7 +16,7 @@
     set -x
 
     example="${./example}"
-    args="--override-input dream2nix /home/grmpf/projects/github/dream2nix --override-input stacklock2nix ${../.} --no-write-lock-file --allow-import-from-derivation --tarball-ttl 0"
+    args="--update-input dream2nix --override-input stacklock2nix ${../.} --no-write-lock-file --allow-import-from-derivation"
 
     # test if nix can render the flake
     nix flake show $args $example
