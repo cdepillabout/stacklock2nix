@@ -44,6 +44,9 @@ hfinal: hprev: with haskell.lib.compose; {
     doCheck = false;
   }) hprev.aeson-typescript;
 
+  # requires a version of QuickCheck that is not in the stackage resolver
+  algebraic-graphs = dontCheck hprev.algebraic-graphs;
+
   ansi-terminal = dontCheck hprev.ansi-terminal;
 
   async = dontCheck hprev.async;
@@ -52,6 +55,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   # doctests fail
   bsb-http-chunked = dontCheck hprev.bsb-http-chunked;
+
+  # Tests don't include all necessary files.
+  c2hs = dontCheck hprev.c2hs;
 
   clock = dontCheck hprev.clock;
 
@@ -101,6 +107,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # This propagates this to everything depending on haskell-gi-base
   haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
 
+  # Tests access the network
+  hnix = dontCheck hprev.hnix;
+
   hourglass = dontCheck hprev.hourglass;
 
   # fails because tests don't expect a revised cabal file
@@ -126,12 +135,21 @@ hfinal: hprev: with haskell.lib.compose; {
 
   logict = dontCheck hprev.logict;
 
+  # Tests appear to not include all required files
+  lsp-test = dontCheck hprev.lsp-test;
+
+  # Tests seem to make incorrect assumptions about URLs and order of items from Maps.
+  mmark = dontCheck hprev.mmark;
+
   mockery = dontCheck hprev.mockery;
 
   nanospec = dontCheck hprev.nanospec;
 
   # test suite doesn't build
   nothunks = dontCheck hprev.nothunks;
+
+  # circular dependency in tests
+  options = dontCheck hprev.options;
 
   # tests require postgres running
   pg-transact = dontCheck hprev.pg-transact;
@@ -153,6 +171,12 @@ hfinal: hprev: with haskell.lib.compose; {
 
   syb = dontCheck hprev.syb;
 
+  # requires a version of chell that is not in the stackage resolver
+  system-fileio = dontCheck hprev.system-fileio;
+
+  # requires a version of chell that is not in the stackage resolver
+  system-filepath = dontCheck hprev.system-filepath;
+
   tasty = dontCheck hprev.tasty;
 
   tasty-discover =
@@ -167,6 +191,9 @@ hfinal: hprev: with haskell.lib.compose; {
   tasty-expected-failure = dontCheck hprev.tasty-expected-failure;
 
   test-framework = dontCheck hprev.test-framework;
+
+  # requires a version of tasty that is not in the stackage resolver
+  text-short = dontCheck hprev.text-short;
 
   # Flaky tests: https://github.com/jfischoff/tmp-postgres/issues/274
   tmp-postgres = dontCheck hprev.tmp-postgres;
