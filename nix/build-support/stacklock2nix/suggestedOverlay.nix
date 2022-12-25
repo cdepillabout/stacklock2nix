@@ -100,6 +100,9 @@ hfinal: hprev: with haskell.lib.compose; {
         # (addBuildTool hfinal.gtk2hs-buildtools)
       ];
 
+  # Version constraints on tests are too strict.
+  haddock-library = dontCheck hprev.haddock-library;
+
   hashable = dontCheck hprev.hashable;
 
   haskeline = dontCheck hprev.haskeline;
@@ -114,6 +117,13 @@ hfinal: hprev: with haskell.lib.compose; {
 
   # fails because tests don't expect a revised cabal file
   hpack = dontCheck hprev.hpack;
+
+  # hslua-core has tests that appear to break when using musl.
+  # https://github.com/hslua/hslua/issues/106
+  hslua-core = dontCheck hprev.hslua-core;
+
+  # tests aren't included in the sdist
+  hslua-list = dontCheck hprev.hslua-list;
 
   hspec = dontCheck hprev.hspec;
 
@@ -200,8 +210,17 @@ hfinal: hprev: with haskell.lib.compose; {
 
   unagi-chan = dontCheck hprev.unagi-chan;
 
+  # tests don't support musl
+  unix-time = dontCheck hprev.unix-time;
+
   vector = dontCheck hprev.vector;
+
+  # test suite uses phantom js
+  wai-cors = dontCheck hprev.wai-cors;
 
   # http://hydra.cryp.to/build/501073/nixlog/5/raw
   warp = dontCheck hprev.warp;
+
+  # https://github.com/jgm/zip-archive/issues/57
+  zip-archive = dontCheck hprev.zip-archive;
 }
