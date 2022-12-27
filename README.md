@@ -189,7 +189,7 @@ It is recommended you pin to one of the
 versions instead of the `main` branch.  You may also be interested in
 the [`CHANGELOG.md`](./CHANGELOG.md) file.
 
-Note: `stacklock2nix` provides a Haskell package set overlay called
+_Note_: `stacklock2nix` provides a Haskell package set overlay called
 `suggestedOverlay`.  This overlay contains overrides for various Haskell
 packages that are necessary for building with Nix.  For instance, some Haskell
 packages have tests that assume it is possible to access the internet. This
@@ -222,6 +222,12 @@ You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
 
 ## FAQ
 
+-   **Are there any other examples of using `stacklock2nix`?**
+
+    Yes, there is a [blog series](https://functor.tokyo/blog/2022-12-15-stacklock2nix)
+    about `stacklock2nix` that gives a few examples of building actual Haskell
+    projects.
+
 -   **Is it possible to use `stacklock2nix` to build a statically-linked Haskell library?**
 
     Recent versions (since mid-2022) of the Haskell infrastructure in Nixpkgs
@@ -243,13 +249,16 @@ You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
     };
     ```
 
+    Here is a [fully-worked example](https://functor.tokyo/blog/2022-12-26-building-pandoc-with-stacklock2nix)
+    of using `stacklock2nix` to build a statically-linked Pandoc.
+
 -   **When using `stacklock2nix` do you ever need to compile GHC?**
 
     In general, no.
 
     `stacklock2nix` uses the Haskell infrastructure from Nixpkgs.  As long as
     you're on a standard [Nixpkgs Channel](https://status.nixos.org/), you
-    should be able to pull any available version of GHC from the stanard
+    should be able to pull any available version of GHC from the
     Nixpkgs/NixOS/Hydra cache.  `stacklock2nix` doesn't override the GHC
     derivations in any way, so you should almost never have to recompile GHC.
 
