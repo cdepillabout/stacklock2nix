@@ -265,3 +265,14 @@ You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
     `stacklock2nix` does override all the Haskell packages in your Stackage
     resolver, so you _will_ have to compile all the Haskell packages you use
     (similar to when you use `stack`).
+
+-   **Is there any chance that a Haskell dependency specified in `stack.yaml` or
+    `stack.yaml.lock` will become a different version depending on whether I compile
+    directly with `stack`, or with Nix using `stacklock2nix`?**
+    
+    No.
+    
+    `stacklock2nix` reads the `stack.yaml.lock` file and generates a completely new
+    Nix package for each Haskell dependency specified in your `stack.yaml` and
+    `stack.yaml.lock` file.  `stacklock2nix` uses the exact version of each package
+    from the `stack.yaml.lock` file.
