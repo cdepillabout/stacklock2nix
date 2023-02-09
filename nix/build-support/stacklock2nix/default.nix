@@ -5,6 +5,7 @@
 , lib
 , runCommand
 , stdenv
+, path
 }@topargs:
 
 { # The path to your stack.yaml file.
@@ -77,6 +78,10 @@
   # This is not used if `baseHaskellPkgSet` is `null`.
   all-cabal-hashes ? null
 , callPackage ? topargs.callPackage
+, # Path to Nixpkgs.
+  #
+  # nixpkgsPath :: Path
+  nixpkgsPath ? topargs.path
 }:
 
 # The stack.yaml path can be computed from the stack.yaml.lock path, or
@@ -372,7 +377,7 @@ let
   # This roughly returns an overlay that looks like the following:
   # ```
   # { lens = callHackage "lens" "5.0.1" {};
-  #   conduit = callHackage "conduit" "5.0.1" {};
+  #   conduit = callHackage "conduit" "1.3.4" {};
   # }
   # ```
   haskPkgLocksToOverlay = haskPkgLocks: hfinal: hprev:
@@ -635,6 +640,15 @@ let
         inherit all-cabal-hashes;
       });
 
+  devShellForPkgSet = packageSet:
+    if packageSet == null then
+      null
+    else
+      packageSet.shellFor {
+        packages = localPkgsSelector;
+        nativeBuildInputs = additionalDevShellNativeBuildInputs packageSet;
+      };
+
   # A development shell created by passing all your local packages (from
   # `localPkgsSelector`) to `pkgSet.shellFor`.
   #
@@ -642,15 +656,119 @@ let
   #
   # Note that this derivation is specifically meant to be passed to `nix
   # develop` or `nix-shell`.
-  devShell =
-    if pkgSet == null then
+  devShell = devShellForPkgSet pkgSet;
+
+  # An Nixpkgs Haskell overlay that has GHC boot packages set to `null`. This
+  # is used as an initial overlay when creating a brand new package set.
+  newPkgSetCompilerConfig = self: super: {
+    # TODO: Should llvmPackages be enabled here?
+    # llvmPackages = pkgs.lib.dontRecurseIntoAttrs self.ghc.llvmPackages;
+
+    # Disable GHC core libraries.
+    array = null;
+    base = null;
+    binary = null;
+    bytestring = null;
+    Cabal = null;
+    containers = null;
+    deepseq = null;
+    directory = null;
+    exceptions = null;
+    filepath = null;
+    ghc-bignum = null;
+    ghc-boot = null;
+    ghc-boot-th = null;
+    ghc-compact = null;
+    ghc-heap = null;
+    ghc-prim = null;
+    ghci = null;
+    haskeline = null;
+    hpc = null;
+    integer-gmp = null;
+    libiserv = null;
+    mtl = null;
+    parsec = null;
+    pretty = null;
+    process = null;
+    rts = null;
+    stm = null;
+    template-haskell = null;
+
+    # GHC only builds terminfo if it is a native compiler
+    # terminfo = if pkgs.stdenv.hostPlatform == pkgs.stdenv.buildPlatform then null else self.terminfo_0_4_1_5;
+    terminfo = null;
+
+    text = null;
+    time = null;
+    transformers = null;
+    unix = null;
+
+    # GHC only bundles the xhtml library if haddock is enabled, check if this is
+    # still the case when updating: https://gitlab.haskell.org/ghc/ghc/-/blob/0198841877f6f04269d6050892b98b5c3807ce4c/ghc.mk#L463
+    # xhtml = if self.ghc.hasHaddock or true then null else self.xhtml_3000_2_2_1;
+    xhtml = null;
+  };
+
+  # This is similar to `pkgSet`.
+  #
+  # While `pkgSet` is `baseHaskellPkgSet` overridden with overlays from your
+  # stack.yaml.lock file, `newPkgSet` is a completely new Nixpkgs Haskell
+  # package set.  It _only_ contains packages defined in the `stack.yaml` file.
+  #
+  # newPkgSet :: HaskellPkgSet
+  #
+  # `newPkgSet` will contain local packages.  For instance, if you have a local
+  # package called `my-haskell-pkg`:
+  #
+  # Example: `newPkgSet.my-haskell-pkg`
+  #
+  # `newPkgSet` will also contain packages in your stack.yaml resolver. For
+  # instance:
+  #
+  # Example: `newPkgSet.lens`
+  #
+  # `pkgSet` will _not_ contain packages from the underlying Haskell package
+  # set.  For instance, `termonad` is not available in Stackage, so it is not
+  # available in `newPkgSet`.
+  newPkgSet =
+    if baseHaskellPkgSet == null then
       null
     else
-      pkgSet.shellFor {
-        packages = localPkgsSelector;
-        nativeBuildInputs = additionalDevShellNativeBuildInputs pkgSet;
-      };
+      let
+        haskPkgSet = callPackage (nixpkgsPath + "/pkgs/development/haskell-modules") {
+          haskellLib = haskell.lib.compose;
 
+          # TODO: Is it okay to use a completely different package set as the
+          # base package set like this?
+          buildHaskellPackages = baseHaskellPkgSet;
+
+          ghc = baseHaskellPkgSet.ghc;
+
+          compilerConfig = newPkgSetCompilerConfig;
+
+          initialPackages = _: _: {};
+
+          overrides = lib.composeManyExtensions [
+            # It is not possible to put these overlays into the
+            # `initialPackages` argument, because they use functions like
+            # `callHackage` and `callCabal2nix`, which appear to not be
+            # available when `initialPackages` gets evaluated.
+            combinedOverlay
+            additionalHaskellPkgSetOverrides
+          ];
+
+          nonHackagePackages = _: _: {};
+          configurationCommon = _: _: _: {};
+          configurationNix = _: _: _: {};
+          configurationArm = _: _: _: {};
+          configurationDarwin = _: _: _: {};
+        };
+      in haskPkgSet;
+
+  # Same as `devShell`, but based on `newPkgSet`.
+  #
+  # newPkgSetDevShell :: Drv
+  newPkgSetDevShell = devShellForPkgSet newPkgSet;
 in
 
 { inherit
@@ -662,6 +780,8 @@ in
     localPkgsSelector
     pkgSet
     devShell
+    newPkgSet
+    newPkgSetDevShell
     ;
 
   # These are a bunch of internal attributes, used for testing.

@@ -36,24 +36,55 @@
 #     for testing, but this is not necessary to build the Haskell library.
 #
 # Please feel free to send PRs adding necessary overrides here.
+#
+# Make sure to keep this list in alphabetical order.
 
 cabal2nixArgsOverrides {
   "gi-cairo" = ver: { cairo = pkgs.cairo; };
+
   "gi-gdk" = ver: { gtk3 = pkgs.gtk3; };
+
   "gi-gio" = ver: { glib = pkgs.glib; };
+
   "gi-glib" = ver: { glib = pkgs.glib; };
+
   "gi-gtk" = ver: { gtk3 = pkgs.gtk3; };
+
   "gi-gmodule" = ver: { gmodule = null; };
+
   "gi-gobject" = ver: { glib = pkgs.glib; };
+
   "gi-harfbuzz" = ver: { harfbuzz-gobject = null; };
+
   "gi-pango" = ver: { cairo = pkgs.cairo; pango = pkgs.pango; };
+
   "gi-vte" = ver: { vte_291 = pkgs.vte; };
+
   "glib" = ver: { glib = pkgs.glib; };
+
   "haskell-gi" = ver: { glib = pkgs.glib; gobject-introspection = pkgs.gobject-introspection; };
+
   "haskell-gi-base" = ver: { glib = pkgs.glib; };
+
+  # The PSQueue and fingertree-psqueue packages are used in benchmarks, but they are not on Stackage.
+  "psqueues" = ver: { fingertree-psqueue = null; PSQueue = null; };
+
   "saltine" = ver: { libsodium = pkgs.libsodium; };
+
   "secp256k1-haskell" = ver: { secp256k1 = pkgs.secp256k1; };
+
   "splitmix" = ver: { testu01 = null; };
+
+  "test-framework" = ver: { libxml = pkgs.libxml; };
+
   "termonad" = ver: { vte_291 = pkgs.vte; gtk3 = pkgs.gtk3; pcre2 = pkgs.pcre2;};
+
+  # unordered-containers uses the Haskell package nothunks in its test-suite,
+  # but nothunks is not in Stackage.  We disable the tests for unordered-containers
+  # in the suggestedOverlay.nix file, but callCabal2Nix is called on it before
+  # suggestedOverlay.nix is applied.  So here we need to just pass in null for
+  # the nothunks dependency, since it won't end up being used.
+  "unordered-containers" = ver: { nothunks = null; };
+
   "zlib" = ver: { zlib = pkgs.zlib; };
 }

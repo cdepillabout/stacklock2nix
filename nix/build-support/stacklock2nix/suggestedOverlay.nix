@@ -28,6 +28,8 @@
 # ```
 #
 # These will be maintained on a best-effort basis.  Again, please send PRs.
+#
+# Make sure to keep this list in alphabetical order.
 
 hfinal: hprev: with haskell.lib.compose; {
 
@@ -155,9 +157,6 @@ hfinal: hprev: with haskell.lib.compose; {
 
   nanospec = dontCheck hprev.nanospec;
 
-  # test suite doesn't build
-  nothunks = dontCheck hprev.nothunks;
-
   # circular dependency in tests
   options = dontCheck hprev.options;
 
@@ -212,6 +211,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   # tests don't support musl
   unix-time = dontCheck hprev.unix-time;
+
+  # Test suite requires the nothunks library, which isn't on stackage.
+  unordered-containers = dontCheck hprev.unordered-containers;
 
   vector = dontCheck hprev.vector;
 
