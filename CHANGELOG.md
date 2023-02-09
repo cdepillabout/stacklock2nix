@@ -1,3 +1,32 @@
+## 1.1.0
+
+*   Added two new attributes to the attribute set returned from a call to
+    `stacklock2nix`: `newPkgSet` and `newPkgSetDevShell`.  These two values are
+    similar to the existing `pkgSet` and `devShell` attributes.  Whereas
+    `pkgSet` and `devShell` take the `baseHaskellPkgSet` argument and overlay
+    it with package overrides created from your `stack.yaml` file, `newPkgSet`
+    and `newPkgSetDevShell` are a completely new package set, containing _only_
+    packages from your `stack.yaml`.
+
+    The effect of this is that `pkgSet` will contain packages that are in
+    Nixpkgs, but not in Stackage.  For instance, when using `pkgSet`, you
+    should be able to access the package
+    [`pkgSet.termonad`](https://hackage.haskell.org/package/termonad) because
+    it is available on Hackage (and in Nixpkgs), even though it is not in any
+    Stackage resolver.
+
+    However, `newPkgSet` will only contain packages in your `stack.yaml` file.
+    For instance, you'll never be able to access `newPkgSet.termonad` or
+    `newPkgSet.spago`, because they will likely never be available on Stackage.
+
+    In general, in your own projects, should you use `pkgSet` or `newPkgSet`?
+
+    For building your own projects, most of the time `pkgSet` and `newPkgSet`
+    should be similar.  `newPkgSet` may be slightly safer, since there is
+    almost no chance you accidentally use a Haskell package outside of your
+    `stack.yaml`.  `pkgSet` may be slightly more convenient depending on what
+    you're trying to do.
+
 ## 1.0.0
 
 *   This is the 1.0 release of `stacklock2nix`.  I've tested `stacklock2nix` on

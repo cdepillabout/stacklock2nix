@@ -1,6 +1,7 @@
 
 # Nix result files
-/result
+result
+result-*
 
 # Haskell .gitignore
 dist

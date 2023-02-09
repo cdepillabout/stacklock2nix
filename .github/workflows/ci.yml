@@ -102,6 +102,10 @@ jobs:
         run: "nix develop -L --command cabal test all"
         working-directory: "./my-example-haskell-lib-advanced/"
 
+      - name: "Tests"
+        run: "nix-build"
+        working-directory: "./test/"
+
   nix-commit-from-flake-lock:
     name: nix / ubuntu-latest / using stacklock2nix commit from flake.lock
     runs-on: ubuntu-latest
