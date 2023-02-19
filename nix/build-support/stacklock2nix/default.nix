@@ -660,6 +660,9 @@ let
 
   # An Nixpkgs Haskell overlay that has GHC boot packages set to `null`. This
   # is used as an initial overlay when creating a brand new package set.
+  #
+  # TODO: This overlay can likely be defined automatically using IFD:
+  # https://github.com/cdepillabout/stacklock2nix/issues/13
   newPkgSetCompilerConfig = self: super: {
     # TODO: Should llvmPackages be enabled here?
     # llvmPackages = pkgs.lib.dontRecurseIntoAttrs self.ghc.llvmPackages;
