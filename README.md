@@ -201,25 +201,6 @@ This `suggestedOverlay` is _not_ part of the Semantic Versioning guaranteed by
 `suggestedOverlay` without bumping the version of `stacklock2nix`. (Although,
 this is unlikely to be much of a problem for most users in practice.)
 
-## Contributions and Where to Get Help
-
-Contributions are highly appreciated.  If there is something you would like to
-add to `stacklock2nix`, or if you find a bug, please submit an
-[issue](https://github.com/cdepillabout/stacklock2nix/issues) or
-[PR](https://github.com/cdepillabout/stacklock2nix/pulls)!
-
-The easiest way to get help with `stacklock2nix` is to open an issue describing
-your problem.  If you link to a repository (even a simple example) that can
-be cloned and demonstrates your problem, it is much easier to help.
-
-## Sponsor `stacklock2nix`
-
-Sponsoring `stacklock2nix` enables me to spend more time fixing bugs, reviewing
-PRs, and helping people who run into problems.  I prioritize issues and PRs
-from people who are sponsors.
-
-You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
-
 ## FAQ
 
 -   **Are there any other examples of using `stacklock2nix`?**
@@ -269,10 +250,74 @@ You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
 -   **Is there any chance that a Haskell dependency specified in `stack.yaml` or
     `stack.yaml.lock` will become a different version depending on whether I compile
     directly with `stack`, or with Nix using `stacklock2nix`?**
-    
+
     No.
-    
+
     `stacklock2nix` reads the `stack.yaml.lock` file and generates a completely new
     Nix package for each Haskell dependency specified in your `stack.yaml` and
     `stack.yaml.lock` file.  `stacklock2nix` uses the exact version of each package
     from the `stack.yaml.lock` file.
+
+## Contributions and Where to Get Help
+
+Contributions are highly appreciated.  If there is something you would like to
+add to `stacklock2nix`, or if you find a bug, please submit an
+[issue](https://github.com/cdepillabout/stacklock2nix/issues) or
+[PR](https://github.com/cdepillabout/stacklock2nix/pulls)!
+
+The easiest way to get help with `stacklock2nix` is to open an issue describing
+your problem.  If you link to a repository (even a simple example) that can
+be cloned and demonstrates your problem, it is much easier to help.
+
+### Hacking on `stacklock2nix`
+
+If you're interested in hacking on `stacklock2nix`, there are two main ways to
+test the changes you're making:
+
+1.  Run the tests in the [`./test`](./test) directory.
+
+    From `./test/`, run all tests:
+
+    ```console
+    $ nix-build
+    ```
+
+    Or, run individual tests.  For instance, the `new-package-set` test:
+
+    ```console
+    $ nix-build ./nixpkgs.nix -A stacklock2nix-tests.new-package-set
+    ```
+
+2.  Try building the two example projects.
+
+    Using the "easy" example, from the
+    [`./my-example-haskell-lib-easy/`](./my-example-haskell-lib-easy/)
+    directory:
+
+    ```console
+    $ nix build
+    ```
+
+    Using the "advanced" example, from the
+    [`./my-example-haskell-lib-advanced/`](./my-example-haskell-lib-advanced/)
+    directory:
+
+    ```console
+    $ nix build
+    ```
+
+    **WARNING**: You need to update the `stacklock2nix` flake input to use
+    the `stacklock2nix` version from your checked-out `stacklock2nix` repo.
+    You can do so with a command like:
+
+    ```console
+    $ sed -i -e 's|github:cdepillabout/stacklock2nix/main|path:../.|' flake.nix
+    ```
+
+## Sponsor `stacklock2nix`
+
+Sponsoring `stacklock2nix` enables me to spend more time fixing bugs, reviewing
+PRs, and helping people who run into problems.  I prioritize issues and PRs
+from people who are sponsors.
+
+You can find the sponsor page [here](https://github.com/sponsors/cdepillabout).
