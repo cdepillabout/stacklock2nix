@@ -1,4 +1,7 @@
 
+# This tests that stacklock2nix correctly outputs `newPkgSet` and
+# `newPkgSetDevShell` attributes.
+
 { stacklock2nix
 , haskell
 , cabal-install
