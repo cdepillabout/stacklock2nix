@@ -1,5 +1,5 @@
 
-{ curl, coreutils, lib, stdenvNoCC, writeShellScript }:
+{ all-cabal-hashes, curl, coreutils, lib, stdenvNoCC, writeShellScript }:
 
 # Fetch the revision of a `.cabal` file for a given Haskell package from
 # Hackage.
@@ -42,7 +42,91 @@ stdenvNoCC.mkDerivation {
   builder = writeShellScript "fetchCabalFileRevisionBuilder.sh" ''
     source $stdenv/setup
 
-    set -euo pipefail
+    set -xeuo pipefail
+
+
+    # Try to extract the .cabal file for the given revision
+    #
+    # Arguments:
+    #   $1: The revision ID to use.  Ex. "2"
+    #
+    # Returns:
+    #   0:         If the given .cabal revision was found in the tarball.
+    #   non-zero:  If the given .cabal revision was not found in the tarball.
+    #
+    # Side effects:
+    #   Creates the file "./${name}.cabal" if the given revision was found
+    #   in the tarball.
+    find_cabal_file_in_tar () {
+      revId=$1
+      tar --wildcards --extract --occurrence=$revId \
+        --file '${all-cabal-hashes}' --verbose --gzip --strip-components=3 \
+        '*/${name}/${version}/${name}.cabal'
+    }
+
+    # Test the hash of the file "./${name}.cabal" to see if it is equal to
+    # the passed-in hash.
+    #
+    # Arguments:
+    #   (none)
+    #
+    # Returns:
+    #   0:         If the hashes are equal.
+    #   non-zero:  If the hashes are not equal
+    #
+    # Side effects:
+    #   (none)
+    test_hash () {
+      fileSha=$(sha256sum "${name}.cabal" | cut -d' ' -f1)
+      [[ "$fileSha" == "${hash}" ]]
+    }
+
+    # Copies the "./${name}.cabal" file to "$out" and exits.
+    #
+    # Arguments:
+    #   (none)
+    #
+    # Returns:
+    #   (none)
+    #
+    # Side effects:
+    #   Exits
+    copy_cabal_file_to_out_and_exit () {
+      cp "${name}.cabal" "$out"
+      exit 0
+    }
+
+    # TODO: check if all-cabal-hashes is a directory, and don't do this in that case
+
+
+    # This will look for the given revision of the cabal file in
+    # all-cabal-hashes. This will loop while incrementing the revision ID to
+    # look for.
+    #
+    # If a .cabal file is found with the correct hash, it is used.  Otherwise,
+    # this loop ends when there are no more revision IDs available for the
+    # package/version.
+    #
+    # TODO: It turns out that all-cabal-hashes only has a SINGLE cabal file,
+    # it doesn't have cabal files for each revision, unfortunately.  This
+    # loop should really be simplified (or we should setup a repository
+    # like all-cabal-hashes that does actually contain all cabal files for
+    # all revisions, and just use that).
+    hackagePkgRevId=0
+    while find_cabal_file_in_tar $hackagePkgRevId; do
+      # We successfully extracted the tar file, now we see if it has the
+      # correct hash.
+      if test_hash ; then
+        # The file has the correct hash
+        copy_cabal_file_to_out_and_exit
+      fi
+
+      # increment the hackage package revision ID
+      ((hackagePkgRevId+=1))
+
+      # Remove the .cabal file because the hash doesn't match.
+      rm "${name}.cabal"
+    done
 
     curlVersion=$(curl -V | head -1 | cut -d' ' -f2)
 
@@ -74,24 +158,19 @@ stdenvNoCC.mkDerivation {
     # I've never seen this fail to find a revision, but who knows what weird
     # things go on in the edge-cases of Hackage.
 
-    found="no"
-
     for hackageRevisionId in $(seq 0 20) ; do
       echo "$hackageRevisionId"
       revisionUrl="https://hackage.haskell.org/package/${name}-${version}/revision/''${hackageRevisionId}.cabal"
       "''${curl[@]}" -L "$revisionUrl" > "${name}.cabal"
-      fileSha=$(sha256sum "${name}.cabal" | cut -d' ' -f1)
-      if [[ "$fileSha" == "${hash}" ]]; then
-        found=yes
-        cp "${name}.cabal" "$out"
-        break
+      if test_hash ; then
+        copy_cabal_file_to_out_and_exit
       fi
       rm "${name}.cabal"
     done
 
-    if [[ "$found" == "no" ]]; then
-      echo "ERROR: Could not find cabal file revision for ${name}-${version} with hash ${hash}."
-      exit 1
-    fi
+
+
+    echo "ERROR: Could not find cabal file revision for ${name}-${version} with hash ${hash}."
+    exit 1
   '';
 }
