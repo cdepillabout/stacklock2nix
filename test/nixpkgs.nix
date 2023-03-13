@@ -16,10 +16,13 @@ let
 
     # tests
     (final: prev: {
-      stacklock2nix-tests =
-        (final.callPackage ./test-new-package-set.nix {}) ++ [
-          # new tests go here
-        ];
+      stacklock2nix-tests = {
+        new-package-set = final.callPackage ./test-new-package-set.nix {};
+      };
+
+      # A list of all stacklock2nix tests.  This makes it easy to build all
+      # tests with a single call to `nix-build`.
+      all-stacklock2nix-tests = builtins.attrValues final.stacklock2nix-tests;
     })
   ];
 
