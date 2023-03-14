@@ -17,12 +17,20 @@ let
     # tests
     (final: prev: {
       stacklock2nix-tests = {
+        # This tests that stacklock2nix correctly outputs `newPkgSet` and
+        # `newPkgSetDevShell` attributes.
+        #
+        # This also tests that all-cabal-hashes works correctly as a tarball (not a directory).
         new-package-set = final.callPackage ./test-new-package-set.nix {};
+
+        # This tests that all-cabal-hashes works correctly as a directory (not a tarball).
+        all-cabal-hashes-is-dir = final.callPackage ./test-all-cabal-hashes-is-dir.nix {};
       };
 
       # A list of all stacklock2nix tests.  This makes it easy to build all
       # tests with a single call to `nix-build`.
-      all-stacklock2nix-tests = builtins.attrValues final.stacklock2nix-tests;
+      all-stacklock2nix-tests =
+        final.lib.flatten (builtins.attrValues final.stacklock2nix-tests);
     })
   ];
 

@@ -25,9 +25,15 @@ set -euo pipefail
 # Side effects:
 #   Creates the file "./${haskPkgName}.cabal" if the given revision was found
 #   in the tarball.
-find_cabal_file_in_tar () {
-  tar --wildcards --extract --file "${all_cabal_hashes}" \
-    --gzip --strip-components=3 "*/${haskPkgName}/${haskPkgVer}/${haskPkgName}.cabal"
+find_cabal_file_in_all_cabal_hashes () {
+  if [ -d "${all_cabal_hashes}" ]; then
+    # all-cabal-hashes is a directory.  Directly reference the .cabal file need.
+    cp "${all_cabal_hashes}/${haskPkgName}/${haskPkgVer}/${haskPkgName}.cabal" ./
+  else
+    # all-cabal-hashes is a tarball.  Try to pull out the .cabal file we need.
+    tar --wildcards --extract --file "${all_cabal_hashes}" \
+        --gzip --strip-components=3 "*/${haskPkgName}/${haskPkgVer}/${haskPkgName}.cabal"
+  fi
 }
 
 # Test the hash of the file "./${haskPkgName}.cabal" to see if it is equal to
@@ -72,7 +78,7 @@ copy_cabal_file_to_out_and_exit () {
 # If a .cabal file is found with the correct hash, it is used.  Otherwise,
 # this loop ends when there are no more revision IDs available for the
 # package/version.
-if find_cabal_file_in_tar; then
+if find_cabal_file_in_all_cabal_hashes; then
   # We successfully extracted the tar file, now we see if it has the
   # correct hash.
   if test_hash ; then

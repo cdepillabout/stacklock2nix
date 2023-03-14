@@ -68,14 +68,20 @@
   #
   # Example:
   # ```
-  # final.fetchurl {
-  #   name = "all-cabal-hashes";
-  #   url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/9ab160f48cb535719783bc43c0fbf33e6d52fa99.tar.gz";
-  #   sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
+  # final.fetchFromGitHub {
+  #   owner = "commercialhaskell";
+  #   repo = "all-cabal-hashes";
+  #   rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
+  #   sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
   # };
   # ```
   #
   # This is not used if `baseHaskellPkgSet` is `null`.
+  #
+  # (NOTE: You likely want to fetch all-cabal-hashes with `fetchFromGitHub`
+  # (instead of something like `fetchurl`) so that the repository is unzipped
+  # and untarred.  stacklock2nix can still work with an all-cabal-hashes that is
+  # a tarball, but building will be faster with a plain directory.)
   all-cabal-hashes ? null
 , callPackage ? topargs.callPackage
 , # Path to Nixpkgs.
