@@ -72,12 +72,6 @@ copy_cabal_file_to_out_and_exit () {
 # If a .cabal file is found with the correct hash, it is used.  Otherwise,
 # this loop ends when there are no more revision IDs available for the
 # package/version.
-#
-# TODO: It turns out that all-cabal-hashes only has a SINGLE cabal file,
-# it doesn't have cabal files for each revision, unfortunately.  This
-# loop should really be simplified (or we should setup a repository
-# like all-cabal-hashes that does actually contain all cabal files for
-# all revisions, and just use that).
 if find_cabal_file_in_tar; then
   # We successfully extracted the tar file, now we see if it has the
   # correct hash.
