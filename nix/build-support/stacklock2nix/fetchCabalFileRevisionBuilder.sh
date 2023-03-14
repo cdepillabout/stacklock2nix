@@ -11,7 +11,7 @@
 
 source $stdenv/setup
 
-set -xeuo pipefail
+set -euo pipefail
 
 # Try to extract the .cabal file for the given revision
 #
@@ -90,7 +90,7 @@ if find_cabal_file_in_tar; then
   rm "${haskPkgName}.cabal"
 fi
 
-echo "Couldn't find .cabal file revision for ${haskPkgName}-${haskPkgVersion} in all-cabal-hashes.  Fetching from Hackage..."
+echo "Couldn't find .cabal file revision for ${haskPkgName}-${haskPkgVer} in all-cabal-hashes.  Fetching from Hackage..."
 
 curlVersion=$(curl -V | head -1 | cut -d' ' -f2)
 
@@ -124,8 +124,8 @@ curl=(
 
 for hackageRevisionId in $(seq 0 20) ; do
   echo "$hackageRevisionId"
-  revisionUrl="https://hackage.haskell.org/package/${haskPkgName}-${haskPkgVer}/revision/''${hackageRevisionId}.cabal"
-  "''${curl[@]}" -L "$revisionUrl" > "${haskPkgName}.cabal"
+  revisionUrl="https://hackage.haskell.org/package/${haskPkgName}-${haskPkgVer}/revision/${hackageRevisionId}.cabal"
+  "${curl[@]}" -L "$revisionUrl" > "${haskPkgName}.cabal"
   if test_hash ; then
     copy_cabal_file_to_out_and_exit
   fi
