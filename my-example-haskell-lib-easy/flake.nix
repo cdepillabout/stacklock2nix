@@ -89,10 +89,11 @@
           #
           # If you are using a very recent Stackage resolver and an old Nixpkgs,
           # it is almost always necessary to override `all-cabal-hashes`.
-          all-cabal-hashes = final.fetchurl {
-            name = "all-cabal-hashes";
-            url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/9ab160f48cb535719783bc43c0fbf33e6d52fa99.tar.gz";
-            sha256 = "sha256-QC07T3MEm9LIMRpxIq3Pnqul60r7FpAdope6S62sEX8=";
+          all-cabal-hashes = final.fetchFromGitHub {
+            owner = "commercialhaskell";
+            repo = "all-cabal-hashes";
+            rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
+            sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
           };
         };
 
