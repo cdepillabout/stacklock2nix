@@ -133,7 +133,12 @@ let
   # file.
   resolverParsed = readYAML resolverRawYaml;
 
-  fetchCabalFileRevision = callPackage ./fetchCabalFileRevision.nix {};
+  fetchCabalFileRevision =
+    let
+      args =
+        lib.optionalAttrs (all-cabal-hashes != null) { inherit all-cabal-hashes; };
+    in
+    callPackage ./fetchCabalFileRevision.nix args;
 
   # Replace the `.cabal` file in a given Haskell package with the revision
   # specified by the given hash.
@@ -792,8 +797,10 @@ in
   # `.Internal` modules in Haskell.
   _internal = {
     inherit
-      snapshotInfo
+      all-cabal-hashes
+      fetchCabalFileRevision
       resolverParsed
+      snapshotInfo
       ;
   };
 }
