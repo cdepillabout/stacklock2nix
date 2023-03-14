@@ -1,14 +1,14 @@
 { stacklock2nix
 , haskell
 , cabal-install
-, fetchurl
+, fetchFromGitHub
 }:
 
 let
   hasklib = haskell.lib.compose;
 
   stacklock = stacklock2nix {
-    stackYaml = ../my-example-haskell-lib-advanced/stack.yaml;
+    stackYaml = ../my-example-haskell-lib-easy/stack.yaml;
     baseHaskellPkgSet = haskell.packages.ghc924;
     additionalHaskellPkgSetOverrides = hfinal: hprev: {
       # The servant-cassava.cabal file is malformed on GitHub:
@@ -27,19 +27,16 @@ let
       amazonka-sso = ver: { amazonka-test = null; };
       amazonka-sts = ver: { amazonka-test = null; };
     };
-    additionalDevShellNativeBuildInputs = stacklockHaskellPkgSet: [
-      cabal-install
-    ];
-    # XXX: Make sure to keep the call to fetchurl here, since it is partly
+    # XXX: Make sure to keep the call to fetchFromGitHub here, since it is
     # testing that fetchCabalFileRevision is able to handle all-cabal-hashes
-    # being a tarball. (fetchurl makes the output derivation a tarball.)
-    all-cabal-hashes = fetchurl {
-      name = "all-cabal-hashes";
-      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/80869091dcb9f932c15fe57e30d4d0730c5f87df.tar.gz";
-      sha256 = "sha256-FI1Z1zMPnOXRBAPJiSI5VIyH6JkOuY9Cu1qdq1vwjK0=";
+    # being a directory.  (fetchFromGitHub makes the output derivation a
+    # directory.)
+    all-cabal-hashes = fetchFromGitHub {
+      owner = "commercialhaskell";
+      repo = "all-cabal-hashes";
+      rev = "80869091dcb9f932c15fe57e30d4d0730c5f87df";
+      sha256 = "sha256-LAD3/5qeJWbzfqkcWccMOq0pHBnSkNnvBjWnlLzWFvQ=";
     };
   };
 in
-[ stacklock.newPkgSet.my-example-haskell-app
-  stacklock.newPkgSetDevShell
-]
+stacklock.newPkgSet.my-example-haskell-app
