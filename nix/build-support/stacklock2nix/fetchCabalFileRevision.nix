@@ -42,7 +42,7 @@ stdenvNoCC.mkDerivation {
   builder = writeShellScript "fetchCabalFileRevisionBuilder.sh" ''
     source $stdenv/setup
 
-    set -xeuo pipefail
+    set -euo pipefail
 
 
     # Try to extract the .cabal file for the given revision
@@ -60,7 +60,7 @@ stdenvNoCC.mkDerivation {
     find_cabal_file_in_tar () {
       revId=$1
       tar --wildcards --extract --occurrence=$revId \
-        --file '${all-cabal-hashes}' --verbose --gzip --strip-components=3 \
+        --file '${all-cabal-hashes}' --gzip --strip-components=3 \
         '*/${name}/${version}/${name}.cabal'
     }
 
@@ -128,6 +128,8 @@ stdenvNoCC.mkDerivation {
       rm "${name}.cabal"
     done
 
+    echo "Couldn't find .cabal file revision for ${name}-${version} in all-cabal-hashes.  Fetching from Hackage..."
+
     curlVersion=$(curl -V | head -1 | cut -d' ' -f2)
 
     curl=(
@@ -168,9 +170,7 @@ stdenvNoCC.mkDerivation {
       rm "${name}.cabal"
     done
 
-
-
-    echo "ERROR: Could not find cabal file revision for ${name}-${version} with hash ${hash}."
+    echo "ERROR: Could not find cabal file revision for ${name}-${version} with hash ${hash} in Hackage"
     exit 1
   '';
 }
