@@ -1,3 +1,31 @@
+## 1.2.0
+
+*   Make sure that `stacklock2nix` will work if the input `all-cabal-hashes`
+    argument is a directory (instead of a tarball).
+
+    Passing `all-cabal-hashes` as a directory will make the initial build
+    process a little faster (although shouldn't affect future rebuilds).
+
+    You can easily pass `all-cabal-hashes` as a directory by pulling it down
+    with `fetchFromGitHub` like the following:
+
+    ```nix
+    final: prev: {
+      my-stacklock2nix-proj = final.stacklock2nix {
+        stackYaml = ./stack.yaml;
+
+        ...
+
+        all-cabal-hashes = final.fetchFromGitHub {
+          owner = "commercialhaskell";
+          repo = "all-cabal-hashes";
+          rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
+          sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
+        };
+      };
+    }
+    ```
+
 ## 1.1.0
 
 *   Added two new attributes to the attribute set returned from a call to
