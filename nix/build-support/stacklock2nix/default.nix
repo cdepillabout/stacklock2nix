@@ -796,6 +796,7 @@ in
     devShell
     newPkgSet
     newPkgSetDevShell
+    all-cabal-hashes
     ;
 
   # These are a bunch of internal attributes, used for testing.
@@ -803,7 +804,6 @@ in
   # `.Internal` modules in Haskell.
   _internal = {
     inherit
-      all-cabal-hashes
       fetchCabalFileRevision
       resolverParsed
       snapshotInfo
