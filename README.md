@@ -258,6 +258,42 @@ this is unlikely to be much of a problem for most users in practice.)
     `stack.yaml.lock` file.  `stacklock2nix` uses the exact version of each package
     from the `stack.yaml.lock` file.
 
+-   **I'm seeing an error about not being able to find a `.json` file.  What is this?**
+
+    When using `stacklock2nix`, sometimes you'll see an error about not being able to
+    find a `PKG.json` or `PKG.cabal` file.  Here's an example of what this looks like:
+
+    ```console
+    $ nix build -L
+    ...
+    all-cabal-hashes-component-happy> cp: cannot stat '/nix/store/bz3lipc0zb8s6cgjvf23mrx7iicgcy8l-source/happy/1.20.1.1/happy.json': No such file or directory
+    ```
+
+    This is an internal error from `haskellPackages.callHackage` (which is used
+    by `stacklock2nix`) saying that your `all-cabal-hashes` is too old.  It is not
+    able to find the package version it is looking for.
+
+    The solution to this is to pass a newer version of `all-cabal-hashes` to
+    `stacklock2nix`:
+
+    ```nix
+    my-haskell-stacklock = final.stacklock2nix {
+      stackYaml = ./stack.yaml;
+      all-cabal-hashes = final.fetchFromGitHub {
+        owner = "commercialhaskell";
+        repo = "all-cabal-hashes";
+        rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
+        sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
+      };
+      ...
+    };
+    ```
+
+    You should be able to go to
+    <https://github.com/commercialhaskell/all-cabal-hashes/tree/hackage> and
+    just pick the latest commit. It is also possible to add this repo as a Nix
+    flake input.
+
 ## Contributions and Where to Get Help
 
 Contributions are highly appreciated.  If there is something you would like to
