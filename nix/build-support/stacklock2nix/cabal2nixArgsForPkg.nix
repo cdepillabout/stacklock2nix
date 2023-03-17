@@ -8,6 +8,26 @@
   # `VersionString` will be a string like `"0.1.2.3"`, but may also be `null`
   # for local packages (since it is sometimes hard to figure out a version for
   # a local package without parsing the .cabal file).
+  #
+  # Example:
+  # ```
+  # args: args // {
+  #   "pango" = version: { pango = final.pango; };
+  # }
+  # ```
+  #
+  # The `args` argument is the default attribute set of arguments that are
+  # specified in this file.  Most people will want to keep them (since they
+  # are generally helpful), but you could throw them all away and define
+  # your own set of arguments, like this:
+  #
+  # ```
+  # _: {
+  #   "cairo" = version: { pango = final.cairo; };
+  #   "pango" = version: { pango = final.pango; };
+  #   "test-framework" = version: { libxml = final.libxml; };
+  # }
+  # ```
   cabal2nixArgsOverrides ? (args: args)
 }:
 
@@ -40,6 +60,8 @@
 # Make sure to keep this list in alphabetical order.
 
 cabal2nixArgsOverrides {
+  "cairo" = ver: { cairo = pkgs.cairo; };
+
   "gi-cairo" = ver: { cairo = pkgs.cairo; };
 
   "gi-gdk" = ver: { gtk3 = pkgs.gtk3; };
@@ -65,6 +87,8 @@ cabal2nixArgsOverrides {
   "haskell-gi" = ver: { glib = pkgs.glib; gobject-introspection = pkgs.gobject-introspection; };
 
   "haskell-gi-base" = ver: { glib = pkgs.glib; };
+
+  "pango" = ver: { pango = pkgs.pango; };
 
   # The PSQueue and fingertree-psqueue packages are used in benchmarks, but they are not on Stackage.
   "psqueues" = ver: { fingertree-psqueue = null; PSQueue = null; };

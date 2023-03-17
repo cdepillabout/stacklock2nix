@@ -1,3 +1,27 @@
+## 1.3.0
+
+*   Add `all-cabal-hashes` as an output from `stacklock2nix`.  This can be
+    used as in the ["advanced" example](./my-example-haskell-lib-advanced/nix/overlay.nix):
+
+    ```nix
+    final: prev: {
+      my-example-haskell-stacklock = final.stacklock2nix {
+        stackYaml = ../stack.yaml;
+        all-cabal-hashes = final.fetchFromGitHub {
+          owner = "commercialhaskell";
+          repo = "all-cabal-hashes";
+          rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
+          sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
+        };
+      };
+
+      my-example-haskell-pkg-set = final.haskell.packages.ghc924.override (oldAttrs: {
+        inherit (final.my-example-haskell-stacklock) all-cabal-hashes;
+        ...
+    ```
+
+    Added in [#19](https://github.com/cdepillabout/stacklock2nix/pull/19).
+
 ## 1.2.0
 
 *   Make sure that `stacklock2nix` will work if the input `all-cabal-hashes`
@@ -25,6 +49,10 @@
       };
     }
     ```
+
+    Implemented in [#15](https://github.com/cdepillabout/stacklock2nix/pull/15),
+    [#16](https://github.com/cdepillabout/stacklock2nix/pull/16), and
+    [#17](https://github.com/cdepillabout/stacklock2nix/pull/17).
 
 ## 1.1.0
 

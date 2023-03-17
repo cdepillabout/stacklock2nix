@@ -3,6 +3,25 @@ final: prev: {
   # First, call stacklock2nix and pass it the `stack.yaml` for your project.
   my-example-haskell-stacklock = final.stacklock2nix {
     stackYaml = ../stack.yaml;
+
+    # When using `stacklock2nix`, you may need to specify a newer all-cabal-hashes.
+    #
+    # This is necessary when you are using a Stackage snapshot/resolver or
+    # `extraDeps` in your `stack.yaml` file that is _newer_ than the
+    # `all-cabal-hashes` derivation from the Nixpkgs you are using.
+    #
+    # If you are using the latest nixpkgs-unstable and an old Stackage
+    # resolver, then it is usually not necessary to override
+    # `all-cabal-hashes`.
+    #
+    # If you are using a very recent Stackage resolver and an old Nixpkgs,
+    # it is almost always necessary to override `all-cabal-hashes`.
+    all-cabal-hashes = final.fetchFromGitHub {
+      owner = "commercialhaskell";
+      repo = "all-cabal-hashes";
+      rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
+      sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
+    };
   };
 
   # Then, apply the Haskell package overlays provided by stacklock2nix to the
@@ -12,6 +31,11 @@ final: prev: {
   # stack.yaml and Stackage snapshot / resolver.
   my-example-haskell-pkg-set =
     final.haskell.packages.ghc924.override (oldAttrs: {
+
+      # Make sure the package set is created with the same all-cabal-hashes you
+      # passed to `stacklock2nix`.
+      inherit (final.my-example-haskell-stacklock) all-cabal-hashes;
+
       overrides = final.lib.composeManyExtensions [
         # Make sure not to lose any old overrides, although in most cases there
         # won't be any.
@@ -46,12 +70,6 @@ final: prev: {
           amazonka-sts = final.haskell.lib.dontCheck hprev.amazonka-sts;
         })
       ];
-      all-cabal-hashes = final.fetchFromGitHub {
-        owner = "commercialhaskell";
-        repo = "all-cabal-hashes";
-        rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
-        sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
-      };
     });
 
   # Finally, you can pull out the Haskell package you're interested in and

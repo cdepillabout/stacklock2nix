@@ -222,12 +222,14 @@ this is unlikely to be much of a problem for most users in practice.)
     `pkgs.pkgsStatic.haskell.packages.ghc924`:
 
     ```nix
-    my-haskell-stacklock = final.stacklock2nix {
-      stackYaml = ./stack.yaml;
-      baseHaskellPkgSet = final.pkgsStatic.haskell.packages.ghc924;
-      callPackage = final.pkgsStatic.callPackage;
-      ...
-    };
+    final: prev: {
+      my-haskell-stacklock = final.stacklock2nix {
+        stackYaml = ./stack.yaml;
+        baseHaskellPkgSet = final.pkgsStatic.haskell.packages.ghc924;
+        callPackage = final.pkgsStatic.callPackage;
+        ...
+      };
+    }
     ```
 
     Here is a [fully-worked example](https://functor.tokyo/blog/2022-12-26-building-pandoc-with-stacklock2nix)
@@ -257,6 +259,112 @@ this is unlikely to be much of a problem for most users in practice.)
     Nix package for each Haskell dependency specified in your `stack.yaml` and
     `stack.yaml.lock` file.  `stacklock2nix` uses the exact version of each package
     from the `stack.yaml.lock` file.
+
+-   **I'm seeing an error about not being able to find a `.json` file.  What is this?**
+
+    When using `stacklock2nix`, sometimes you'll see an error about not being able to
+    find a `PKG.json` or `PKG.cabal` file.  Here's an example of what this looks like:
+
+    ```console
+    $ nix build -L
+    ...
+    all-cabal-hashes-component-happy> cp: cannot stat '/nix/store/bz3lipc0zb8s6cgjvf23mrx7iicgcy8l-source/happy/1.20.1.1/happy.json': No such file or directory
+    ```
+
+    This is an internal error from `haskellPackages.callHackage` (which is used
+    by `stacklock2nix`) saying that your `all-cabal-hashes` is too old.  It is not
+    able to find the package version it is looking for.
+
+    The solution to this is to pass a newer version of `all-cabal-hashes` to
+    `stacklock2nix`:
+
+    ```nix
+    final: prev: {
+      my-haskell-stacklock = final.stacklock2nix {
+        stackYaml = ./stack.yaml;
+        all-cabal-hashes = final.fetchFromGitHub {
+          owner = "commercialhaskell";
+          repo = "all-cabal-hashes";
+          rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
+          sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
+        };
+        ...
+      };
+    }
+    ```
+
+    You should be able to go to
+    <https://github.com/commercialhaskell/all-cabal-hashes/tree/hackage> and
+    just pick the latest commit. It is also possible to add this repo as a Nix
+    flake input.
+
+-   **I'm seeing errors about `infinite recursion`.  What do I do?**
+
+    When using `stacklock2nix`, occasionally you'll get errors about infinite
+    recursion.  This looks like the following:
+
+    ```console
+    $ nix build -L
+    error: infinite recursion encountered
+
+           at /nix/store/rksi78f7vq2xrfghg6jfg1r5dsa8lbv7-source/pkgs/stdenv/generic/make-derivation.nix:314:7:
+    ...
+    ```
+
+    The first step to debugging this is to give the `--show-trace` flag to `nix build`:
+
+    ```console
+    $ nix build -L --show-trace
+    error: infinite recursion encountered
+
+           at /nix/store/rksi78f7vq2xrfghg6jfg1r5dsa8lbv7-source/pkgs/stdenv/generic/make-derivation.nix:314:7:
+
+              313|       depsHostHost                = lib.elemAt (lib.elemAt dependencies 1) 0;
+              314|       buildInputs                 = lib.elemAt (lib.elemAt dependencies 1) 1;
+                 |       ^
+              315|       depsTargetTarget            = lib.elemAt (lib.elemAt dependencies 2) 0;
+
+           … while evaluating the attribute 'buildInputs' of the derivation 'pango-0.13.8.2'
+
+           at /nix/store/rksi78f7vq2xrfghg6jfg1r5dsa8lbv7-source/pkgs/stdenv/generic/make-derivation.nix:270:7:
+
+              269|     // (lib.optionalAttrs (attrs ? name || (attrs ? pname && attrs ? version)) {
+              270|       name =
+                 |       ^
+              271|         let
+
+           … while evaluating the attribute 'propagatedBuildInputs' of the derivation 'diagrams-cairo-1.4.2'
+    ```
+
+    If you squint (and a know a little about Haskell and Nix), you can see that
+    the Haskell package `diagrams-cairo` likely depends on the Haskell package
+    `pango`.
+
+    What's going on is that the Haskell package `pango` depends on the _system_
+    package `pango`, and takes the system package `pango` as one of its build
+    inputs, but it is actually getting passed _itself_ (not the system package
+    `pango`), which causes the infinite recursion.  You can fix this like the
+    following:
+
+    ```nix
+    final: prev: {
+      my-haskell-stacklock = final.stacklock2nix {
+        stackYaml = ./stack.yaml;
+        cabal2nixArgsOverrides = args: args // {
+          "pango" = verion: { pango = final.pango; };
+        };
+        ...
+      };
+    }
+    ```
+
+    This passes the system library `pango` (that is, `final.pango`) as an
+    argument to the Haskell library `pango` (that is, `"pango"` in this
+    example).
+
+    This is caused by an unfortunate interaction between `cabal2nix` and Nixpkgs.  See
+    [`cabal2nixArgsForPkg.nix`](./nix/build-support/stacklock2nix/cabal2nixArgsForPkg.nix)
+    for a more in-depth explanation of this problem.
 
 ## Contributions and Where to Get Help
 
