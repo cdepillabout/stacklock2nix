@@ -60,6 +60,8 @@
 # Make sure to keep this list in alphabetical order.
 
 cabal2nixArgsOverrides {
+  "cairo" = ver: { cairo = pkgs.cairo; };
+
   "gi-cairo" = ver: { cairo = pkgs.cairo; };
 
   "gi-gdk" = ver: { gtk3 = pkgs.gtk3; };
@@ -85,6 +87,8 @@ cabal2nixArgsOverrides {
   "haskell-gi" = ver: { glib = pkgs.glib; gobject-introspection = pkgs.gobject-introspection; };
 
   "haskell-gi-base" = ver: { glib = pkgs.glib; };
+
+  "pango" = ver: { pango = pkgs.pango; };
 
   # The PSQueue and fingertree-psqueue packages are used in benchmarks, but they are not on Stackage.
   "psqueues" = ver: { fingertree-psqueue = null; PSQueue = null; };
