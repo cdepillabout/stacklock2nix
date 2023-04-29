@@ -12,17 +12,23 @@ files to allow for mixed cabal/stack building.
 
 To build:
 
-> nix build
+```shell
+nix build
+```
 
 or
 
-> nix develop
-> cabal build
+```shell
+nix develop
+cabal build
+```
 
 or
 
-> nix develop
-> stack build --nix
+```shell
+nix develop
+stack build --nix
+```
 
 # Customisation
 
