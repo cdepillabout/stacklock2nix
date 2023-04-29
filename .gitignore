@@ -27,3 +27,7 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+
+# Flake template files
+templates/advanced/.direnv
+templates/advanced/.envrc

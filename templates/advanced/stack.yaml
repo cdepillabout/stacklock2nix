@@ -1,0 +1,7 @@
+resolver: lts-20.11
+packages:
+  - .
+nix:
+  ../
+nix:
+  shell-file: "./nix/stack-shell.nix"

@@ -1,0 +1,31 @@
+name:                some-app
+version:             0.1.0.0
+# synopsis:
+# description:
+# homepage:
+# license:
+# author:
+# maintainer:
+# copyright:
+category:            Web
+extra-source-files:
+- README.md
+
+dependencies:
+  - base >= 4.7 && < 5
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+executables:
+  some-app:
+    source-dirs:      src
+    main:             Main.hs
