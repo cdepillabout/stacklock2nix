@@ -1,3 +1,38 @@
+
+## 2.0.0
+
+*   Add a `localPkgFilter` argument to `stacklock2nix`.  This can be used to
+    filter the sources of local Haskell packages.
+
+    Here's an example of how you might use it:
+
+    ```nix
+    stacklock2nix {
+      stackYaml = ./stack.yaml;
+      localPkgFilter = defaultLocalPkgFilter: pkgName: path: type:
+        if pkgName == "my-example-haskell-lib" && baseNameOf path == "extra-file" then
+          false
+        else
+          defaultLocalPkgFilter path type;
+    }
+    ```
+
+    This is an example of filtering out a file called `extra-file` from the input
+    source of the Haskell package `my-example-haskell-lib`.
+
+    This is a major version bump because if you don't specify the
+    `localPkgFilter` argument to `stacklock2nix`, it defaults to using a filter
+    that filters out the `.stack-work/` directory, as well as directories like
+    `dist-newstyle`.  It also passes input files through the
+    `lib.cleanSourceFilter` function, which filters out `.git/`, as well as a
+    few other types of files.
+
+    While this is technically a major version bump, most users won't be
+    negatively affected by this change.  It is quite likely this won't
+    affect most people.
+
+    Added in [#22](https://github.com/cdepillabout/stacklock2nix/pull/22).
+
 ## 1.3.0
 
 *   Add `all-cabal-hashes` as an output from `stacklock2nix`.  This can be

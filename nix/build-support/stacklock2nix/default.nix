@@ -88,6 +88,52 @@
   #
   # nixpkgsPath :: Path
   nixpkgsPath ? topargs.path
+, # A filter function for local packages.
+  #
+  # This should be a function you could pass to the `filter` argument of
+  # `builtins.path` or `lib.cleanSourceWith`.  See the documentation for
+  # either of these functions for how filters work.
+  #
+  # localPkgFilter
+  #   :: (Path -> String -> Bool)
+  #   -> String
+  #   -> Path
+  #   -> String
+  #   -> Bool
+  #
+  # The first argument is a default filter function that is useful for
+  # Haskell packages.  This is passed to you as a convenience for you
+  # to use in your own filter functions.  This default filter function
+  # filters out common Haskell development files, like
+  # `.stack-work`, `dist-newstyle`, etc. It also calls `lib.cleanSourceFilter`.
+  #
+  # The second argument is the Haskell package name that is currently being
+  # filtered.  This package name is read from either the `.cabal` or
+  # `package.yaml` file.
+  #
+  # You may want to override this argument if you want to a more specific
+  # filter for some of your local packages.
+  #
+  # Example:
+  # ```
+  # defaultLocalPkgFilter: pkgName: path: type:
+  #   if pkgName == "my-example-haskell-lib" && baseNameOf path == "extra-file" then
+  #     false
+  #   else
+  #     defaultLocalPkgFilter path type
+  # ```
+  #
+  # This example filters out the filed called `extra-file` from the input
+  # source for the `my-example-haskell-lib` package.  For all other files,
+  # `defaultLocalPkgFilter` is called.
+  #
+  # Here's an example of a filter that doesn't filter out anything:
+  #
+  # ```
+  # defaultLocalPkgFilter: pkgName: path: type: true
+  # ```
+  localPkgFilter ?
+    defaultLocalPkgFilter: pkgName: path: type: defaultLocalPkgFilter path type
 }:
 
 # The stack.yaml path can be computed from the stack.yaml.lock path, or
@@ -277,25 +323,43 @@ let
   #
   # data HaskellPkgLock
   #   = HackageDep { hackage :: String }
-  #   | GitDep { name :: String, git :: String, commit :: String, subdir :: String }
+  #   | GitDep { name :: String, git :: String, commit :: String, version :: String, subdir :: Maybe String }
+  #   | UrlDep { url :: String, name :: String, version :: String, sha256 :: String, subdir :: Maybe String }
   #
-  # In `GitDep`, `subdir` can be left out.
+  # In `GitDep` and `UrlDep`, `subdir` can be left out (which is what the `Maybe`
+  # indicates).  You cannot pass `null` for `subdir`, you must just leave it
+  # out if you don't want it to specify it.
   #
-  # Example:
+  # Example `HackageDep`:
+  #
   # ```
   # extraDepCreateNixHaskPkg
   #   hfinal
   #   { hackage = "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"; }
   # ```
   #
-  # Another Example:
+  # Example `GitDep`:
+  #
   # ```
   # extraDepCreateNixHaskPkg
   #   hfinal
   #   { name = "servant-client";
   #     git = "https://github.com/haskell-servant/servant";
   #     commit = "1fba9dc6048cea6184964032b861b052cd54878c";
+  #     version = "0.19";
   #     subdir = "servant-client";
+  #   }
+  # ```
+  #
+  # Example `UrlDep`:
+  #
+  # ```
+  # extraDepCreateNixHaskPkg
+  #   hfinal
+  #   { name = "pretty-simple";
+  #     url = "https://github.com/cdepillabout/pretty-simple/archive/d8ef1b3c2d913a05515b2d1c4fec0b52d2744434.tar.gz";
+  #     version = "4.1.2.0";
+  #     sha256 = "aba1659b4c133b00b7a28837bcb413672823d72835bcee0f1594e0ba4e2ea4af";
   #   }
   # ```
   extraDepCreateNixHaskPkg = hfinal: haskPkgLock:
@@ -373,7 +437,10 @@ let
   # set.
   #
   # haskPkgLocksToOverlay
-  #  :: [ { hackage :: String } ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #  :: [ HaskellPkgLock ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #
+  # See the documentation for extraDepCreateNixHaskPkg for the definition of
+  # HaskellPkgLock.
   #
   # Example:
   # ```
@@ -407,6 +474,7 @@ let
   #     { name = "servant-client";
   #       git = "https://github.com/haskell-servant/servant";
   #       commit = "1fba9dc6048cea6184964032b861b052cd54878c";
+  #       version = "0.19";
   #       subdir = "servant-client";
   #     }
   #   ]
@@ -438,27 +506,21 @@ let
   #
   # Note that the basename of the `pkgPath` may be different than the actual
   # Haskell package name, which is why this function is needed.
+  #
+  # Also note that localPkgPathStr is assumed to be a relative path from
+  # the directory containing the `stack.yaml` file.
   mkLocalPkg = localPkgPathStr:
     let
-      # Path to the Haskell package.
-      #
-      # pkgPath :: Path
-      pkgPath =
-        lib.cleanSourceWith {
-          src =
-            # TODO: I imagine it is not okay to just assume this package path is a
-            # relative path.
-            builtins.path { path = dirOf stackYamlReal + ("/" + localPkgPathStr); };
-          # TODO: Create a better filter, plus make it overrideable for end-users.
-          filter = path: type: true;
-        };
+      # The localPkgPathStr is assumed to be a relative path from the
+      # directory containing the `stack.yaml` file.
+      rawPkgPath = builtins.path { path = dirOf stackYamlReal + ("/" + localPkgPathStr); };
 
       # This is `pkgPath`, but with everything removed except `.cabal` files
       # and a `package.yaml` file.
       #
       # justCabalFilePath :: Path
       justCabalFilePath = lib.cleanSourceWith {
-        src = pkgPath;
+        src = rawPkgPath;
         filter = path: type:
           lib.hasSuffix ".cabal" path ||
           baseNameOf path == "package.yaml";
@@ -512,7 +574,6 @@ let
       # hasSingleCabalFile :: Bool
       hasSinglePackageYamlFile = lib.any (file: file == "package.yaml") allPkgFiles;
 
-      # pkgName = lib.removeSuffix ".cabal" cabalFileName;
       pkgName =
         if hasSingleCabalFile then
           lib.removeSuffix ".cabal" cabalFileName
@@ -522,6 +583,29 @@ let
           throw
             ("Could not find any .cabal files or a package.yaml file in package ${localPkgPathStr}.  " +
              "all files: ${toString allPkgFiles}");
+
+      # This is a default filter function for Haskell packages. Filters out
+      # things like `.stack-work`, `dist-newstyle`, etc.  Also calls
+      # `lib.cleanSourceFilter`.
+      localPkgDefaultFilter = path: type:
+        let
+          haskFilesToIgnore = [
+            ".stack-work"
+            "stack.yaml"
+            "stack.yaml.lock"
+          ];
+        in
+        (! lib.elem (baseNameOf path) haskFilesToIgnore) &&
+        (! lib.any (lib.flip lib.hasPrefix (baseNameOf path)) [ "dist" ".ghc" ]) &&
+        lib.cleanSourceFilter path type;
+
+      # Path to the Haskell package.
+      #
+      # pkgPath :: Path
+      pkgPath = lib.cleanSourceWith {
+        src = rawPkgPath;
+        filter = path: type: localPkgFilter localPkgDefaultFilter pkgName path type;
+      };
     in
     { inherit pkgPath pkgName; };
 
@@ -583,7 +667,7 @@ let
 
   # A selector for picking only local packages defined in a `stack.yaml` from a Haskell package set.
   #
-  # localPkgs :: HaskellPkgSet -> [ HaskellPkgDrv ]
+  # localPkgsSelector :: HaskellPkgSet -> [ HaskellPkgDrv ]
   #
   # Example: `my-stacklock-pkg-set.ghcWithPackages my-stacklock.localPkgsSelector`
   #
