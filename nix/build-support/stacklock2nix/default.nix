@@ -277,25 +277,43 @@ let
   #
   # data HaskellPkgLock
   #   = HackageDep { hackage :: String }
-  #   | GitDep { name :: String, git :: String, commit :: String, subdir :: String }
+  #   | GitDep { name :: String, git :: String, commit :: String, version :: String, subdir :: Maybe String }
+  #   | UrlDep { url :: String, name :: String, version :: String, sha256 :: String, subdir :: Maybe String }
   #
-  # In `GitDep`, `subdir` can be left out.
+  # In `GitDep` and `UrlDep`, `subdir` can be left out (which is what the `Maybe`
+  # indicates).  You cannot pass `null` for `subdir`, you must just leave it
+  # out if you don't want it to specify it.
   #
-  # Example:
+  # Example `HackageDep`:
+  #
   # ```
   # extraDepCreateNixHaskPkg
   #   hfinal
   #   { hackage = "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"; }
   # ```
   #
-  # Another Example:
+  # Example `GitDep`:
+  #
   # ```
   # extraDepCreateNixHaskPkg
   #   hfinal
   #   { name = "servant-client";
   #     git = "https://github.com/haskell-servant/servant";
   #     commit = "1fba9dc6048cea6184964032b861b052cd54878c";
+  #     version = "0.19";
   #     subdir = "servant-client";
+  #   }
+  # ```
+  #
+  # Example `UrlDep`:
+  #
+  # ```
+  # extraDepCreateNixHaskPkg
+  #   hfinal
+  #   { name = "pretty-simple";
+  #     url = "https://github.com/cdepillabout/pretty-simple/archive/d8ef1b3c2d913a05515b2d1c4fec0b52d2744434.tar.gz";
+  #     version = "4.1.2.0";
+  #     sha256 = "aba1659b4c133b00b7a28837bcb413672823d72835bcee0f1594e0ba4e2ea4af";
   #   }
   # ```
   extraDepCreateNixHaskPkg = hfinal: haskPkgLock:
@@ -373,7 +391,10 @@ let
   # set.
   #
   # haskPkgLocksToOverlay
-  #  :: [ { hackage :: String } ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #  :: [ HaskellPkgLock ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #
+  # See the documentation for extraDepCreateNixHaskPkg for the definition of
+  # HaskellPkgLock.
   #
   # Example:
   # ```
@@ -407,6 +428,7 @@ let
   #     { name = "servant-client";
   #       git = "https://github.com/haskell-servant/servant";
   #       commit = "1fba9dc6048cea6184964032b861b052cd54878c";
+  #       version = "0.19";
   #       subdir = "servant-client";
   #     }
   #   ]
