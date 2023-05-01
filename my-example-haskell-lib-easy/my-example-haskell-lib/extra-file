@@ -1,0 +1,4 @@
+This is an extra file.
+
+You may want to use the `localPkgFilter` argument of `stacklock2nix` to ignore
+extra files like this.
