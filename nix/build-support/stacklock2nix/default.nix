@@ -120,12 +120,18 @@
   #   if pkgName == "my-example-haskell-lib" && baseNameOf path == "extra-file" then
   #     false
   #   else
-  #     defaultLocalPkgFilter path type;
+  #     defaultLocalPkgFilter path type
   # ```
   #
   # This example filters out the filed called `extra-file` from the input
   # source for the `my-example-haskell-lib` package.  For all other files,
   # `defaultLocalPkgFilter` is called.
+  #
+  # Here's an example of a filter that doesn't filter out anything:
+  #
+  # ```
+  # defaultLocalPkgFilter: pkgName: path: type: true
+  # ```
   localPkgFilter ?
     defaultLocalPkgFilter: pkgName: path: type: defaultLocalPkgFilter path type
 }:
