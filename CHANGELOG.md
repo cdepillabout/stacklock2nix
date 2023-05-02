@@ -1,7 +1,21 @@
 
+## 2.0.1
+
+*   Fixes a bug in the implementation of the new `localPkgFilter` argument added
+    in v2.0.0.  This bug is not a correctness problem (so if you accidentally use
+    v2.0.0, you should not get incorrectly built Haskell packages).  The bug is
+    just that files will get pulled into the Nix store that you may expect to be
+    filtered out.
+
+    See [#23](https://github.com/cdepillabout/stacklock2nix/pull/23) for the
+    details.
+
 ## 2.0.0
 
-*   Add a `localPkgFilter` argument to `stacklock2nix`.  This can be used to
+*   (WARNING: There is a bug in the implementation of this new `localPkgFilter`
+    feature.  You are recommended to use v2.0.1 instead of v2.0.0!)
+
+    Add a `localPkgFilter` argument to `stacklock2nix`.  This can be used to
     filter the sources of local Haskell packages.
 
     Here's an example of how you might use it:
