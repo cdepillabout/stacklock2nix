@@ -513,7 +513,7 @@ let
     let
       # The localPkgPathStr is assumed to be a relative path from the
       # directory containing the `stack.yaml` file.
-      rawPkgPath = builtins.path { path = dirOf stackYamlReal + ("/" + localPkgPathStr); };
+      rawPkgPath = dirOf stackYamlReal + ("/" + localPkgPathStr);
 
       # This is `pkgPath`, but with everything removed except `.cabal` files
       # and a `package.yaml` file.
@@ -524,6 +524,7 @@ let
         filter = path: type:
           lib.hasSuffix ".cabal" path ||
           baseNameOf path == "package.yaml";
+        name = "stacklock2nix-sources-for-pkg-name";
       };
 
       cabalFileDir = builtins.readDir justCabalFilePath;
@@ -605,6 +606,7 @@ let
       pkgPath = lib.cleanSourceWith {
         src = rawPkgPath;
         filter = path: type: localPkgFilter localPkgDefaultFilter pkgName path type;
+        name = "stacklock2nix-pkg-sources-" + pkgName;
       };
     in
     { inherit pkgPath pkgName; };
