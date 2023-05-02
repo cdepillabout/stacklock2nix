@@ -1,4 +1,17 @@
 
+## 3.0.0
+
+*   Add some additional filters to the default `localPkgFilter` argument.
+
+    Now most files from
+    [Haskell.gitignore](https://github.com/github/gitignore/blob/main/Haskell.gitignore)
+    are filtered out by default.
+
+    While this is technically a breaking change, this shouldn't negatively
+    affect most users.
+
+    Added in [#24](https://github.com/cdepillabout/stacklock2nix/pull/24).
+
 ## 2.0.1
 
 *   Fixes a bug in the implementation of the new `localPkgFilter` argument added
