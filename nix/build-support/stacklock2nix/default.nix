@@ -591,13 +591,34 @@ let
       localPkgDefaultFilter = path: type:
         let
           haskFilesToIgnore = [
+            ".hpc"
             ".stack-work"
+            # stack.yaml normally doesn't need to be an input for building
+            # individual Haskell packages.
             "stack.yaml"
             "stack.yaml.lock"
           ];
+          haskPrefixesToIgnore = [
+            "dist"
+            # This makes sure to ignore GHC environment files.
+            ".ghc"
+          ];
+          haskSuffixesToIgnore = [
+            ".hi"
+            ".hie"
+            ".chi"
+            ".chs.h"
+            ".dyn_o"
+            ".dyn_hi"
+            ".prof"
+            ".aux"
+            ".hp"
+            ".eventlog"
+          ];
         in
         (! lib.elem (baseNameOf path) haskFilesToIgnore) &&
-        (! lib.any (lib.flip lib.hasPrefix (baseNameOf path)) [ "dist" ".ghc" ]) &&
+        (! lib.any (lib.flip lib.hasPrefix (baseNameOf path)) haskPrefixesToIgnore) &&
+        (! lib.any (lib.flip lib.hasSuffix (baseNameOf path)) haskSuffixesToIgnore) &&
         lib.cleanSourceFilter path type;
 
       # Path to the Haskell package.
