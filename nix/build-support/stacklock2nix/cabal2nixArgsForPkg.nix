@@ -103,12 +103,18 @@ cabal2nixArgsOverrides {
 
   "termonad" = ver: { vte_291 = pkgs.vte; gtk3 = pkgs.gtk3; pcre2 = pkgs.pcre2;};
 
-  # unordered-containers uses the Haskell package nothunks in its test-suite,
-  # but nothunks is not in Stackage.  We disable the tests for unordered-containers
-  # in the suggestedOverlay.nix file, but callCabal2Nix is called on it before
-  # suggestedOverlay.nix is applied.  So here we need to just pass in null for
-  # the nothunks dependency, since it won't end up being used.
-  "unordered-containers" = ver: { nothunks = null; };
+  "unordered-containers" = ver:
+    # Starting in unordered-containers-0.2.18.0 (which is in LTS-20),
+    # unordered-containers uses the Haskell package nothunks in its test-suite,
+    # but nothunks is not in Stackage.  We disable the tests for
+    # unordered-containers in the suggestedOverlay.nix file, but callCabal2Nix
+    # is called on it before suggestedOverlay.nix is applied.  So here we need
+    # to just pass in null for the nothunks dependency, since it won't end up
+    # being used.
+    if pkgs.lib.versionAtLeast ver "0.2.18" then
+      { nothunks = null; }
+    else
+      {};
 
   "zlib" = ver: { zlib = pkgs.zlib; };
 }
