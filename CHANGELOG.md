@@ -1,4 +1,10 @@
 
+## 3.0.1
+
+*   Fix override with unordered-containers argument, `nothunks`.
+
+    Added in [#26](https://github.com/cdepillabout/stacklock2nix/pull/26).
+
 ## 3.0.0
 
 *   Add some additional filters to the default `localPkgFilter` argument.
