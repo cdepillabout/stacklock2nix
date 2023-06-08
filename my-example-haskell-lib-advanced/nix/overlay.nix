@@ -19,8 +19,8 @@ final: prev: {
     all-cabal-hashes = final.fetchFromGitHub {
       owner = "commercialhaskell";
       repo = "all-cabal-hashes";
-      rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
-      sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
+      rev = "f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840";
+      sha256 = "sha256-MLF0Vv2RHai3n7b04JeUchQortm+ikuwSjAzAHWvZJs=";
     };
   };
 
