@@ -168,6 +168,10 @@ hfinal: hprev: with haskell.lib.compose; {
   # Disabling doctests.
   regex-tdfa = overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
 
+  # the rio test suite calls functions from unliftio that are broken:
+  # https://github.com/fpco/unliftio/issues/87
+  rio = dontCheck hprev.rio;
+
   # https://github.com/ndmitchell/shake/issues/804
   shake = dontCheck hprev.shake;
 
@@ -211,6 +215,10 @@ hfinal: hprev: with haskell.lib.compose; {
 
   # tests don't support musl
   unix-time = dontCheck hprev.unix-time;
+
+  # unliftio test suite has functions that are broken on darwin
+  # https://github.com/fpco/unliftio/issues/87
+  unliftio = dontCheck hprev.unliftio;
 
   # Test suite requires the nothunks library, which isn't on stackage.
   unordered-containers = dontCheck hprev.unordered-containers;
