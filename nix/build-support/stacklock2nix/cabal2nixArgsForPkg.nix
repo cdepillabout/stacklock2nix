@@ -102,8 +102,14 @@ cabal2nixArgsOverrides {
     # tests, but it is not available in Nixpkgs.  We disable the tests for
     # splitmix in the suggestedOverlay.nix file, so it is fine to just pass
     # this argument as null.
+    #
+    # However, testu01 is only used on Linux, so we don't need to do anything
+    # if this is not Linux.
     if pkgs.lib.versionAtLeast ver "0.1.0.4" then
-      { testu01 = null; }
+      if pkgs.stdenv.isLinux then
+        { testu01 = null; }
+      else
+        {}
     else
       {};
 
