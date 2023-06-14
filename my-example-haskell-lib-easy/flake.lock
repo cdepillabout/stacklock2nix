@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "all-cabal-hashes": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1686227181,
+        "narHash": "sha256-WMkGyt1IFBGQzw4vnCouiiAhPa8BXr7cFM30RZsgvLY=",
+        "owner": "commercialhaskell",
+        "repo": "all-cabal-hashes",
+        "rev": "f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840",
+        "type": "github"
+      },
+      "original": {
+        "owner": "commercialhaskell",
+        "repo": "all-cabal-hashes",
+        "rev": "f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1686089707,
@@ -18,17 +35,18 @@
     },
     "root": {
       "inputs": {
+        "all-cabal-hashes": "all-cabal-hashes",
         "nixpkgs": "nixpkgs",
         "stacklock2nix": "stacklock2nix"
       }
     },
     "stacklock2nix": {
       "locked": {
-        "lastModified": 1686119819,
-        "narHash": "sha256-iNXW6oqley2vOHtYpxwvruueMsrYSfH0KhYP2pZ5oYI=",
+        "lastModified": 1686721363,
+        "narHash": "sha256-ZIRCubbKAwuNjMWdeXl9Gs7WaBGa5nQkK8hDXP6NejQ=",
         "owner": "cdepillabout",
         "repo": "stacklock2nix",
-        "rev": "8e027606ac4e59498f74024830f8672188ae7bfa",
+        "rev": "5cf045e262079a8233c6e84725c3471d217254e2",
         "type": "github"
       },
       "original": {

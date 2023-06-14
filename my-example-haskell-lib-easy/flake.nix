@@ -16,7 +16,31 @@
   # This is a flake reference to Nixpkgs.
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-  outputs = { self, nixpkgs, stacklock2nix }:
+
+  # When creating your own Haskell package set from the stacklock2nix
+  # output, you may need to specify a newer all-cabal-hashes.
+  #
+  # This is necessary when you are using a Stackage snapshot/resolver or
+  # `extraDeps` in your `stack.yaml` file that is _newer_ than the
+  # `all-cabal-hashes` derivation from the Nixpkgs you are using.
+  #
+  # If you are using the latest nixpkgs-unstable and an old Stackage
+  # resolver, then it is usually not necessary to override
+  # `all-cabal-hashes`.
+  #
+  # If you are using a very recent Stackage resolver and an old Nixpkgs,
+  # it is almost always necessary to override `all-cabal-hashes`.
+  #
+  # Note that if you copy the `./flake.lock` to your own repo, you'll likely
+  # want to update the commit that this all-cabal-hashes reference points to:
+  #
+  # $ nix flake lock --update-input all-cabal-hashes
+  inputs.all-cabal-hashes = {
+    url = "github:commercialhaskell/all-cabal-hashes?rev=f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840";
+    flake = false;
+  };
+
+  outputs = { self, nixpkgs, stacklock2nix, all-cabal-hashes }:
     let
       # System types to support.
       supportedSystems = [
@@ -76,40 +100,7 @@
             #stacklockHaskellPkgSet.some-haskell-lib
           ];
 
-          # When creating your own Haskell package set from the stacklock2nix
-          # output, you may need to specify a newer all-cabal-hashes.
-          #
-          # This is necessary when you are using a Stackage snapshot/resolver or
-          # `extraDeps` in your `stack.yaml` file that is _newer_ than the
-          # `all-cabal-hashes` derivation from the Nixpkgs you are using.
-          #
-          # If you are using the latest nixpkgs-unstable and an old Stackage
-          # resolver, then it is usually not necessary to override
-          # `all-cabal-hashes`.
-          #
-          # If you are using a very recent Stackage resolver and an old Nixpkgs,
-          # it is almost always necessary to override `all-cabal-hashes`.
-          #
-          # WARNING: If you're on a case-insensitive filesystem (like some OSX
-          # filesystems), you may get a hash mismatch when using fetchFromGitHub
-          # to fetch all-cabal-hashes.  As a workaround in that case, you may
-          # want to use fetchurl:
-          #
-          # ```
-          # all-cabal-hashes = final.fetchurl {
-          #   url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840.tar.gz";
-          #   sha256 = "sha256-vYFfZ77fOcOQpAef6VGXlAZBzTe3rjBSS2dDWQQSPUw=";
-          # };
-          # ```
-          #
-          # You can find more information in:
-          # https://github.com/NixOS/nixpkgs/issues/39308
-          all-cabal-hashes = final.fetchFromGitHub {
-            owner = "commercialhaskell";
-            repo = "all-cabal-hashes";
-            rev = "f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840";
-            sha256 = "sha256-MLF0Vv2RHai3n7b04JeUchQortm+ikuwSjAzAHWvZJs=";
-          };
+          inherit all-cabal-hashes;
         };
 
         # One of our local packages.
