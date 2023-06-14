@@ -16,11 +16,26 @@ final: prev: {
     #
     # If you are using a very recent Stackage resolver and an old Nixpkgs,
     # it is almost always necessary to override `all-cabal-hashes`.
+    #
+    # WARNING: If you're on a case-insensitive filesystem (like some OSX
+    # filesystems), you may get a hash mismatch when using fetchFromGitHub
+    # to fetch all-cabal-hashes.  As a workaround in that case, you may
+    # want to use fetchurl:
+    #
+    # ```
+    # all-cabal-hashes = final.fetchurl {
+    #   url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840.tar.gz";
+    #   sha256 = "sha256-vYFfZ77fOcOQpAef6VGXlAZBzTe3rjBSS2dDWQQSPUw=";
+    # };
+    # ```
+    #
+    # You can find more information in:
+    # https://github.com/NixOS/nixpkgs/issues/39308
     all-cabal-hashes = final.fetchFromGitHub {
       owner = "commercialhaskell";
       repo = "all-cabal-hashes";
-      rev = "9ab160f48cb535719783bc43c0fbf33e6d52fa99";
-      sha256 = "sha256-Hz/xaCoxe4cJBH3h/KIfjzsrEyD915YEVEK8HFR7nO4=";
+      rev = "f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840";
+      sha256 = "sha256-MLF0Vv2RHai3n7b04JeUchQortm+ikuwSjAzAHWvZJs=";
     };
   };
 

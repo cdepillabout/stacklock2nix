@@ -97,7 +97,21 @@ cabal2nixArgsOverrides {
 
   "secp256k1-haskell" = ver: { secp256k1 = pkgs.secp256k1; };
 
-  "splitmix" = ver: { testu01 = null; };
+  "splitmix" = ver:
+    # Starting in splitmix-0.1.0.4, a system library called testu01 is used in
+    # tests, but it is not available in Nixpkgs.  We disable the tests for
+    # splitmix in the suggestedOverlay.nix file, so it is fine to just pass
+    # this argument as null.
+    #
+    # However, testu01 is only used on Linux, so we don't need to do anything
+    # if this is not Linux.
+    if pkgs.lib.versionAtLeast ver "0.1.0.4" then
+      if pkgs.stdenv.isLinux then
+        { testu01 = null; }
+      else
+        {}
+    else
+      {};
 
   "test-framework" = ver: { libxml = pkgs.libxml; };
 

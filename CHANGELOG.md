@@ -1,4 +1,16 @@
 
+## 3.0.2
+
+*   Fix override with splitmix argument, `testu01`.
+
+    Added in [#28](https://github.com/cdepillabout/stacklock2nix/pull/28).
+
+*   A few additional overrides added to
+    `nix/build-support/stacklock2nix/suggestedOverlay.nix` to fix some common
+    problems on Darwin.
+
+    Added in [#28](https://github.com/cdepillabout/stacklock2nix/pull/28).
+
 ## 3.0.1
 
 *   Fix override with unordered-containers argument, `nothunks`.
