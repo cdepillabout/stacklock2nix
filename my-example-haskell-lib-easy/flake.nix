@@ -35,7 +35,7 @@
   #
   # $ nix flake lock --update-input all-cabal-hashes
   inputs.all-cabal-hashes = {
-    url = "github:commercialhaskell/all-cabal-hashes?rev=f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840";
+    url = "github:commercialhaskell/all-cabal-hashes/hackage";
     flake = false;
   };
 
