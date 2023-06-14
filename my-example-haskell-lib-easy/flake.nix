@@ -16,7 +16,6 @@
   # This is a flake reference to Nixpkgs.
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-
   # When creating your own Haskell package set from the stacklock2nix
   # output, you may need to specify a newer all-cabal-hashes.
   #
