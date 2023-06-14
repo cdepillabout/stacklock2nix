@@ -105,6 +105,10 @@ hfinal: hprev: with haskell.lib.compose; {
   # Version constraints on tests are too strict.
   haddock-library = dontCheck hprev.haddock-library;
 
+  # Old versions of the happy testsuite will segfault on ARM due to an LLVM bug:
+  # https://github.com/llvm/llvm-project/issues/52844
+  happy = dontCheck hprev.happy;
+
   hashable = dontCheck hprev.hashable;
 
   haskeline = dontCheck hprev.haskeline;
