@@ -33,6 +33,10 @@
 
 hfinal: hprev: with haskell.lib.compose; {
 
+  # Test suite is broken with QuickCheck-2.14.3:
+  # https://github.com/nick8325/quickcheck/issues/359
+  aeson = dontCheck hprev.aeson;
+
   # the testsuite fails because of not finding tsc without some help
   aeson-typescript = overrideCabal (drv: {
     testToolDepends = drv.testToolDepends or [] ++ [ pkgs.nodePackages.typescript ];
@@ -154,6 +158,10 @@ hfinal: hprev: with haskell.lib.compose; {
   # Tests appear to not include all required files
   lsp-test = dontCheck hprev.lsp-test;
 
+  # Test suite is broken with QuickCheck-2.14.3:
+  # https://github.com/nick8325/quickcheck/issues/359
+  math-functions = dontCheck hprev.math-functions;
+
   # Tests seem to make incorrect assumptions about URLs and order of items from Maps.
   mmark = dontCheck hprev.mmark;
 
@@ -185,6 +193,10 @@ hfinal: hprev: with haskell.lib.compose; {
   sourcemap = dontCheck hprev.sourcemap;
 
   splitmix = dontCheck hprev.splitmix;
+
+  # Test suite is broken with QuickCheck-2.14.3:
+  # https://github.com/nick8325/quickcheck/issues/359
+  statistics = dontCheck hprev.statistics;
 
   syb = dontCheck hprev.syb;
 

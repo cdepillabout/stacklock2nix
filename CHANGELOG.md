@@ -1,3 +1,13 @@
+## 3.0.3
+
+*   A few additional overrides added to
+    `nix/build-support/stacklock2nix/suggestedOverlay.nix` to fix some
+    breakages in test suites
+    [caused by QuickCheck-2.14.3](https://github.com/nick8325/quickcheck/issues/359).
+    QuickCheck-2.14.3 is included in LTS-20.24, so you'll likely need these fixes if
+    you are using LTS-20.24 or later.
+
+    Added in [#31](https://github.com/cdepillabout/stacklock2nix/pull/31).
 
 ## 3.0.2
 
