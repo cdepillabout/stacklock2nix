@@ -366,6 +366,30 @@ this is unlikely to be much of a problem for most users in practice.)
     [`cabal2nixArgsForPkg.nix`](./nix/build-support/stacklock2nix/cabal2nixArgsForPkg.nix)
     for a more in-depth explanation of this problem.
 
+-   **I'm getting an error about the cabal file missing the 'name' field. What do I do?**
+
+    If you see an error of this kind:
+
+    ```
+    ...
+    > stacklock2nix: replace Cabal file with revision from /nix/store/l6cda10i5sflwyh1ms0yppx742cszi44-transformers-compat-0.7.2-cabal-file.
+    ...
+    > Warning: transformers-compat.cabal:0:0: "name" field missing
+    > CallStack (from HasCallStack):
+    >   withMetadata, called at libraries/Cabal/Cabal/src/Distribution/Simple/Utils.hs:370:14 in Cabal-le.Utils
+    > Error: Setup: Failed parsing "./transformers-compat.cabal".
+    ...
+
+    ```
+
+    It could be due to your nix store being inconsistent. Check that the
+    relevant file exists (the one in the store), and then try running the
+    following to debug:
+
+    ```
+    nix-store --verify --repair --check-contents
+    ```
+
 ## Contributions and Where to Get Help
 
 Contributions are highly appreciated.  If there is something you would like to
