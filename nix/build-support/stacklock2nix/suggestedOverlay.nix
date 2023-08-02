@@ -115,8 +115,6 @@ hfinal: hprev: with haskell.lib.compose; {
 
   hashable = dontCheck hprev.hashable;
 
-  haskeline = dontCheck hprev.haskeline;
-
   # This propagates this to everything depending on haskell-gi-base
   haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
 

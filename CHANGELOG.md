@@ -1,3 +1,10 @@
+## 3.0.4
+
+*   Remove `dontCheck` override for `haskeline` in
+    `nix/build-support/stacklock2nix/suggestedOverlay.nix`.  `haskeline` is a
+    GHC boot package, so it is not built as a separate Nix derivation.
+    It is distributed with GHC, so it is set to `null` in the Nixpkgs pkg set.
+
 ## 3.0.3
 
 *   A few additional overrides added to
