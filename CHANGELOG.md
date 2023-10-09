@@ -1,3 +1,9 @@
+## 3.0.5
+
+*   Make sure the `digest` Haskell package gets the system `zlib` as an argument.
+
+    Added in [#35](https://github.com/cdepillabout/stacklock2nix/pull/35).
+
 ## 3.0.4
 
 *   Remove `dontCheck` override for `haskeline` in

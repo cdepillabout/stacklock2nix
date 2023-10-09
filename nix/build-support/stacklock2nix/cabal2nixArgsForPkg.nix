@@ -62,6 +62,8 @@
 cabal2nixArgsOverrides {
   "cairo" = ver: { cairo = pkgs.cairo; };
 
+  "digest" = ver: { zlib = pkgs.zlib; };
+
   "gi-cairo" = ver: { cairo = pkgs.cairo; };
 
   "gi-gdk" = ver: { gtk3 = pkgs.gtk3; };
