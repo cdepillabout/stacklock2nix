@@ -1,3 +1,10 @@
+## 4.0.0
+
+*   Make sure the `psqueues` Haskell package gets the `fingertree-psqueue` dep
+    depending on what version of `psqueues` you're compiling.
+
+    Added in [#39](https://github.com/cdepillabout/stacklock2nix/pull/39).
+
 ## 3.0.5
 
 *   Make sure the `digest` Haskell package gets the system `zlib` as an argument.
