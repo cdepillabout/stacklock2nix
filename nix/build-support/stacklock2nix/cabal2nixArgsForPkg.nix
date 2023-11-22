@@ -92,8 +92,13 @@ cabal2nixArgsOverrides {
 
   "pango" = ver: { pango = pkgs.pango; };
 
-  # The PSQueue and fingertree-psqueue packages are used in benchmarks, but they are not on Stackage.
-  "psqueues" = ver: { fingertree-psqueue = null; PSQueue = null; };
+  "psqueues" = ver:
+    if pkgs.lib.versionAtLeast ver "0.2.8.0" then
+      # The PSQueue package is used in benchmarks, but it is not on Stackage.
+      { PSQueue = null; }
+    else
+      # The PSQueue and fingertree-psqueue packages are used in benchmarks, but they are not on Stackage.
+      { fingertree-psqueue = null; PSQueue = null; };
 
   "saltine" = ver: { libsodium = pkgs.libsodium; };
 
