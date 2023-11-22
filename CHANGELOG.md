@@ -5,6 +5,45 @@
 
     Added in [#39](https://github.com/cdepillabout/stacklock2nix/pull/39).
 
+*   Change stacklock2nix's handling of Stack's `git` dependencies.
+
+    A `git` dependency looks like the following in `stack.yaml`:
+
+    ```yaml
+    extra-deps:
+      - git: "https://github.com/haskell-servant/servant-cassava"
+        commit: "f76308b42b9f93a6641c70847cec8ecafbad3abc"
+    ```
+
+    Up until now, stacklock2nix would download Stack's `git` dependencies using
+    Nix's `builtins.fetchGit` function.
+
+    By default, this function doesn't clone the full repository, but only the
+    history of the default branch.  This is a problem if you try to specify a
+    commit that is not a parent of the default branch.  This may happen if
+    you're developing new functionality in a feature branch that hasn't yet
+    been merged into `master`.
+
+    stacklock2nix has been changed to additionally specify the `allRefs = true`
+    argument to `builtins.fetchGit`.  This causes the full Git repository to be
+    downloaded, even commits that aren't ancestors of the default branch.
+
+    Added in [#39](https://github.com/cdepillabout/stacklock2nix/pull/39).
+    Thanks to [@isomorpheme](https://github.com/isomorpheme) for reporting this
+    and coming up with the fix.
+
+    It is possible this causes increased download times, especially for repos
+    that are very big.
+
+    You may be able to work around this by using Stack's functionality for
+    downloading given URLs, in order to download a tarball of a repository
+    (without any of the Git history).:
+
+    ```yaml
+    extra-deps:
+      - url: "https://github.com/haskell-servant/servant-cassava/archive/f76308b42b9f93a6641c70847cec8ecafbad3abc.tar.gz"
+    ```
+
 ## 3.0.5
 
 *   Make sure the `digest` Haskell package gets the system `zlib` as an argument.

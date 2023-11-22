@@ -380,6 +380,7 @@ let
             url = haskPkgLock.git;
             name = srcName;
             rev = haskPkgLock.commit;
+            allRefs = true;
           };
           src =
             if haskPkgLock ? "subdir" then
