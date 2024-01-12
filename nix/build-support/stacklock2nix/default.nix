@@ -185,12 +185,14 @@ let
   # file.
   resolverParsed = readYAML resolverRawYaml;
 
-  fetchCabalFileRevision =
-    let
-      args =
-        lib.optionalAttrs (all-cabal-hashes != null) { inherit all-cabal-hashes; };
-    in
-    callPackage ./fetchCabalFileRevision.nix args;
+  # Fetch cabal revisions from the stackage content addressable store.
+  fetchCabalFileRevision = {name, version, hash}:
+    fetchurl {
+      pname = "${name}-cabal";
+      inherit version;
+      url = "https://casa.stackage.org/${hash}";
+      sha256 = hash;
+    };
 
   # Replace the `.cabal` file in a given Haskell package with the revision
   # specified by the given hash.
