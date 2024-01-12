@@ -1,3 +1,17 @@
+## 4.0.1
+
+*   Download `.cabal` file revisions from the public Casa instance instead of
+    Hackage.
+
+    We believe this change shouldn't affect any end users, but we now depend on
+    <https://casa.stackage.org> instead of Hackage.  If Casa ends up having
+    signficantly worse uptime than Hackage, then users may be affected when
+    trying to use stacklock2nix.  Please let us know if this ends up affecting
+    you.
+
+    Added in [#42](https://github.com/cdepillabout/stacklock2nix/pull/42).
+    Thanks [@TeofilC](https://github.com/TeofilC)!
+
 ## 4.0.0
 
 *   Make sure the `psqueues` Haskell package gets the `fingertree-psqueue` dep
