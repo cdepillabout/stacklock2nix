@@ -378,25 +378,24 @@ let
       extraGitDep =
         let
           srcName = haskPkgLock.name + "-git-repo";
-          rawSrc = builtins.fetchGit {
+          src = builtins.fetchGit {
             url = haskPkgLock.git;
             name = srcName;
             rev = haskPkgLock.commit;
             allRefs = true;
           };
-          src =
+          extraCabal2nixOptions =
             if haskPkgLock ? "subdir" then
-              runCommand (srcName + "-get-subdir-" + haskPkgLock.subdir) {} ''
-                cp -r "${rawSrc}/${haskPkgLock.subdir}" "$out"
-              ''
+              "--subpath ${haskPkgLock.subdir}"
             else
-              rawSrc;
+              "";
         in {
           name = haskPkgLock.name;
           value =
-            hfinal.callCabal2nix
+            hfinal.callCabal2nixWithOptions
               haskPkgLock.name
               src
+              extraCabal2nixOptions
               (getAdditionalCabal2nixArgs haskPkgLock.name haskPkgLock.version);
         };
 
