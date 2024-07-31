@@ -1,0 +1,40 @@
+resolver: nightly-2022-10-18
+
+# This is a test that stacklock2nix works even if there are no local packages
+# defined in the stack.yaml file, so we want to make sure we have no local
+# packages specified here.
+# packages: []
+
+extra-deps:
+
+  # example dep from hackage
+  - "unagi-streams-0.2.7"
+
+  # example git dep
+  - git: "https://github.com/haskell-servant/servant-cassava"
+    commit: "f76308b42b9f93a6641c70847cec8ecafbad3abc"
+
+  # example git dep with single subdir
+  - git: "https://github.com/haskell-servant/servant"
+    commit: "1fba9dc6048cea6184964032b861b052cd54878c"
+    subdir: "servant-client"
+
+  # example git dep with multiple subdirs
+  - git: "https://github.com/haskell-servant/servant"
+    commit: "1fba9dc6048cea6184964032b861b052cd54878c"
+    subdirs:
+      - "servant"
+      - "servant-server"
+
+  # example of a GitHub dep without subdirs
+  - github: cdepillabout/pretty-simple
+    commit: "d8ef1b3c2d913a05515b2d1c4fec0b52d2744434"
+
+  # example of a GitHub dep with multiple subdirs
+  - github: brendanhay/amazonka
+    commit: "43e8fb7e6e30e24adef11f66331ae6752642bffd"
+    subdirs:
+      - lib/amazonka
+      - lib/amazonka-core
+      - lib/services/amazonka-sso
+      - lib/services/amazonka-sts

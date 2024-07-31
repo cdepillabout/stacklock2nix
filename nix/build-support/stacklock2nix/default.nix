@@ -638,7 +638,13 @@ let
   # Call `mkLocalPkg` for each local package from the `stack.yaml` file.
   #
   # localPkgs :: [ { pkgPath :: Path, pkgName :: String } ]
-  localPkgs = map mkLocalPkg stackYamlParsed.packages;
+  #
+  # If the `stack.yaml` file doesn't have any local packages defined, this will
+  # be an empty list.
+  localPkgs =
+    if stackYamlParsed ? packages
+    then map mkLocalPkg stackYamlParsed.packages
+    else [];
 
   suggestedOverlay = callPackage ./suggestedOverlay.nix {};
 
@@ -777,6 +783,9 @@ let
   #
   # Note that this derivation is specifically meant to be passed to `nix
   # develop` or `nix-shell`.
+  #
+  # Note that if you don't have any local packages defined in your `stack.yaml`
+  # file, this `devShell` won't really be useful.
   devShell = devShellForPkgSet pkgSet;
 
   # An Nixpkgs Haskell overlay that has GHC boot packages set to `null`. This
