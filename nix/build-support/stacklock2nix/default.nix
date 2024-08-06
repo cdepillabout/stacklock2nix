@@ -639,12 +639,14 @@ let
   #
   # localPkgs :: [ { pkgPath :: Path, pkgName :: String } ]
   #
-  # If the `stack.yaml` file doesn't have any local packages defined, this will
-  # be an empty list.
+  # This uses the top-level `packages` key from `stack.yaml`.  Note that
+  # if the `packages` key is not defined, `stack` defaults to using the value
+  # `["."]`, which defines one package in the same directory as the
+  # `stack.yaml` file.
   localPkgs =
     if stackYamlParsed ? packages
     then map mkLocalPkg stackYamlParsed.packages
-    else [];
+    else [ (mkLocalPkg ".") ];
 
   suggestedOverlay = callPackage ./suggestedOverlay.nix {};
 

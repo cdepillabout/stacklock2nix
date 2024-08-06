@@ -1,9 +1,9 @@
 resolver: nightly-2022-10-18
 
-# This is a test that stacklock2nix works even if there are no local packages
-# defined in the stack.yaml file, so we want to make sure we have no local
-# packages specified here.
-packages: []
+# This is a test that stacklock2nix works even if the top-level `packages` key
+# is not specified.  In this case, `stack` defaults to having a single package
+# in this same directory.
+# packages: ["."]
 
 extra-deps:
 
