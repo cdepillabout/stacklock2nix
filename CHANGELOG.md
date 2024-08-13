@@ -1,3 +1,15 @@
+## 4.0.2
+
+*   Fix a bug where `stacklock2nix` would throw an error if there were
+    no local `packages` defined in the input `stack.yaml` file.
+
+    This PR also makes `stacklock2nix` use a default package of `"."` if the
+    top-level `packages` key is missing from the `stack.yaml` file.  This
+    matches `stack`'s behavior.
+
+    Fixed in [#50](https://github.com/cdepillabout/stacklock2nix/pull/50).
+    Thanks [@chris-martin](https://github.com/chris-martin) for reporting this.
+
 ## 4.0.1
 
 *   Download `.cabal` file revisions from the public Casa instance instead of

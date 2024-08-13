@@ -25,6 +25,14 @@ let
 
         # This tests that all-cabal-hashes works correctly as a directory (not a tarball).
         all-cabal-hashes-is-dir = final.callPackage ./test-all-cabal-hashes-is-dir.nix {};
+
+        # This test that a stack.yaml with no local packages defined is still
+        # able to be used by stacklock2nix, and produces a reasonable package set.
+        no-local-packages = final.callPackage ./test-no-local-packages {};
+
+        # This tests that leaving out the `packages` top-level key from `stack.yaml` will
+        # default to just using a single package in the same directory as the `stack.yaml` file.
+        default-local-package = final.callPackage ./test-default-local-package {};
       };
 
       # A list of all stacklock2nix tests.  This makes it easy to build all
