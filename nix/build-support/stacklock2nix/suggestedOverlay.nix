@@ -225,6 +225,14 @@ hfinal: hprev: with haskell.lib.compose; {
   # Flaky tests: https://github.com/jfischoff/tmp-postgres/issues/274
   tmp-postgres = dontCheck hprev.tmp-postgres;
 
+  # Depends on system tzdata library.
+  # https://github.com/NixOS/nixpkgs/commit/0c2ff42913035c83d56b53aeafd24b39b31d4152
+  tz = addBuildDepends [ pkgs.tzdata ] hprev.tz;
+
+  # Depends on system tzdata library.
+  # https://github.com/NixOS/nixpkgs/commit/0c2ff42913035c83d56b53aeafd24b39b31d4152
+  tzdata = addBuildDepends [ pkgs.tzdata ] hprev.tzdata;
+
   unagi-chan = dontCheck hprev.unagi-chan;
 
   # tests don't support musl
