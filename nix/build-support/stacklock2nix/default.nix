@@ -382,7 +382,15 @@ let
             url = haskPkgLock.git;
             name = srcName;
             rev = haskPkgLock.commit;
+
+            # We make sure that ALL Git refs are fetched, since the user may be
+            # using a commit on a branch that is not reachable from the default branch
+            # (usually `master` / `main`).  This is what `stack` does by default.
             allRefs = true;
+
+            # We make sure that all submodules are checked out, since `stack`
+            # does this by default.
+            submodules = true;
           };
           src =
             if haskPkgLock ? "subdir" then
