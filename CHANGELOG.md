@@ -4,6 +4,11 @@
     `tzdata` packages in `nix/build-support/stacklock2nix/suggestedOverlay.nix`.
     Fixed in [#52](https://github.com/cdepillabout/stacklock2nix/pull/52).
 
+*   Make sure Haskell packages specified as Git repos in the `stack.yaml` file
+    check out all submodules when fetching their source.
+    Fixed in [#53](https://github.com/cdepillabout/stacklock2nix/pull/53).
+    Thanks to [@isomorpheme](https://github.com/isomorpheme) for reporting this.
+
 ## 4.0.2
 
 *   Fix a bug where `stacklock2nix` would throw an error if there were
