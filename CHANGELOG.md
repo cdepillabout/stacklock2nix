@@ -1,3 +1,9 @@
+## (next)
+
+*   Add build depend on system `tzdata` package for the Haskell `tz` and
+    `tzdata` packages in `nix/build-support/stacklock2nix/suggestedOverlay.nix`.
+    Fixed in [#52](https://github.com/cdepillabout/stacklock2nix/pull/52).
+
 ## 4.0.2
 
 *   Fix a bug where `stacklock2nix` would throw an error if there were
