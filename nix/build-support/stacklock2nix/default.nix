@@ -6,6 +6,7 @@
 , runCommand
 , stdenv
 , path
+, all-cabal-hashes
 }@topargs:
 
 { # The path to your stack.yaml file.
@@ -82,7 +83,7 @@
   # (instead of something like `fetchurl`) so that the repository is unzipped
   # and untarred.  stacklock2nix can still work with an all-cabal-hashes that is
   # a tarball, but building will be faster with a plain directory.)
-  all-cabal-hashes ? null
+  all-cabal-hashes ? topargs.all-cabal-hashes
 , callPackage ? topargs.callPackage
 , # Path to Nixpkgs.
   #
@@ -306,15 +307,25 @@ let
   #
   # This takes care of replaces the `.cabal` file from Hackage with the correct revision
   # specified in the Hackage lock info.
-  pkgHackageInfoToNixHaskPkg = pkgHackageInfo: hfinal:
+  pkgHackageInfoToNixHaskPkg = {name, version, cabalFileHash, ...}: hfinal:
     let
-      additionalArgs = getAdditionalCabal2nixArgs pkgHackageInfo.name pkgHackageInfo.version;
+      additionalArgs = getAdditionalCabal2nixArgs name version;
     in
     overrideCabalFileRevision
-      pkgHackageInfo.name
-      pkgHackageInfo.version
-      pkgHackageInfo.cabalFileHash
-      (hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs);
+      name
+      version
+      cabalFileHash
+        # Like callHackage from nixpkgs,
+        # but we don't call all-cabal-hashes-component
+        # to avoid excessive IFD
+        (hfinal.callPackage
+          (hfinal.haskellSrc2nix {
+            name = "${name}-${version}";
+            src = "${all-cabal-hashes}/${name}/${version}/${name}.cabal";
+            sha256 =''$(sed -e 's/.*"SHA256":"//' -e 's/".*$//' "${all-cabal-hashes}/${name}/${version}/${name}.json")'';
+            })
+          additionalArgs
+        );
 
   # Return a derivation for a Haskell package for the given Haskell package
   # lock info.
