@@ -1,4 +1,4 @@
-## (next)
+## 4.1.0
 
 *   Add build depend on system `tzdata` package for the Haskell `tz` and
     `tzdata` packages in `nix/build-support/stacklock2nix/suggestedOverlay.nix`.
@@ -27,6 +27,20 @@
     Fixed in [#46](https://github.com/cdepillabout/stacklock2nix/pull/46) and
     [#56](https://github.com/cdepillabout/stacklock2nix/pull/56).
     Thanks to [@isomorpheme](https://github.com/isomorpheme)
+
+*   Make `stacklock2nix`'s `fromYAML` function more reliable.
+
+    `stacklock2nix` internally uses the
+    [`remarshal`](https://github.com/remarshal-project/remarshal) tool for
+    converting from the `stack.yaml` file to a JSON, in order to read it with
+    Nix.
+
+    Recent versions of `remarshal` (>= 0.17.0) changed functionality to fail at
+    runtime more often.  An new flag is needed on the command line to fall back
+    to the old functionality.
+
+    Fixed in [#55](https://github.com/cdepillabout/stacklock2nix/pull/55).
+    Thanks to [@Mr-Andersen](https://github.com/Mr-Andersen)
 
 ## 4.0.2
 
