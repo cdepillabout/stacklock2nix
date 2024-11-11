@@ -9,6 +9,25 @@
     Fixed in [#53](https://github.com/cdepillabout/stacklock2nix/pull/53).
     Thanks to [@isomorpheme](https://github.com/isomorpheme) for reporting this.
 
+*   Change handling of subdirs for `git` extra-deps.
+
+    `stacklock2nix` internally calls `cabal2nix` to generate Nix expressions
+    for Haskell packages.  In previous versions of `stacklock2nix`, the
+    actual `subdir` for a `git` extra-dep would be copied to the Nix store,
+    and then `cabal2nix` would be run on it.
+
+    This has been fixed to instead call `cabalni2x` on the full Git repo,
+    but pass the `--subpath` to specify the sub package.  This likely
+    works better where sub paths contain soft links to other paths in the
+    Git repo.
+
+    It is unlikely this change will cause any problems for any current users of
+    `stacklock2nix`.
+
+    Fixed in [#46](https://github.com/cdepillabout/stacklock2nix/pull/46) and
+    [#56](https://github.com/cdepillabout/stacklock2nix/pull/56).
+    Thanks to [@isomorpheme](https://github.com/isomorpheme)
+
 ## 4.0.2
 
 *   Fix a bug where `stacklock2nix` would throw an error if there were
