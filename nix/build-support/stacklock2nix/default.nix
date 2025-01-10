@@ -53,8 +53,8 @@
   #
   # Example:
   # devShellArguments = {
-  #   nativeBuildInputs = [ final.stack ];
-  #   buildInputs = [ final.pango ];
+  #   nativeBuildInputs = stacklockHaskellPkgSet: [ final.stack ];
+  #   buildInputs = stacklockHaskellPkgSet: [ final.pango ];
   # };
   #
   # `devShellArguments` is unused if `baseHaskellPkgSet` is null.
