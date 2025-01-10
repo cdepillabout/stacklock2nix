@@ -50,6 +50,12 @@
   #
   # `additionalDevShellNativeBuildInputs` is unused if `baseHaskellPkgSet` is null.
   additionalDevShellNativeBuildInputs ? (stacklockHaskellPkgSet: [])
+, # Additional buildInputs to provide in the devShell.
+  #
+  # additionalDevShellBuildInputs :: [ Drv ]
+  #
+  # `additionalDevShellBuildInputs` is unused if `baseHaskellPkgSet` is null.
+  additionalDevShellBuildInputs ? (stacklockHaskellPkgSet: [])
 , # When creating your own Haskell package set from the stacklock2nix
   # output, you may need to specify a newer all-cabal-hashes.
   #
@@ -783,6 +789,7 @@ let
       packageSet.shellFor {
         packages = localPkgsSelector;
         nativeBuildInputs = additionalDevShellNativeBuildInputs packageSet;
+        buildInputs = additionalDevShellBuildInputs packageSet;
       };
 
   # A development shell created by passing all your local packages (from
