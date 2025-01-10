@@ -783,7 +783,12 @@ let
         inherit all-cabal-hashes;
       });
 
-  shellForArguments = packageSet: lib.attrsets.concatMapAttrs (name: value: { ${name} = value; packages = localPkgsSelector; }) devShellArguments;
+  shellForArguments = packageSet:
+    devShellArguments // {
+      packages = localPkgsSelector;
+      nativeBuildInputs = devShellArguments.nativeBuildInputs packageSet;
+      buildInputs = devShellArguments.buildInputs packageSet;
+    };
 
   devShellForPkgSet = packageSet:
     if packageSet == null then
