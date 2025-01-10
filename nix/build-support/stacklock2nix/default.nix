@@ -46,15 +46,13 @@
   additionalHaskellPkgSetOverrides ? hfinal: hprev: {}
 , # Arguments to provide in the devShell.
   #
-  # devShellArguments :: {
-  #   #nativeBuildInputs :: [ Drv ]
-  #   #buildInputs :: [ Drv ]
-  # }
+  # devShellArguments :: AttrSet
   #
   # Example:
   # devShellArguments = {
   #   nativeBuildInputs = stacklockHaskellPkgSet: [ final.stack ];
   #   buildInputs = stacklockHaskellPkgSet: [ final.pango ];
+  #   SOME_ENV = "HI!!";
   # };
   #
   # `devShellArguments` is unused if `baseHaskellPkgSet` is null.
@@ -785,15 +783,13 @@ let
         inherit all-cabal-hashes;
       });
 
+  shellForArguments = packageSet: lib.attrsets.concatMapAttrs (name: value: { ${name} = value; packages = localPkgsSelector; }) devShellArguments;
+
   devShellForPkgSet = packageSet:
     if packageSet == null then
       null
     else
-      packageSet.shellFor {
-        packages = localPkgsSelector;
-        nativeBuildInputs = devShellArguments.nativeBuildInputs packageSet;
-        buildInputs = devShellArguments.buildInputs packageSet;
-      };
+      packageSet.shellFor (shellForArguments packageSet);
 
   # A development shell created by passing all your local packages (from
   # `localPkgsSelector`) to `pkgSet.shellFor`.
