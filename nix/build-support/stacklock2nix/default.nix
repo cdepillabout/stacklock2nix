@@ -44,18 +44,21 @@
   #
   # `additionalHaskellPkgSetOverrides` is unused if `baseHaskellPkgSet` is null.
   additionalHaskellPkgSetOverrides ? hfinal: hprev: {}
-, # Additional nativeBuildInputs to provide in the devShell.
+, # Arguments to provide in the devShell.
   #
-  # additionalDevShellNativeBuildInputs :: [ Drv ]
+  # devShellArguments :: {
+  #   #nativeBuildInputs :: [ Drv ]
+  #   #buildInputs :: [ Drv ]
+  # }
   #
-  # `additionalDevShellNativeBuildInputs` is unused if `baseHaskellPkgSet` is null.
-  additionalDevShellNativeBuildInputs ? (stacklockHaskellPkgSet: [])
-, # Additional buildInputs to provide in the devShell.
+  # Example:
+  # devShellArguments = {
+  #   nativeBuildInputs = [ final.stack ];
+  #   buildInputs = [ final.pango ];
+  # };
   #
-  # additionalDevShellBuildInputs :: [ Drv ]
-  #
-  # `additionalDevShellBuildInputs` is unused if `baseHaskellPkgSet` is null.
-  additionalDevShellBuildInputs ? (stacklockHaskellPkgSet: [])
+  # `devShellArguments` is unused if `baseHaskellPkgSet` is null.
+  devShellArguments ? {}
 , # When creating your own Haskell package set from the stacklock2nix
   # output, you may need to specify a newer all-cabal-hashes.
   #
@@ -788,8 +791,8 @@ let
     else
       packageSet.shellFor {
         packages = localPkgsSelector;
-        nativeBuildInputs = additionalDevShellNativeBuildInputs packageSet;
-        buildInputs = additionalDevShellBuildInputs packageSet;
+        nativeBuildInputs = devShellArguments.nativeBuildInputs packageSet;
+        buildInputs = devShellArguments.buildInputs packageSet;
       };
 
   # A development shell created by passing all your local packages (from
