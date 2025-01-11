@@ -791,13 +791,13 @@ let
         if lib.attrsets.hasAttrByPath ["nativeBuildInputs"] devShellArguments then
           devShellArguments.nativeBuildInputs packageSet
         else
-          null;
+          [];
 
       buildInputs =
         if lib.attrsets.hasAttrByPath ["buildInputs"] devShellArguments then
           devShellArguments.buildInputs packageSet
         else
-          null;
+          [];
     };
 
   devShellForPkgSet = packageSet:
