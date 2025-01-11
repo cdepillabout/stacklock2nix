@@ -27,7 +27,7 @@ let
       amazonka-sso = ver: { amazonka-test = null; };
       amazonka-sts = ver: { amazonka-test = null; };
     };
-    additionalDevShellNativeBuildInputs = stacklockHaskellPkgSet: [
+    devShellArguments.nativeBuildInputs = stacklockHaskellPkgSet: [
       cabal-install
     ];
     # XXX: Make sure to keep the call to fetchurl here, since it is partly

@@ -28,7 +28,7 @@ let
       amazonka-sso = ver: { amazonka-test = null; };
       amazonka-sts = ver: { amazonka-test = null; };
     };
-    additionalDevShellNativeBuildInputs = stacklockHaskellPkgSet: [
+    devShellArguments.nativeBuildInputs = stacklockHaskellPkgSet: [
       cabal-install
     ];
     all-cabal-hashes = fetchFromGitHub {
