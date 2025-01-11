@@ -789,7 +789,7 @@ let
       packages = localPkgsSelector;
       nativeBuildInputs =
         if lib.attrsets.hasAttrByPath ["nativeBuildInputs"] devShellArguments then
-          devShellArguments.nativeBuildInputs packageSet;
+          devShellArguments.nativeBuildInputs packageSet
         else
           null;
 
