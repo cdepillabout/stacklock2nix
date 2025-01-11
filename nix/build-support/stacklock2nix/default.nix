@@ -56,10 +56,7 @@
   # };
   #
   # `devShellArguments` is unused if `baseHaskellPkgSet` is null.
-  devShellArguments ? {
-    nativeBuildInputs = stacklockHaskellPkgSet: [];
-    buildInputs = stacklockHaskellPkgSet: [];
-  }
+  devShellArguments ? {}
 , # When creating your own Haskell package set from the stacklock2nix
   # output, you may need to specify a newer all-cabal-hashes.
   #
@@ -787,10 +784,20 @@ let
       });
 
   shellForArguments = packageSet:
-    devShellArguments // {
+    devShellArguments //
+    {
       packages = localPkgsSelector;
-      nativeBuildInputs = devShellArguments.nativeBuildInputs packageSet;
-      buildInputs = devShellArguments.buildInputs packageSet;
+      nativeBuildInputs =
+        if lib.attrsets.hasAttrByPath ["nativeBuildInputs"] devShellArguments then
+          devShellArguments.nativeBuildInputs packageSet;
+        else
+          null;
+
+      buildInputs =
+        if lib.attrsets.hasAttrByPath ["buildInputs"] devShellArguments then
+          devShellArguments.buildInputs packageSet
+        else
+          null;
     };
 
   devShellForPkgSet = packageSet:
