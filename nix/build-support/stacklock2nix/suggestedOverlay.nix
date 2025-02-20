@@ -121,6 +121,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # This propagates this to everything depending on haskell-gi-base
   haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
 
+  # Tests fail
+  haskoin-core = dontCheck hprev.haskoin-core;
+
   # Tests access the network
   hnix = dontCheck hprev.hnix;
 

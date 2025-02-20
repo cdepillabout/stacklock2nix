@@ -20,6 +20,7 @@
 
     - mark `prettyprinter` as `dontCheck`
     - mark `binary-search` as `dontCheck`
+    - mark `haskoin-core` as `dontCheck`
 
 ## 4.1.0
 
