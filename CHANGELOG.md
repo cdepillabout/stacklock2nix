@@ -18,11 +18,12 @@
 *   Various additions to the suggestedOverlay.nix file to get more Haskell
     packages building by default:
 
-    - mark `prettyprinter` as `dontCheck`
     - mark `binary-search` as `dontCheck`
     - mark `haskoin-core` as `dontCheck`
     - mark `http-client`, `http-client-openssl`, and `http-client-tls` as `dontCheck`.
     - mark `js-query` as `dontCheck`.
+    - mark `prettyprinter` as `dontCheck`
+    - mark `servant-openapi3` as `dontCheck`.
 
     Added in [#59](https://github.com/cdepillabout/stacklock2nix/pull/59).
 

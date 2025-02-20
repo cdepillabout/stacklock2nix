@@ -203,6 +203,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # https://github.com/fpco/unliftio/issues/87
   rio = dontCheck hprev.rio;
 
+  # Tests don't build
+  servant-openapi3 = dontCheck hprev.servant-openapi3;
+
   # https://github.com/ndmitchell/shake/issues/804
   shake = dontCheck hprev.shake;
 
