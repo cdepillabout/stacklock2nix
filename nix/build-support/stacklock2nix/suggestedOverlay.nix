@@ -173,6 +173,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # tests require postgres running
   pg-transact = dontCheck hprev.pg-transact;
 
+  # Tests run for a really long time, and also require a broken package.
+  prettyprinter = dontCheck hprev.prettyprinter;
+
   random = dontCheck hprev.random;
 
   # Disabling doctests.
