@@ -164,6 +164,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   HUnit = dontCheck hprev.HUnit;
 
+  # Tests try to access internet.
+  js-jquery = dontCheck hprev.js-jquery;
+
   logging-facade = dontCheck hprev.logging-facade;
 
   logict = dontCheck hprev.logict;

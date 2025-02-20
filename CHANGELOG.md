@@ -22,6 +22,7 @@
     - mark `binary-search` as `dontCheck`
     - mark `haskoin-core` as `dontCheck`
     - mark `http-client`, `http-client-openssl`, and `http-client-tls` as `dontCheck`.
+    - mark `js-query` as `dontCheck`.
 
     Added in [#59](https://github.com/cdepillabout/stacklock2nix/pull/59).
 
