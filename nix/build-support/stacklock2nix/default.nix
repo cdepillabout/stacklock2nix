@@ -50,6 +50,34 @@
   #
   # `additionalDevShellNativeBuildInputs` is unused if `baseHaskellPkgSet` is null.
   additionalDevShellNativeBuildInputs ? (stacklockHaskellPkgSet: [])
+, # A hook to modify the package set used to generate the dev shell.
+  #
+  # devShellPkgSetModifier :: HaskellPkgSet -> HaskellPkgSet
+  #
+  # You can use this to modify just the package set that is used to generate
+  # the dev shell.  This can be helpful if you want your dev shell to be
+  # setup with different options.
+  #
+  # For instance, maybe you passed a baseHaskellPkgSet with doCheck set to
+  # false.  But you want test dependencies within your dev shell.  You can
+  # set devShellPkgSetModifier to a value like the following to re-enable test
+  # dependencies just for the dev shell:
+  #
+  # ```
+  # haskPkgSet:
+  #   haskPkgSet.override (oldAttrs: {
+  #     overrides = lib.composeManyExtensions [
+  #       (hfinal: hprev: with haskell.lib.compose; {
+  #         mkDerivation = args: hprev.mkDerivation (args // { doCheck = true; });
+  #       })
+  #       # Make sure not to lose any old overrides.
+  #       (oldAttrs.overrides or (_: _: {}))
+  #     ];
+  #   });
+  # ```
+  #
+  # `devShellPkgSetModifier` is unused if `baseHaskellPkgSet` is null.
+  devShellPkgSetModifier ? pkgSet: pkgSet
 , # When creating your own Haskell package set from the stacklock2nix
   # output, you may need to specify a newer all-cabal-hashes.
   #
@@ -780,7 +808,7 @@ let
     if packageSet == null then
       null
     else
-      packageSet.shellFor {
+      (devShellPkgSetModifier packageSet).shellFor {
         packages = localPkgsSelector;
         nativeBuildInputs = additionalDevShellNativeBuildInputs packageSet;
       };
