@@ -150,6 +150,15 @@ hfinal: hprev: with haskell.lib.compose; {
   # Needs internet to run tests
   HTTP = dontCheck hprev.HTTP;
 
+  # Tests try to access internet.
+  http-client = dontCheck hprev.http-client;
+
+  # Tests try to access internet.
+  http-client-openssl = dontCheck hprev.http-client-openssl;
+
+  # Tests try to access internet.
+  http-client-tls = dontCheck hprev.http-client-tls;
+
   # Due to tests restricting base in 0.8.0.0 release
   http-media = doJailbreak hprev.http-media;
 

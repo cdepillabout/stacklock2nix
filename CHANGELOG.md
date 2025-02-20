@@ -21,6 +21,9 @@
     - mark `prettyprinter` as `dontCheck`
     - mark `binary-search` as `dontCheck`
     - mark `haskoin-core` as `dontCheck`
+    - mark `http-client`, `http-client-openssl`, and `http-client-tls` as `dontCheck`.
+
+    Added in [#59](https://github.com/cdepillabout/stacklock2nix/pull/59).
 
 ## 4.1.0
 
