@@ -59,6 +59,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   base-orphans = dontCheck hprev.base-orphans;
 
+  # Doctests fail, likely some configuration issue in how they are setup.
+  binary-search = dontCheck hprev.binary-search;
+
   # doctests fail
   bsb-http-chunked = dontCheck hprev.bsb-http-chunked;
 

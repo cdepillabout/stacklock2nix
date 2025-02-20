@@ -19,7 +19,7 @@
     packages building by default:
 
     - mark `prettyprinter` as `dontCheck`
-    - 
+    - mark `binary-search` as `dontCheck`
 
 ## 4.1.0
 
