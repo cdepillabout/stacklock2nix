@@ -28,6 +28,7 @@
     - mark `js-query` as `dontCheck`
     - mark `prettyprinter` as `dontCheck`
     - mark `servant-openapi3` as `dontCheck`
+    - mark `wai-rate-limit-redis` as `dontCheck`
 
     Added in [#59](https://github.com/cdepillabout/stacklock2nix/pull/59).
 

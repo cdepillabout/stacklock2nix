@@ -280,6 +280,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # test suite uses phantom js
   wai-cors = dontCheck hprev.wai-cors;
 
+  # test suite tries to access the network
+  wai-rate-limit-redis = dontCheck hprev.wai-rate-limit-redis;
+
   # http://hydra.cryp.to/build/501073/nixlog/5/raw
   warp = dontCheck hprev.warp;
 
