@@ -20,6 +20,7 @@
 
     - mark `binary-search` as `dontCheck`
     - mark `haskoin-core` as `dontCheck`
+    - mark `hedis` as `dontCheck`
     - mark `http-client` as `dontCheck`
     - mark `http-client-openssl` as `dontCheck`
     - mark `http-client-tls` as `dontCheck`

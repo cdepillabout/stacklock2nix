@@ -124,6 +124,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # Tests fail
   haskoin-core = dontCheck hprev.haskoin-core;
 
+  # Tests try to use network
+  hedis = dontCheck hprev.hedis;
+
   # Tests access the network
   hnix = dontCheck hprev.hnix;
 
