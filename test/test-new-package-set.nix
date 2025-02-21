@@ -30,6 +30,7 @@ let
     additionalDevShellNativeBuildInputs = stacklockHaskellPkgSet: [
       cabal-install
     ];
+    devShellArgsModifier = shellForArgs: shellForArgs // { MY_ENV_VAR = "hello"; };
     # XXX: Make sure to keep the call to fetchurl here, since it is partly
     # testing that fetchCabalFileRevision is able to handle all-cabal-hashes
     # being a tarball. (fetchurl makes the output derivation a tarball.)

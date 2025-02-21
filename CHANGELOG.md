@@ -1,3 +1,38 @@
+
+## 4.2.0
+
+*   Add a new `devShellPkgSetModifier` for giving the user a hook to modify the
+    Haskell package set used to generate the development shell.
+    See
+    [here](https://github.com/cdepillabout/stacklock2nix/blob/ff62905d81884b1ed97243cc1b9854ba9f99e4c5/nix/build-support/stacklock2nix/default.nix#L66-L93)
+    for documentation. Added in [#59](https://github.com/cdepillabout/stacklock2nix/pull/59).
+
+*   Add a new `devShellArgsModifier` for giving the user a hook to modify the
+    arguments passed to `shellFor` when generating the development shell.
+    See
+    [here](https://github.com/cdepillabout/stacklock2nix/blob/ff62905d81884b1ed97243cc1b9854ba9f99e4c5/nix/build-support/stacklock2nix/default.nix#L94-L115)
+    for documentation. Added in [#59](https://github.com/cdepillabout/stacklock2nix/pull/59).
+    Heavily inspired by [#57](https://github.com/cdepillabout/stacklock2nix/pull/57).
+    Thanks [@haruki7049](https://github.com/haruki7049)!
+
+*   Various additions to the suggestedOverlay.nix file to get more Haskell
+    packages building by default:
+
+    - mark `binary-search` as `dontCheck`
+    - mark `haskoin-core` as `dontCheck`
+    - mark `hedis` as `dontCheck`
+    - mark `http-client` as `dontCheck`
+    - mark `http-client-openssl` as `dontCheck`
+    - mark `http-client-tls` as `dontCheck`
+    - mark `http-conduit` as `dontCheck`
+    - mark `js-query` as `dontCheck`
+    - mark `prettyprinter` as `dontCheck`
+    - mark `servant-openapi3` as `dontCheck`
+    - mark `servant-rate-limit` as `dontCheck`
+    - mark `wai-rate-limit-redis` as `dontCheck`
+
+    Added in [#59](https://github.com/cdepillabout/stacklock2nix/pull/59).
+
 ## 4.1.0
 
 *   Add build depend on system `tzdata` package for the Haskell `tz` and

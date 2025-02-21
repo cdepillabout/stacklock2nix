@@ -59,6 +59,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   base-orphans = dontCheck hprev.base-orphans;
 
+  # Doctests fail, likely some configuration issue in how they are setup.
+  binary-search = dontCheck hprev.binary-search;
+
   # doctests fail
   bsb-http-chunked = dontCheck hprev.bsb-http-chunked;
 
@@ -118,6 +121,12 @@ hfinal: hprev: with haskell.lib.compose; {
   # This propagates this to everything depending on haskell-gi-base
   haskell-gi-base = addBuildDepend pkgs.gobject-introspection hprev.haskell-gi-base;
 
+  # Tests fail
+  haskoin-core = dontCheck hprev.haskoin-core;
+
+  # Tests try to use network
+  hedis = dontCheck hprev.hedis;
+
   # Tests access the network
   hnix = dontCheck hprev.hnix;
 
@@ -144,10 +153,25 @@ hfinal: hprev: with haskell.lib.compose; {
   # Needs internet to run tests
   HTTP = dontCheck hprev.HTTP;
 
+  # Tests try to access internet.
+  http-client = dontCheck hprev.http-client;
+
+  # Tests try to access internet.
+  http-client-openssl = dontCheck hprev.http-client-openssl;
+
+  # Tests try to access internet.
+  http-client-tls = dontCheck hprev.http-client-tls;
+
+  # Tests try to access internet.
+  http-conduit = dontCheck hprev.http-conduit;
+
   # Due to tests restricting base in 0.8.0.0 release
   http-media = doJailbreak hprev.http-media;
 
   HUnit = dontCheck hprev.HUnit;
+
+  # Tests try to access internet.
+  js-jquery = dontCheck hprev.js-jquery;
 
   logging-facade = dontCheck hprev.logging-facade;
 
@@ -173,6 +197,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # tests require postgres running
   pg-transact = dontCheck hprev.pg-transact;
 
+  # Tests run for a really long time, and also require a broken package.
+  prettyprinter = dontCheck hprev.prettyprinter;
+
   random = dontCheck hprev.random;
 
   # Disabling doctests.
@@ -181,6 +208,12 @@ hfinal: hprev: with haskell.lib.compose; {
   # the rio test suite calls functions from unliftio that are broken:
   # https://github.com/fpco/unliftio/issues/87
   rio = dontCheck hprev.rio;
+
+  # Tests don't build
+  servant-openapi3 = dontCheck hprev.servant-openapi3;
+
+  # Tests try using network.
+  servant-rate-limit = dontCheck hprev.servant-rate-limit;
 
   # https://github.com/ndmitchell/shake/issues/804
   shake = dontCheck hprev.shake;
@@ -249,6 +282,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   # test suite uses phantom js
   wai-cors = dontCheck hprev.wai-cors;
+
+  # test suite tries to access the network
+  wai-rate-limit-redis = dontCheck hprev.wai-rate-limit-redis;
 
   # http://hydra.cryp.to/build/501073/nixlog/5/raw
   warp = dontCheck hprev.warp;
