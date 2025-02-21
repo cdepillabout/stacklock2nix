@@ -212,6 +212,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # Tests don't build
   servant-openapi3 = dontCheck hprev.servant-openapi3;
 
+  # Tests try using network.
+  servant-rate-limit = dontCheck hprev.servant-rate-limit;
+
   # https://github.com/ndmitchell/shake/issues/804
   shake = dontCheck hprev.shake;
 
