@@ -967,7 +967,7 @@ let
             additionalHaskellPkgSetOverrides
           ];
 
-          nonHackagePackages = _: _: {};
+          nonHackagePackages = _: _: _: {};
           configurationCommon = _: _: _: {};
           configurationNix = _: _: _: {};
           configurationArm = _: _: _: {};
