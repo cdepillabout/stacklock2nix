@@ -68,6 +68,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # Tests don't include all necessary files.
   c2hs = dontCheck hprev.c2hs;
 
+  # Tests require too-strict version of deps.
+  cborg = dontCheck hprev.cborg;
+
   clock = dontCheck hprev.clock;
 
   colour = dontCheck hprev.colour;
