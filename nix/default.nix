@@ -9,7 +9,7 @@
 # Within this nix-repl, you have access to everything defined in ./overlay.nix.
 
 let
-  flake-lock = builtins.fromJSON (builtins.readFile ../flake.lock);
+  flake-lock = builtins.fromJSON (builtins.readFile ../my-example-haskell-lib-easy/flake.lock);
 
   nixpkgs-src = builtins.fetchTarball {
     url = "https://github.com/NixOS/nixpkgs/archive/${flake-lock.nodes.nixpkgs.locked.rev}.tar.gz";
