@@ -212,6 +212,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # https://github.com/fpco/unliftio/issues/87
   rio = dontCheck hprev.rio;
 
+  # Tests try using warp, but require a version not in stackage
+  servant-cassava = dontCheck hprev.servant-cassava;
+
   # Tests don't build
   servant-openapi3 = dontCheck hprev.servant-openapi3;
 
