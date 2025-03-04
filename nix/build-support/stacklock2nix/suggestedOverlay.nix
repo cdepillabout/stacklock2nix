@@ -173,6 +173,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # Tests try to access internet.
   js-jquery = dontCheck hprev.js-jquery;
 
+  # Tests require versions of deps not in stackage.
+  lifted-base = dontCheck hprev.lifted-base;
+
   logging-facade = dontCheck hprev.logging-facade;
 
   logict = dontCheck hprev.logict;
