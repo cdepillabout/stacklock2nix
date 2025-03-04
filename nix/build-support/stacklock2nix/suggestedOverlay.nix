@@ -215,6 +215,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # https://github.com/fpco/unliftio/issues/87
   rio = dontCheck hprev.rio;
 
+  # Tests require version of tasty-quickcheck not in stackage
+  serialise = dontCheck hprev.serialise;
+
   # Tests try using warp, but require a version not in stackage
   servant-cassava = dontCheck hprev.servant-cassava;
 
