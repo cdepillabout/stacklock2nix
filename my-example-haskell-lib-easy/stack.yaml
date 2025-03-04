@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: nightly-2022-10-18
+resolver: lts-23.10
 # resolver:
 #   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/30.yaml
 
@@ -49,19 +49,7 @@ extra-deps:
 
   # example git dep
   - git: https://github.com/haskell-servant/servant-cassava
-    commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
-
-  # example git dep with single subdir
-  - git: https://github.com/haskell-servant/servant
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    subdir: servant-client
-
-  # example git dep with multiple subdirs
-  - git: https://github.com/haskell-servant/servant
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    subdirs:
-      - servant
-      - servant-server
+    commit: 9e27886d7f41023e6aa1429f6f2badf1b3cb5293
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

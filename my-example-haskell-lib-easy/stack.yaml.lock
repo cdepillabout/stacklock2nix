@@ -12,58 +12,19 @@ packages:
   original:
     hackage: unagi-streams-0.2.7
 - completed:
-    commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
+    commit: 9e27886d7f41023e6aa1429f6f2badf1b3cb5293
     git: https://github.com/haskell-servant/servant-cassava
     name: servant-cassava
     pantry-tree:
-      sha256: 1e040a08512e69847e2c9a9e313927b4a1864408a32ac935819247291d154ea7
+      sha256: 89ee177e8bce42f1cb466bbab1d8a38ce030e17b52470fff52e863c059a62c99
       size: 652
-    version: 0.10.1
+    version: 0.10.2
   original:
-    commit: f76308b42b9f93a6641c70847cec8ecafbad3abc
+    commit: 9e27886d7f41023e6aa1429f6f2badf1b3cb5293
     git: https://github.com/haskell-servant/servant-cassava
-- completed:
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    git: https://github.com/haskell-servant/servant
-    name: servant-client
-    pantry-tree:
-      sha256: c37445bd27aa2f7234b3c5ef73533b0952b979f005d38ca5ebfc8230e2712f92
-      size: 1481
-    subdir: servant-client
-    version: '0.19'
-  original:
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    git: https://github.com/haskell-servant/servant
-    subdir: servant-client
-- completed:
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    git: https://github.com/haskell-servant/servant
-    name: servant
-    pantry-tree:
-      sha256: ce0c502681ffbf5cb48f5606e9a9947e4c956b39ed8ce5b1a590dbaeff112dd9
-      size: 2949
-    subdir: servant
-    version: '0.19'
-  original:
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    git: https://github.com/haskell-servant/servant
-    subdir: servant
-- completed:
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    git: https://github.com/haskell-servant/servant
-    name: servant-server
-    pantry-tree:
-      sha256: 2f0df25ed677c6f08aaf1499eec2c82830aedbbe19564d7356ed77cbd49ceeed
-      size: 2727
-    subdir: servant-server
-    version: 0.19.1
-  original:
-    commit: 1fba9dc6048cea6184964032b861b052cd54878c
-    git: https://github.com/haskell-servant/servant
-    subdir: servant-server
 snapshots:
 - completed:
-    sha256: 895204e9116cba1f32047525ec5bad7423216587706e5df044c4a7c191a5d8cb
-    size: 644482
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2022/10/18.yaml
-  original: nightly-2022-10-18
+    sha256: 889b6bffaf21cd509a7c6017703281e77c2f6df0a0908a11c85fa97fcbf11d4e
+    size: 680573
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/23/10.yaml
+  original: lts-23.10
