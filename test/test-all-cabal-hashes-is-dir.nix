@@ -52,4 +52,43 @@ let
         defaultLocalPkgFilter path type;
   };
 in
+
+# Check that our additional passthru values are working. We expect that local
+# packages have is-local-pkg set to true, and all other values set to false.
+assert stacklock.newPkgSet.my-example-haskell-lib.passthru.stacklock2nix.is-local-pkg;
+assert !stacklock.newPkgSet.my-example-haskell-lib.passthru.stacklock2nix.is-extra-dep;
+assert !stacklock.newPkgSet.my-example-haskell-lib.passthru.stacklock2nix.is-hackage-dep;
+assert !stacklock.newPkgSet.my-example-haskell-lib.passthru.stacklock2nix.is-git-dep;
+assert !stacklock.newPkgSet.my-example-haskell-lib.passthru.stacklock2nix.is-url-dep;
+
+# We expect that unagi-streams is Hackage extra-dep.
+assert !stacklock.newPkgSet.unagi-streams.passthru.stacklock2nix.is-local-pkg;
+assert stacklock.newPkgSet.unagi-streams.passthru.stacklock2nix.is-extra-dep;
+assert stacklock.newPkgSet.unagi-streams.passthru.stacklock2nix.is-hackage-dep;
+assert !stacklock.newPkgSet.unagi-streams.passthru.stacklock2nix.is-git-dep;
+assert !stacklock.newPkgSet.unagi-streams.passthru.stacklock2nix.is-url-dep;
+
+# We expect that servant-cassava is a Git extra-dep.
+assert !stacklock.newPkgSet.servant-cassava.passthru.stacklock2nix.is-local-pkg;
+assert stacklock.newPkgSet.servant-cassava.passthru.stacklock2nix.is-extra-dep;
+assert !stacklock.newPkgSet.servant-cassava.passthru.stacklock2nix.is-hackage-dep;
+assert stacklock.newPkgSet.servant-cassava.passthru.stacklock2nix.is-git-dep;
+assert !stacklock.newPkgSet.servant-cassava.passthru.stacklock2nix.is-url-dep;
+
+# TODO: Add a similar test for a URL extra-dep.
+
+# We expect that other packages from Stackage are Hackage deps, but not extra deps.
+# For example, aeson.
+assert !stacklock.newPkgSet.aeson.passthru.stacklock2nix.is-local-pkg;
+assert !stacklock.newPkgSet.aeson.passthru.stacklock2nix.is-extra-dep;
+assert stacklock.newPkgSet.aeson.passthru.stacklock2nix.is-hackage-dep;
+assert !stacklock.newPkgSet.aeson.passthru.stacklock2nix.is-git-dep;
+assert !stacklock.newPkgSet.aeson.passthru.stacklock2nix.is-url-dep;
+
+# We expect that packages not included in Stackage, but from Nixpkgs (from Hackage) don't
+# have any of our stacklock2nix passthru values.
+#
+# For example, this uses vault-tool, a random old package unlikely to be added to stackage.
+assert ! stacklock.pkgSet.vault-tool.passthru ? stacklock2nix;
+
 stacklock.newPkgSet.my-example-haskell-app

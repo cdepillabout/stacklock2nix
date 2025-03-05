@@ -299,6 +299,55 @@ let
     inherit cabal2nixArgsOverrides;
   };
 
+  # Add some additional pieces of data to passthru on a Haskell derivation
+  # specifically from stacklock2nix.
+  #
+  # addStacklock2nixPassthru :: Args -> HaskellPkgDrv -> HaskellPkgDrv
+  #
+  # See the body of the function for what values you can pass to Args.
+  #
+  # Example:
+  # ```
+  # > newLensDrv = addStacklock2nixPassthru { is-extra-dep = true; is-hackage-dep = true; } lensDrv
+  # > newLensDrv.passthru.stacklock2nix
+  # {
+  #   is-local-pkg = false;
+  #   is-extra-dep = true;
+  #   is-hackage-dep = true;
+  #   is-git-dep = false;
+  #   is-url-dep = false;
+  # }
+  # ```
+  #
+  # You can see that this will return `lensDrv`, but with the `is-extra-dep`
+  # and `is-hackage-dep` keys in `passthru` set to `true`.
+  addStacklock2nixPassthru =
+    { # Is this a local package defined in `stack.yaml`?
+      is-local-pkg ? false
+    , # Is this an `extra-dep` defined in `stack.yaml`?
+      is-extra-dep ? false
+    , # Is this a dep from Hackage?
+      is-hackage-dep ? false
+    , # Is this a dep from Git?
+      is-git-dep ? false
+    , # Is this a dep from a URL?
+      is-url-dep ? false
+    }:
+    haskell.lib.compose.overrideCabal
+      (oldAttrs:
+        let
+          oldPassthru = oldAttrs.passthru or {};
+          oldStacklock2nix = oldPassthru.stacklock2nix or {};
+        in
+        {
+          passthru = oldPassthru // {
+            stacklock2nix = oldStacklock2nix // {
+              inherit is-local-pkg is-extra-dep is-hackage-dep is-git-dep is-url-dep;
+            };
+          };
+        }
+      );
+
   # Parse a Haskell package Hackage lock into the name, version, and hash info.
   #
   # parseHackageStr :: String -> { name :: String, version :: String, cabalFileHash :: String, cabalFileLen :: String }
@@ -353,13 +402,20 @@ let
   # Haskell package derivation.
   #
   # pkgHackageInfoToNixHaskPkg
-  #   :: { name :: String, version :: String, cabalFileHash :: String, cabalFileLen :: String }
+  #   :: Bool
+  #   -> { name :: String, version :: String, cabalFileHash :: String, cabalFileLen :: String }
   #   -> HaskellPkgSet
   #   -> HaskellPkgDrv
+  #
+  # The first `Bool` is `true` if the passed-in information was originally an
+  # `extra-deps` from `stack.yaml`.  Otherwise, `false` if this was not
+  # specified in `stack.yaml` but instead just from the Stackage
+  # snapshot/resolver.
   #
   # Example:
   # ```
   # pkgHackageInfoToNixHaskPkg
+  #   false
   #   { name = "cassava";
   #     version = "0.5.3.0";
   #     cabalFileHash = "06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29";
@@ -370,22 +426,34 @@ let
   #
   # This takes care of replaces the `.cabal` file from Hackage with the correct revision
   # specified in the Hackage lock info.
-  pkgHackageInfoToNixHaskPkg = pkgHackageInfo: hfinal:
+  pkgHackageInfoToNixHaskPkg = isExtraDep: pkgHackageInfo: hfinal:
     let
-      additionalArgs = getAdditionalCabal2nixArgs pkgHackageInfo.name pkgHackageInfo.version;
+      additionalArgs =
+        getAdditionalCabal2nixArgs pkgHackageInfo.name pkgHackageInfo.version;
+      baseDrv =
+        hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs;
+      baseDrvWithCorrectRev =
+        overrideCabalFileRevision
+          pkgHackageInfo.name
+          pkgHackageInfo.version
+          pkgHackageInfo.cabalFileHash
+          baseDrv;
     in
-    overrideCabalFileRevision
-      pkgHackageInfo.name
-      pkgHackageInfo.version
-      pkgHackageInfo.cabalFileHash
-      (hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs);
+      addStacklock2nixPassthru
+        {
+          is-extra-dep = isExtraDep;
+          is-hackage-dep = true;
+        }
+        baseDrvWithCorrectRev;
 
   # Return a derivation for a Haskell package for the given Haskell package
   # lock info.
   #
-  # extraDepCreateNixHaskPkg :: HaskellPkgSet -> HaskellPkgLock -> HaskellPkgDrv
+  # extraDepCreateNixHaskPkg :: Bool -> HaskellPkgSet -> HaskellPkgLock -> HaskellPkgDrv
   #
-  # where
+  # The first `Bool` is `true` if the passed-in HaskellPkgLock is an
+  # `extra-deps` from `stack.yaml`.  Otherwise, `false` if the passed-in
+  # HaskellPkgLock are from the Stackage snapshot/resolver.
   #
   # data HaskellPkgLock
   #   = HackageDep { hackage :: String }
@@ -400,6 +468,7 @@ let
   #
   # ```
   # extraDepCreateNixHaskPkg
+  #   false
   #   hfinal
   #   { hackage = "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"; }
   # ```
@@ -408,6 +477,7 @@ let
   #
   # ```
   # extraDepCreateNixHaskPkg
+  #   true
   #   hfinal
   #   { name = "servant-client";
   #     git = "https://github.com/haskell-servant/servant";
@@ -421,6 +491,7 @@ let
   #
   # ```
   # extraDepCreateNixHaskPkg
+  #   true
   #   hfinal
   #   { name = "pretty-simple";
   #     url = "https://github.com/cdepillabout/pretty-simple/archive/d8ef1b3c2d913a05515b2d1c4fec0b52d2744434.tar.gz";
@@ -428,7 +499,7 @@ let
   #     sha256 = "aba1659b4c133b00b7a28837bcb413672823d72835bcee0f1594e0ba4e2ea4af";
   #   }
   # ```
-  extraDepCreateNixHaskPkg = hfinal: haskPkgLock:
+  extraDepCreateNixHaskPkg = isExtraDep: hfinal: haskPkgLock:
     let
       extraHackageDep =
         let
@@ -436,7 +507,7 @@ let
           pkgHackageInfo = parseHackageStr hackageStr;
         in {
           name = pkgHackageInfo.name;
-          value = pkgHackageInfoToNixHaskPkg pkgHackageInfo hfinal;
+          value = pkgHackageInfoToNixHaskPkg isExtraDep pkgHackageInfo hfinal;
         };
 
       extraGitDep =
@@ -461,14 +532,21 @@ let
               "--subpath ${haskPkgLock.subdir}"
             else
               "";
-        in {
-          name = haskPkgLock.name;
-          value =
+          baseDrv =
             hfinal.callCabal2nixWithOptions
               haskPkgLock.name
               src
               extraCabal2nixOptions
               (getAdditionalCabal2nixArgs haskPkgLock.name haskPkgLock.version);
+        in {
+          name = haskPkgLock.name;
+          value =
+            addStacklock2nixPassthru
+              {
+                is-extra-dep = isExtraDep;
+                is-git-dep = true;
+              }
+              baseDrv;
         };
 
       extraUrlDep =
@@ -487,13 +565,20 @@ let
               tar -xf "${rawSrc}" -C ./raw-input-source --strip-components=1
               cp -r "./raw-input-source/${haskPkgLock.subdir or ""}" "$out"
             '';
-        in {
-          name = haskPkgLock.name;
-          value =
+          baseDrv =
             hfinal.callCabal2nix
               haskPkgLock.name
               src
               (getAdditionalCabal2nixArgs haskPkgLock.name haskPkgLock.version);
+        in {
+          name = haskPkgLock.name;
+          value =
+            addStacklock2nixPassthru
+              {
+                is-extra-dep = isExtraDep;
+                is-url-dep = true;
+              }
+              baseDrv;
         };
     in
     if haskPkgLock ? "hackage" then
@@ -511,7 +596,11 @@ let
   # set.
   #
   # haskPkgLocksToOverlay
-  #  :: [ HaskellPkgLock ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #  :: Bool -> [ HaskellPkgLock ] -> HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
+  #
+  # The first `Bool` is `true` if the list of passed-in HaskellPkgLocks are
+  # `extra-deps` from `stack.yaml`.  Otherwise, `false` if the list of passed-in
+  # HaskellPkgLocks are from the Stackage snapshot/resolver.
   #
   # See the documentation for extraDepCreateNixHaskPkg for the definition of
   # HaskellPkgLock.
@@ -519,6 +608,7 @@ let
   # Example:
   # ```
   # haskPkgLocksToOverlay
+  #   false
   #   [ { hackage = "lens-5.0.1@sha256:63ed57e4d54c583ae2873d6892ef690942d90030864d0b772413a1458e98159f,15544"; }
   #     { hackage = "conduit-1.3.4.3@sha256:c32a5f3ee2daff364de2807afeec45996e5633f9a5010c8504472a930ac7153e,5129"; }
   #   ]
@@ -532,8 +622,8 @@ let
   #   conduit = callHackage "conduit" "1.3.4" {};
   # }
   # ```
-  haskPkgLocksToOverlay = haskPkgLocks: hfinal: hprev:
-    builtins.listToAttrs (map (extraDepCreateNixHaskPkg hfinal) haskPkgLocks);
+  haskPkgLocksToOverlay = isExtraDeps: haskPkgLocks: hfinal: hprev:
+    builtins.listToAttrs (map (extraDepCreateNixHaskPkg isExtraDeps hfinal) haskPkgLocks);
 
   # Similar to `haskPkgLocksToOverlay`, but takes in both Hackage locks and Git
   # locks (so the `HaskellPkgLock` type) from above.
@@ -556,7 +646,7 @@ let
   #   hprev
   # ```
   extraDepsToOverlay = extraDepsPkgs: hfinal: hprev:
-    haskPkgLocksToOverlay (map (pkg: pkg.completed) extraDepsPkgs) hfinal hprev;
+    haskPkgLocksToOverlay true (map (pkg: pkg.completed) extraDepsPkgs) hfinal hprev;
 
   # Figure out the name of a local package from the stack.yaml file and its path.
   #
@@ -725,7 +815,7 @@ let
   # snapshot / resolver.
   #
   # stackYamlResolverOverlay :: HaskellPkgSet -> HaskellPkgSet -> HaskellPkgSet
-  stackYamlResolverOverlay = haskPkgLocksToOverlay resolverParsed.packages;
+  stackYamlResolverOverlay = haskPkgLocksToOverlay false resolverParsed.packages;
 
   # A Haskell package set overlay that adds all the packages from the `extraDeps`
   # in your `stack.yaml`.
@@ -764,8 +854,9 @@ let
         value =
           let
             additionalArgs = getAdditionalCabal2nixArgs pkgName null;
+            baseDrv = hfinal.callCabal2nix pkgName pkgPath additionalArgs;
           in
-          hfinal.callCabal2nix pkgName pkgPath additionalArgs;
+          addStacklock2nixPassthru { is-local-pkg = true; } baseDrv;
       };
     in
     builtins.listToAttrs (map localPkgToOverlayAttr localPkgs);
