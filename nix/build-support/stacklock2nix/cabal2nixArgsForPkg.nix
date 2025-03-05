@@ -92,6 +92,11 @@ cabal2nixArgsOverrides {
 
   "pango" = ver: { pango = pkgs.pango; };
 
+  # This requires the Haskell package pgp-wordlist as a test dependency, but it
+  # is not in Stackage. Tests are disabled in suggestedOverlay.nix, so there
+  # should be no problem with marking this as null.
+  "prettyprinter" = ver: { pgp-wordlist = null; };
+
   "psqueues" = ver:
     if pkgs.lib.versionAtLeast ver "0.2.8.0" then
       # The PSQueue package is used in benchmarks, but it is not on Stackage.
