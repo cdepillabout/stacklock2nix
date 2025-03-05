@@ -23,6 +23,54 @@ Big changes:
 
 A few other small changes:
 
+*   Expose some additional `passthru` values on Haskell derivations generated
+    by stacklock2nix.
+
+    All Haskell derivations generated with `stacklock2nix` now have a
+    `passthru.stacklock2nix` key, which is an attrset filled with the
+    following keys.  All keys have a `Bool` value:
+
+    -   `is-local-pkg`: Is this a local package defined in `stack.yaml`?
+    -   `is-extra-dep`: Is this an `extra-dep` defined in `stack.yaml`?
+    -   `is-hackage-dep`: Is this a dep from Hackage?
+    -   `is-git-dep`: Is this a dep from Git?
+    -   `is-url-dep`: Is this a dep from a URL?
+
+    This can be used in your own overlays.  For instance, if you want to
+    apply an overlay to the Haskell package set produced by stacklock2nix
+    that disables tests ONLY for local Haskell packages, you could write
+    the overlay like the following:
+
+    ```nix
+    hfinal: hprev:
+      lib.mapAttrs
+        ( name: drv:
+            if lib.attrByPath [ "passthru" "stacklock2nix" "is-local-pkg" ] false drv then
+              modifierFunc drv
+            else
+              drv
+        )
+        hprev
+    ```
+
+    Added in [#63](https://github.com/cdepillabout/stacklock2nix/pull/63)
+
+    See the tests in that PR for some more examples of how you might want to
+    use this.
+
+*   Expose some additional `passthru` values on the Haskell dev shell generated
+    by stacklock2nix.
+
+    The dev shells generated with `stacklock2nix` now have a
+    `passthru.stacklock2nix` key, which is an attrset filled with the
+    following keys and values:
+
+    -   `dev-shell-pkg-set`: The Haskell package set used to generate this dev shell.
+        This is mainly useful in conjunction with the `devShellPkgSetModifier`, in order
+        to inspect the final package set produced after applying `devShellPkgSetModifier`.
+    -   `shell-for-args`: The passed to `shellFor` in order to produce the dev shell.
+        This is an attrset.
+
 *   Mark some additional packages as `dontCheck` in `suggestedOverlay`:
 
     - cborg
