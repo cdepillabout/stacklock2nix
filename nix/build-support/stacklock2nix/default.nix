@@ -945,7 +945,7 @@ let
       null
     else
       let
-        haskPkgSet = callPackage (nixpkgsPath + "/pkgs/development/haskell-modules") {
+        haskPkgSet = callPackage (nixpkgsPath + "/pkgs/development/haskell-modules") ({
           haskellLib = haskell.lib.compose;
 
           # TODO: Is it okay to use a completely different package set as the
@@ -967,12 +967,15 @@ let
             additionalHaskellPkgSetOverrides
           ];
 
-          nonHackagePackages = _: _: {};
+          nonHackagePackages = _: _: _: {};
           configurationCommon = _: _: _: {};
           configurationNix = _: _: _: {};
           configurationArm = _: _: _: {};
           configurationDarwin = _: _: _: {};
-        };
+        } //
+        lib.optionalAttrs (all-cabal-hashes != null) {
+          inherit all-cabal-hashes;
+        });
       in haskPkgSet;
 
   # Same as `devShell`, but based on `newPkgSet`.

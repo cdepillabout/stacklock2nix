@@ -68,6 +68,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # Tests don't include all necessary files.
   c2hs = dontCheck hprev.c2hs;
 
+  # Tests require too-strict version of deps.
+  cborg = dontCheck hprev.cborg;
+
   clock = dontCheck hprev.clock;
 
   colour = dontCheck hprev.colour;
@@ -173,6 +176,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # Tests try to access internet.
   js-jquery = dontCheck hprev.js-jquery;
 
+  # Tests require versions of deps not in stackage.
+  lifted-base = dontCheck hprev.lifted-base;
+
   logging-facade = dontCheck hprev.logging-facade;
 
   logict = dontCheck hprev.logict;
@@ -208,6 +214,12 @@ hfinal: hprev: with haskell.lib.compose; {
   # the rio test suite calls functions from unliftio that are broken:
   # https://github.com/fpco/unliftio/issues/87
   rio = dontCheck hprev.rio;
+
+  # Tests require version of tasty-quickcheck not in stackage
+  serialise = dontCheck hprev.serialise;
+
+  # Tests try using warp, but require a version not in stackage
+  servant-cassava = dontCheck hprev.servant-cassava;
 
   # Tests don't build
   servant-openapi3 = dontCheck hprev.servant-openapi3;

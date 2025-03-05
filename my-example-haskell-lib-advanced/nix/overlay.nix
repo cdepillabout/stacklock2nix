@@ -24,8 +24,8 @@ final: prev: {
     #
     # ```
     # all-cabal-hashes = final.fetchurl {
-    #   url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840.tar.gz";
-    #   sha256 = "sha256-vYFfZ77fOcOQpAef6VGXlAZBzTe3rjBSS2dDWQQSPUw=";
+    #   url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/578b09df5072f21768cfe13edfc3e4c3e41428fc.tar.gz";
+    #   sha256 = "sha256-vYFfZ77fOcOQpAef6VGXlAZBzTe3rjBSS2dDWQQSPPw=";
     # };
     # ```
     #
@@ -34,8 +34,8 @@ final: prev: {
     all-cabal-hashes = final.fetchFromGitHub {
       owner = "commercialhaskell";
       repo = "all-cabal-hashes";
-      rev = "f3f41d1f11f40be4a0eb6d9fcc3fe5ff62c0f840";
-      sha256 = "sha256-MLF0Vv2RHai3n7b04JeUchQortm+ikuwSjAzAHWvZJs=";
+      rev = "578b09df5072f21768cfe13edfc3e4c3e41428fc";
+      sha256 = "sha256-fmf4LukOJ2c0bCmNfuN+n2R6bxGhJqag9CBvZQEl3kA=";
     };
   };
 
@@ -45,7 +45,7 @@ final: prev: {
   # This gives you a normal Haskell package set with packages defined by your
   # stack.yaml and Stackage snapshot / resolver.
   my-example-haskell-pkg-set =
-    final.haskell.packages.ghc924.override (oldAttrs: {
+    final.haskell.packages.ghc984.override (oldAttrs: {
 
       # Make sure the package set is created with the same all-cabal-hashes you
       # passed to `stacklock2nix`.
@@ -111,7 +111,7 @@ final: prev: {
         # carefully setup in Nixpkgs so that the tool will compile, and your
         # stacklock2nix Haskell package set will likely contain different
         # versions.
-        final.haskell.packages.ghc924.haskell-language-server
+        final.haskell.packages.ghc984.haskell-language-server
         # Other Haskell tools may need to be taken from the stacklock2nix
         # Haskell package set, and compiled with the example same dependency
         # versions your project depends on.

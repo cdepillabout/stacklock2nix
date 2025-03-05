@@ -10,7 +10,7 @@ let
 
   stacklock = stacklock2nix {
     stackYaml = ./stack.yaml;
-    baseHaskellPkgSet = haskell.packages.ghc924;
+    baseHaskellPkgSet = haskell.packages.ghc984;
     additionalHaskellPkgSetOverrides = hfinal: hprev: {
       # The servant-cassava.cabal file is malformed on GitHub:
       # https://github.com/haskell-servant/servant-cassava/pull/29
@@ -34,8 +34,8 @@ let
     all-cabal-hashes = fetchFromGitHub {
       owner = "commercialhaskell";
       repo = "all-cabal-hashes";
-      rev = "80869091dcb9f932c15fe57e30d4d0730c5f87df";
-      sha256 = "sha256-LAD3/5qeJWbzfqkcWccMOq0pHBnSkNnvBjWnlLzWFvQ=";
+      rev = "578b09df5072f21768cfe13edfc3e4c3e41428fc";
+      sha256 = "sha256-fmf4LukOJ2c0bCmNfuN+n2R6bxGhJqag9CBvZQEl3kA=";
     };
   };
 in
