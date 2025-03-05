@@ -1,4 +1,45 @@
 
+## 5.0.0
+
+Starting from this version of `stacklock2nix`, it will only be usable with Nixpkgs >= 24.05!
+
+Big changes:
+
+*   Fixes the construction of `newPkgSet`.  See
+    [here](https://github.com/cdepillabout/stacklock2nix/pull/60#issuecomment-2696401882)
+    for more information.
+
+    One big implication of this change is that Nixpkgs before the referenced
+    commit will not be able to be used with stacklock2nix anymore.  So this
+    version of stacklock2nix will only work with Nixpkgs after that commit (so
+    around `>= nixos-24.05`)!
+
+    Fixed in [#62](https://github.com/cdepillabout/stacklock2nix/pull/62).
+    Thanks to [@Mr-Andersen](https://github.com/Mr-Andersen)!
+
+*   Correctly passes `all-cabal-hashes` to `newPkgSet`.
+    Fixed in [#62](https://github.com/cdepillabout/stacklock2nix/pull/62).
+    Thanks to [@Mr-Andersen](https://github.com/Mr-Andersen) for reporting this.
+
+A few other small changes:
+
+*   Mark some additional packages as `dontCheck` in `suggestedOverlay`:
+
+    - cborg
+    - lifted-base
+    - serialise
+    - servant-cassava
+
+    Implemented in [#62](https://github.com/cdepillabout/stacklock2nix/pull/62)
+
+*   Pass `null` as the `pgp-wordlist` argument to `prettyprinter`.
+    `pgp-wordlist` is a test dep, but it is not in stackage.
+
+    Implemented in [#62](https://github.com/cdepillabout/stacklock2nix/pull/62)
+
+    (Tests for `prettyprinter` were disabled in `suggestedOverlay` in
+    https://github.com/cdepillabout/stacklock2nix/pull/59)
+
 ## 4.2.0
 
 *   Add a new `devShellPkgSetModifier` for giving the user a hook to modify the
