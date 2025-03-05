@@ -9,7 +9,7 @@ let
 
   stacklock = stacklock2nix {
     stackYaml = ../my-example-haskell-lib-advanced/stack.yaml;
-    baseHaskellPkgSet = haskell.packages.ghc924;
+    baseHaskellPkgSet = haskell.packages.ghc984;
     additionalHaskellPkgSetOverrides = hfinal: hprev: {
       # The servant-cassava.cabal file is malformed on GitHub:
       # https://github.com/haskell-servant/servant-cassava/pull/29
@@ -36,8 +36,8 @@ let
     # being a tarball. (fetchurl makes the output derivation a tarball.)
     all-cabal-hashes = fetchurl {
       name = "all-cabal-hashes";
-      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/80869091dcb9f932c15fe57e30d4d0730c5f87df.tar.gz";
-      sha256 = "sha256-FI1Z1zMPnOXRBAPJiSI5VIyH6JkOuY9Cu1qdq1vwjK0=";
+      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/578b09df5072f21768cfe13edfc3e4c3e41428fc.tar.gz";
+      sha256 = "sha256-z9GGg21QObZHsK//45zGshdbjsJh3wsw9Oo0R1TYqT8=";
     };
   };
 in
