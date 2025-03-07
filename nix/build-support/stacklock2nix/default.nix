@@ -936,13 +936,33 @@ let
       null
     else
       let
+        # The modified package set that the dev shell
+        # will be based off of.
+        #
+        # This is an attrset where the keys are Haskell package names,
+        # and the values are Haskell package derivations.
         pSet = devShellPkgSetModifier packageSet;
+
+        # The arguments to be passed to shellFor.
         shellForArgs = devShellArgsModifier {
           packages = localPkgsSelector;
           nativeBuildInputs = additionalDevShellNativeBuildInputs packageSet;
         };
+
+        # The actual dev shell.
+        shell = pSet.shellFor shellForArgs;
       in
-      pSet.shellFor shellForArgs;
+      # Add a dev-shell-pkg-set and shell-for-args key to passthru.stacklock2nix.
+      # The end-user should be able to use these to easily access the modified
+      # package set.
+      shell.overrideAttrs (oldAttrs: {
+        passthru = (oldAttrs.passthru or {}) // {
+          stacklock2nix = ((oldAttrs.passthru or {}).stacklock2nix or {}) // {
+            dev-shell-pkg-set = pSet;
+            shell-for-args = shellForArgs;
+          };
+        };
+      });
 
   # A development shell created by passing all your local packages (from
   # `localPkgsSelector`) to `pkgSet.shellFor`.
