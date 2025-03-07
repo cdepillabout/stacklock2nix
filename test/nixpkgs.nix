@@ -24,6 +24,8 @@ let
         new-package-set = final.callPackage ./test-new-package-set.nix {};
 
         # This tests that all-cabal-hashes works correctly as a directory (not a tarball).
+        #
+        # This also tests that our stacklock2nix-specific passthru values are working.
         all-cabal-hashes-is-dir = final.callPackage ./test-all-cabal-hashes-is-dir.nix {};
 
         # This test that a stack.yaml with no local packages defined is still
