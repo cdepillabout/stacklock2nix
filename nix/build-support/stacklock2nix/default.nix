@@ -1008,6 +1008,7 @@ let
     integer-gmp = null;
     libiserv = null;
     mtl = null;
+    os-string = null;
     parsec = null;
     pretty = null;
     process = null;
