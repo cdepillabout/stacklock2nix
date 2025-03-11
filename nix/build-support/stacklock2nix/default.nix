@@ -197,7 +197,15 @@
   # defaultLocalPkgFilter: pkgName: path: type: true
   # ```
   localPkgFilter ?
-    defaultLocalPkgFilter: pkgName: path: type: defaultLocalPkgFilter path type
+    defaultLocalPkgFilter: pkgName: path: type: defaultLocalPkgFilter path type,
+  # A function to generate a cabal file for a local package.
+  # Normally this is handled by `cabal2nix`, but in special cases we might want
+  # to do this ourselves, eg, when using hpack `!include`s.
+  #
+  #
+  # generateCabalFile :: String -> String -> Path -> Path
+  generateCabalFile ?
+    pkgName: subdir: filteredSrc: filteredSrc
 }:
 
 # The stack.yaml path can be computed from the stack.yaml.lock path, or
@@ -719,15 +727,19 @@ let
       # Example: `"my-cool-pkg"`
       pkgNameFromPackageYaml =
         let
-          packageYaml = readYAML (justCabalFilePath + "/package.yaml");
-        in
-        if packageYaml ? name then
-          packageYaml.name
-        else
-          throw
-            ("Could not find read a .name field from the package.yaml file in package ${localPkgPathStr}.  " +
-             "This is unexpected.  All package.yaml files should have a top-level .name field. " +
-             "package.yaml file: ${builtins.toJSON packageYaml}");
+          packageYamlName = builtins.readFile
+            (runCommand "read-package-name" {}
+              ''
+              function fail {
+                echo "Could not find read a .name field from the package.yaml file in package ${localPkgPathStr}."
+                echo "This is unexpected.  All package.yaml files should have a top-level .name field."
+                echo "package.yaml file: "
+                cat package.yaml
+                exit 1
+              }
+              (sed -nr 's/name:\s*\"?(.*)\"?\s*/\1/p' ${justCabalFilePath + "/package.yaml"} | tr -d '\n' >$out) || fail''
+            );
+        in packageYamlName;
 
       # Whether or not this package has at least one .cabal file.
       #
@@ -787,12 +799,25 @@ let
 
       # Path to the Haskell package.
       #
-      # pkgPath :: Path
-      pkgPath = lib.cleanSourceWith {
+      # filteredPkgPath :: Path
+      filteredPkgPath = lib.cleanSourceWith {
         src = rawPkgPath;
         filter = path: type: localPkgFilter localPkgDefaultFilter pkgName path type;
         name = "stacklock2nix-pkg-sources-" + pkgName;
       };
+
+      # Path to the Haskell package,
+      # but if it doesn't contain a .cabal file
+      # then we call the `generateCabalFile` function to potentially pre-generate
+      # the .cabal file. This is useful if the `package.yaml` file needs special
+      # treatment, eg, because of includes.
+      #
+      # pkgPath :: Path
+      pkgPath =
+        if hasSingleCabalFile then
+          filteredPkgPath
+        else
+          generateCabalFile pkgName localPkgPathStr filteredPkgPath;
     in
     { inherit pkgPath pkgName; };
 
