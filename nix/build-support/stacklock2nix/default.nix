@@ -1001,6 +1001,7 @@ let
     ghc-boot-th = null;
     ghc-compact = null;
     ghc-heap = null;
+    ghc-internal = null;
     ghc-prim = null;
     ghci = null;
     haskeline = null;
