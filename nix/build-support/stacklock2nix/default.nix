@@ -1001,6 +1001,7 @@ let
     ghc-boot-th = null;
     ghc-compact = null;
     ghc-heap = null;
+    ghc-internal = null;
     ghc-prim = null;
     ghci = null;
     haskeline = null;
@@ -1008,6 +1009,7 @@ let
     integer-gmp = null;
     libiserv = null;
     mtl = null;
+    os-string = null;
     parsec = null;
     pretty = null;
     process = null;
