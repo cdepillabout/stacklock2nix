@@ -1,4 +1,11 @@
 
+## 5.1.0
+
+*   Adds `os-string` and `ghc-internal` to list of GHC boot libraries.  This is
+    required for using `stacklock2nix` with >= GHC-9.10.
+    Added in [#64](https://github.com/cdepillabout/stacklock2nix/pull/64).
+    Thanks to [@Mr-Andersen](https://github.com/Mr-Andersen)!
+
 ## 5.0.0
 
 Starting from this version of `stacklock2nix`, it will only be usable with Nixpkgs >= 24.05!
