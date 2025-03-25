@@ -424,7 +424,7 @@ let
   #   hfinal
   # ```
   #
-  # This takes care of replaces the `.cabal` file from Hackage with the correct revision
+  # This takes care of replacing the `.cabal` file from Hackage with the correct revision
   # specified in the Hackage lock info.
   pkgHackageInfoToNixHaskPkg = isExtraDep: pkgHackageInfo: hfinal:
     let
@@ -449,7 +449,8 @@ let
   # Return a derivation for a Haskell package for the given Haskell package
   # lock info.
   #
-  # extraDepCreateNixHaskPkg :: Bool -> HaskellPkgSet -> HaskellPkgLock -> HaskellPkgDrv
+  # extraDepCreateNixHaskPkg ::
+  #   Bool -> HaskellPkgSet -> HaskellPkgLock -> { name :: String, value :: HaskellPkgDrv }
   #
   # The first `Bool` is `true` if the passed-in HaskellPkgLock is an
   # `extra-deps` from `stack.yaml`.  Otherwise, `false` if the passed-in
