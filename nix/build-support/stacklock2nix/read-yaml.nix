@@ -9,10 +9,14 @@
 #
 # but takes an input file in YAML instead of JSON.
 #
-# readYAML :: Path -> a
-#
-# where `a` is the Nixified version of the input file.
-path:
+# readYAML ::
+#   -- | The name to use in the output derivation.  Helpful for debugging.
+#   String ->
+#   -- | The path of the actual YAML file to turn into JSON.
+#   Path ->
+#   -- | The nixified version of the input YAML file.
+#   a
+drvName: path:
 
 let
   # Starting in remarshal-0.17.0, it added a new `--stringify` CLI flag:
@@ -28,7 +32,7 @@ let
 
   jsonOutputDrv =
     runCommand
-      "from-yaml"
+      "from-yaml-${drvName}"
       { nativeBuildInputs = [ remarshal ]; }
       "remarshal ${remarshal-stringify-arg} -if yaml -i \"${path}\" -of json -o \"$out\"";
 in

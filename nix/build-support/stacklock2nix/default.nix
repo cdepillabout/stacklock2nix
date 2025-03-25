@@ -221,10 +221,10 @@ let
   readYAML = callPackage ./read-yaml.nix {};
 
   # The `stack.yaml` file read in as a Nix value.
-  stackYamlParsed = readYAML stackYamlReal;
+  stackYamlParsed = readYAML "stack.yaml" stackYamlReal;
 
   # The `stack.yaml.lock` file read in as a Nix value.
-  stackYamlLockParsed = readYAML stackYamlLockReal;
+  stackYamlLockParsed = readYAML "stack.yaml.lock" stackYamlLockReal;
 
   # The URL and sha256 for the snapshot from the `stack.yaml.lock` file.
   #
@@ -247,7 +247,7 @@ let
 
   # The Nix value for the Stackage snapshot specified in the `stack.yaml.lock`
   # file.
-  resolverParsed = readYAML resolverRawYaml;
+  resolverParsed = readYAML "stackage-resolver" resolverRawYaml;
 
   # Fetch cabal revisions from the stackage content addressable store.
   fetchCabalFileRevision = {name, version, hash}:
@@ -719,7 +719,7 @@ let
       # Example: `"my-cool-pkg"`
       pkgNameFromPackageYaml =
         let
-          packageYaml = readYAML (justCabalFilePath + "/package.yaml");
+          packageYaml = readYAML (baseNameOf rawPkgPath + "-package.yaml") (justCabalFilePath + "/package.yaml");
         in
         if packageYaml ? name then
           packageYaml.name
