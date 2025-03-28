@@ -140,6 +140,9 @@
   # };
   # ```
   #
+  # An alternative to specifying this option is to instead just override
+  # the top-level all-cabal-hashes attribute in Nixpkgs.
+  #
   # This is not used if `baseHaskellPkgSet` is `null`.
   #
   # (NOTE: You likely want to fetch all-cabal-hashes with `fetchFromGitHub`
@@ -147,7 +150,54 @@
   # and untarred.  stacklock2nix can still work with an all-cabal-hashes that is
   # a tarball, but building will be faster with a plain directory.)
   all-cabal-hashes ? null
-, # TODO: Write this explanation
+, # This option is similar to the above `all-cabal-hashes` option.
+  # This option allows you to specify a checkout of the
+  # https://github.com/all-cabal-nixes/all-cabal-nixes repo.
+  # This is mainly used to speed up the internal IFD used by stacklock2nix.
+  #
+  # By default, stacklock2nix internally uses the `hfinal.callHackage` function to
+  # generate the `.nix` files for Haskell packages that come from Hackage.
+  # All packages from the Stackage resolver fall into this category, as well
+  # as packages added to extra-deps in stack.yaml.
+  #
+  # `hfinal.callHackage` will internally call the `cabal2nix` executable on the
+  # `.cabal` file from `all-cabal-hashes`. While this is simple, one big
+  # downside is that if you have many, many dependencies, you end up with eval
+  # time in Nix taking quite a long time, since `cabal2nix` has to be called
+  # sequentially on each of your transitive dependencies.
+  #
+  # `all-cabal-nixes` presents an alternative approach, since it already
+  # contains the output of running `cabal2nix` on all the packages on Hackage.
+  #
+  # If you specify `all-cabal-nixes`, then instead of needing to use
+  # `hfinal.callHackage` to generate the package, stacklock2nix will instead
+  # just do `hfinal.callPackage` on the correct package/version from
+  # `all-cabal-nixes`.
+  #
+  # all-cabal-nixes :: Drv
+  #
+  # Example:
+  # ```
+  # final.fetchFromGitHub {
+  #   owner = "all-cabal-nixes";
+  #   repo = "all-cabal-nixes";
+  #   rev = "fabab20db25b8e90686c18b56ced346306ecf29b";
+  #   sha256 = "sha256-dPM+jMBU9rsGL6oiPRsQi+lxAv/n6rDNoHFSakboljU=";
+  # };
+  # ```
+  #
+  # Using `all-cabal-nixes` can considerably speed up an initial build, since
+  # it doesn't have to use IFD to call `cabal2nix` for all transitive
+  # dependencies from Hackage.  However, once you've done a full build and have
+  # all required files in your Nix store, `all-cabal-nixes` doesn't provide any
+  # benefit for subsequent builds.
+  #
+  # Specifying `all-cabal-nixes` is often the most helpful when paired with a
+  # shared Nix cache used by all developers and CI.
+  #
+  # Make sure you read the FAQ in the README of
+  # https://github.com/all-cabal-nixes/all-cabal-nixes so that you understand
+  # the downsides before using this.
   all-cabal-nixes ? null
 , callPackage ? topargs.callPackage
 , # Path to Nixpkgs.
