@@ -140,6 +140,9 @@
   # };
   # ```
   #
+  # An alternative to specifying this option is to instead just override
+  # the top-level all-cabal-hashes attribute in Nixpkgs.
+  #
   # This is not used if `baseHaskellPkgSet` is `null`.
   #
   # (NOTE: You likely want to fetch all-cabal-hashes with `fetchFromGitHub`
@@ -147,6 +150,55 @@
   # and untarred.  stacklock2nix can still work with an all-cabal-hashes that is
   # a tarball, but building will be faster with a plain directory.)
   all-cabal-hashes ? null
+, # This option is similar to the above `all-cabal-hashes` option.
+  # This option allows you to specify a checkout of the
+  # https://github.com/all-cabal-nixes/all-cabal-nixes repo.
+  # This is mainly used to speed up the internal IFD used by stacklock2nix.
+  #
+  # By default, stacklock2nix internally uses the `hfinal.callHackage` function to
+  # generate the `.nix` files for Haskell packages that come from Hackage.
+  # All packages from the Stackage resolver fall into this category, as well
+  # as packages added to extra-deps in stack.yaml.
+  #
+  # `hfinal.callHackage` will internally call the `cabal2nix` executable on the
+  # `.cabal` file from `all-cabal-hashes`. While this is simple, one big
+  # downside is that if you have many, many dependencies, you end up with eval
+  # time in Nix taking quite a long time, since `cabal2nix` has to be called
+  # sequentially on each of your transitive dependencies.
+  #
+  # `all-cabal-nixes` presents an alternative approach, since it already
+  # contains the output of running `cabal2nix` on all the packages on Hackage.
+  #
+  # If you specify `all-cabal-nixes`, then instead of needing to use
+  # `hfinal.callHackage` to generate the package, stacklock2nix will instead
+  # just do `hfinal.callPackage` on the correct package/version from
+  # `all-cabal-nixes`.
+  #
+  # all-cabal-nixes :: Drv
+  #
+  # Example:
+  # ```
+  # final.fetchFromGitHub {
+  #   owner = "all-cabal-nixes";
+  #   repo = "all-cabal-nixes";
+  #   rev = "fabab20db25b8e90686c18b56ced346306ecf29b";
+  #   sha256 = "sha256-dPM+jMBU9rsGL6oiPRsQi+lxAv/n6rDNoHFSakboljU=";
+  # };
+  # ```
+  #
+  # Using `all-cabal-nixes` can considerably speed up an initial build, since
+  # it doesn't have to use IFD to call `cabal2nix` for all transitive
+  # dependencies from Hackage.  However, once you've done a full build and have
+  # all required files in your Nix store, `all-cabal-nixes` doesn't provide any
+  # benefit for subsequent builds.
+  #
+  # Specifying `all-cabal-nixes` is often the most helpful when paired with a
+  # shared Nix cache used by all developers and CI.
+  #
+  # Make sure you read the FAQ in the README of
+  # https://github.com/all-cabal-nixes/all-cabal-nixes so that you understand
+  # the downsides before using this.
+  all-cabal-nixes ? null
 , callPackage ? topargs.callPackage
 , # Path to Nixpkgs.
   #
@@ -221,10 +273,10 @@ let
   readYAML = callPackage ./read-yaml.nix {};
 
   # The `stack.yaml` file read in as a Nix value.
-  stackYamlParsed = readYAML stackYamlReal;
+  stackYamlParsed = readYAML "stack.yaml" stackYamlReal;
 
   # The `stack.yaml.lock` file read in as a Nix value.
-  stackYamlLockParsed = readYAML stackYamlLockReal;
+  stackYamlLockParsed = readYAML "stack.yaml.lock" stackYamlLockReal;
 
   # The URL and sha256 for the snapshot from the `stack.yaml.lock` file.
   #
@@ -247,7 +299,7 @@ let
 
   # The Nix value for the Stackage snapshot specified in the `stack.yaml.lock`
   # file.
-  resolverParsed = readYAML resolverRawYaml;
+  resolverParsed = readYAML "stackage-resolver" resolverRawYaml;
 
   # Fetch cabal revisions from the stackage content addressable store.
   fetchCabalFileRevision = {name, version, hash}:
@@ -398,6 +450,104 @@ let
     else
       {};
 
+  # This is a derivation that contains only the cabal2nix-generated .nix files
+  # from all-cabal-nixes for exactly the packages from the Stackage resolver,
+  # as well as those packages passed in the stack.yaml extra-deps list.
+  #
+  # all-cabal-nixes contains ALL the cabal2nix-generated .nix files from
+  # all-cabal-hashes/Hackage, while some-cabal-nixes contains just the .nix
+  # files relevant to your project.
+  #
+  # some-cabal-nixes :: Drv
+  #
+  # This is mainly useful as an optimization for CI.  By using this, in
+  # combination with a shared Nix cachix, you will only need to download the
+  # small some-cabal-nixes derivation in order to build your project, instead
+  # of needing to download the huge all-cabal-nixes repo.
+  some-cabal-nixes =
+    if all-cabal-nixes == null then
+      null
+    else
+      let
+        # Figure out the Haskell package name a version from a Hackage package lock string.
+        #
+        # Example:
+        # ```
+        # > getHackagePkgNameVersion "cassava-0.5.3.0@sha256:06e6dbc0f3467f3d9823321171adc08d6edc639491cadb0ad33b2dca1e530d29,6083"
+        # { name = "cassava"; version = "0.5.3.0"; }
+        # ```
+        getHackagePkgNameVersion = haskPkgLock:
+          { inherit (parseHackageStr haskPkgLock.hackage) name version; };
+
+        # A list of package names and versions from the Stackage resolver.
+        resolverPkgs = map getHackagePkgNameVersion resolverParsed.packages;
+
+        # A list of package names and versions from the extra-deps in the stack.yaml.
+        extraPkgs =
+          lib.pipe
+            stackYamlLockParsed.packages
+            [
+              # pull out the .completed attribute
+              (map (pkg: pkg.completed))
+
+              # filter out everything that doesn't have a .hackage attribute
+              (builtins.filter (pkg: pkg ? "hackage"))
+
+              # get the name and version for the hackage package
+              (map getHackagePkgNameVersion)
+            ];
+
+        pkgs = resolverPkgs ++ extraPkgs;
+
+        # Shell command to copy a default.nix for a given package/version out
+        # of all-cabal-nixes.
+        #
+        # copyForPkg :: { name :: String, version :: String } -> String
+        #
+        # Only copy the default.nix file if it doesn't already exist.  It can
+        # sometimes already exist if the same file was specified both in the
+        # Stackage resolver and in the extra-deps from stack.yaml.
+        copyForPkg = pkg:
+          ''
+            mkdir -p "./${pkg.name}/${pkg.version}"
+            [ ! -f "./${pkg.name}/${pkg.version}/default.nix" ] && cp "${all-cabal-nixes}/${pkg.name}/${pkg.version}/default.nix" "./${pkg.name}/${pkg.version}/"
+          '';
+      in
+      runCommand
+        "some-cabal-nixes"
+        {}
+        ''
+          mkdir -p "$out"
+          cd "$out"
+          ${lib.concatMapStrings copyForPkg pkgs}
+        '';
+
+  # Similar to callHackage, but instead of internally running cabal2nix, it
+  # just does hfinal.callPackage on the generated .nix file from
+  # all-cabal-nixes.
+  #
+  # callAllCabalNixes :: HaskPkgSet -> String -> String -> AttrSet -> HaskellPkgDrv
+  #
+  # Example:
+  # ```
+  # callAllCabalNixes hfinal "lens" "5.2.3" { doctest = final.my-cool-doctest; }
+  # ```
+  callAllCabalNixes =
+    if all-cabal-nixes == null then
+      null
+    else
+      hfinal: name: version: args:
+        hfinal.callPackage "${all-cabal-nixes}/${name}/${version}/default.nix" args;
+
+  # Similar to callAllCabalNixes, but uses some-cabal-nixes instead of
+  # all-cabal-nixes.
+  callSomeCabalNixes =
+    if some-cabal-nixes == null then
+      null
+    else
+      hfinal: name: version: args:
+        hfinal.callPackage "${some-cabal-nixes}/${name}/${version}/default.nix" args;
+
   # Take the Hackage lock info for a given package, and turn it into an actual
   # Haskell package derivation.
   #
@@ -424,14 +574,29 @@ let
   #   hfinal
   # ```
   #
-  # This takes care of replaces the `.cabal` file from Hackage with the correct revision
+  # This takes care of replacing the `.cabal` file from Hackage with the correct revision
   # specified in the Hackage lock info.
   pkgHackageInfoToNixHaskPkg = isExtraDep: pkgHackageInfo: hfinal:
     let
       additionalArgs =
         getAdditionalCabal2nixArgs pkgHackageInfo.name pkgHackageInfo.version;
       baseDrv =
-        hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs;
+        # TODO: Could we be more clever about this fallback logic?
+        #
+        # For instanced, we could actually check within the some-cabal-nixes
+        # directory to figure out if the requested package/version exists or
+        # not.  And if it doesn't exist, then we could try all-cabal-nixes.
+        # And only if that doesn't exist, try callHackage.
+        #
+        # Just checking whether or not they are null is somewhat too big of a
+        # hammer.
+        if some-cabal-nixes != null then
+          callSomeCabalNixes hfinal pkgHackageInfo.name pkgHackageInfo.version additionalArgs
+        else if all-cabal-nixes != null then
+          callAllCabalNixes hfinal pkgHackageInfo.name pkgHackageInfo.version additionalArgs
+        else
+          hfinal.callHackage pkgHackageInfo.name pkgHackageInfo.version additionalArgs;
+
       baseDrvWithCorrectRev =
         overrideCabalFileRevision
           pkgHackageInfo.name
@@ -449,7 +614,8 @@ let
   # Return a derivation for a Haskell package for the given Haskell package
   # lock info.
   #
-  # extraDepCreateNixHaskPkg :: Bool -> HaskellPkgSet -> HaskellPkgLock -> HaskellPkgDrv
+  # extraDepCreateNixHaskPkg ::
+  #   Bool -> HaskellPkgSet -> HaskellPkgLock -> { name :: String, value :: HaskellPkgDrv }
   #
   # The first `Bool` is `true` if the passed-in HaskellPkgLock is an
   # `extra-deps` from `stack.yaml`.  Otherwise, `false` if the passed-in
@@ -719,7 +885,7 @@ let
       # Example: `"my-cool-pkg"`
       pkgNameFromPackageYaml =
         let
-          packageYaml = readYAML (justCabalFilePath + "/package.yaml");
+          packageYaml = readYAML (baseNameOf rawPkgPath + "-package.yaml") (justCabalFilePath + "/package.yaml");
         in
         if packageYaml ? name then
           packageYaml.name
@@ -1109,6 +1275,10 @@ in
     newPkgSet
     newPkgSetDevShell
     all-cabal-hashes
+    all-cabal-nixes
+    some-cabal-nixes
+    callAllCabalNixes
+    callSomeCabalNixes
     ;
 
   # These are a bunch of internal attributes, used for testing.
