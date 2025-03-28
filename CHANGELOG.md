@@ -1,4 +1,30 @@
 
+## 5.2.0
+
+*   Adds `all-cabal-nixes` argument to stacklock2nix.  This gives an
+    improvement on initial build time when using stacklock2nix with a shared
+    cache.
+
+    The `all-cabal-nixes` argument can be used like the following:
+
+    ```nix
+    stacklock2nix {
+      stackYaml = ./stack.yaml;
+      all-cabal-nixes = fetchFromGitHub {
+        owner = "all-cabal-nixes";
+        repo = "all-cabal-nixes";
+        rev = "c37e66df270014a18ed11527db55928a4a2ae5d4";
+        sha256 = "sha256-QcAhW8yFGwj7L1LWbvjdSQ2bTDeQ+1DVeC+/jS4gJA4=";
+      };
+    }
+    ```
+
+    This greatly reduces the amount of IFD needed for building packages from
+    Hackage.
+
+    See the PR adding this feature for more information:
+    [#65](https://github.com/cdepillabout/stacklock2nix/pull/65)
+
 ## 5.1.0
 
 *   Adds `os-string` and `ghc-internal` to list of GHC boot libraries.  This is
