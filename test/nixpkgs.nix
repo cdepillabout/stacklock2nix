@@ -28,6 +28,9 @@ let
         # This also tests that our stacklock2nix-specific passthru values are working.
         all-cabal-hashes-is-dir = final.callPackage ./test-all-cabal-hashes-is-dir.nix {};
 
+        # This tests that the all-cabal-nixes argument works correctly.
+        all-cabal-nixes = final.callPackage ./test-all-cabal-nixes.nix {};
+
         # This test that a stack.yaml with no local packages defined is still
         # able to be used by stacklock2nix, and produces a reasonable package set.
         no-local-packages = final.callPackage ./test-no-local-packages {};
