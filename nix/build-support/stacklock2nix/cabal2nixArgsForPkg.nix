@@ -125,7 +125,11 @@ cabal2nixArgsOverrides {
     else
       {};
 
-  "test-framework" = ver: { libxml = pkgs.libxml; };
+  "test-framework" = ver:
+    if pkgs.lib.versionAtLeast ver "0.8.1.1" then
+      {}
+    else
+      { libxml = pkgs.libxml; };
 
   "termonad" = ver: { vte_291 = pkgs.vte; gtk3 = pkgs.gtk3; pcre2 = pkgs.pcre2;};
 
