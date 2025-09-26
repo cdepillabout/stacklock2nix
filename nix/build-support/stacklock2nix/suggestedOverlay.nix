@@ -65,6 +65,9 @@ hfinal: hprev: with haskell.lib.compose; {
   # doctests fail
   bsb-http-chunked = dontCheck hprev.bsb-http-chunked;
 
+  # tests don't work when run with nix
+  call-stack = dontCheck hprev.call-stack;
+
   # Tests don't include all necessary files.
   c2hs = dontCheck hprev.c2hs;
 
