@@ -75,6 +75,7 @@ hfinal: hprev: with haskell.lib.compose; {
 
   colour = dontCheck hprev.colour;
 
+  # circular dep in tests
   doctest = dontCheck hprev.doctest;
 
   doctest-parallel = dontCheck hprev.doctest-parallel;
@@ -200,11 +201,17 @@ hfinal: hprev: with haskell.lib.compose; {
   # circular dependency in tests
   options = dontCheck hprev.options;
 
+  # circular dependency in tests
+  optparse-applicative = dontCheck hprev.optparse-applicative;
+
   # tests require postgres running
   pg-transact = dontCheck hprev.pg-transact;
 
   # Tests run for a really long time, and also require a broken package.
   prettyprinter = dontCheck hprev.prettyprinter;
+
+  # circular dependency in tests
+  prettyprinter-ansi-terminal = dontCheck hprev.prettyprinter-ansi-terminal;
 
   random = dontCheck hprev.random;
 
@@ -249,6 +256,7 @@ hfinal: hprev: with haskell.lib.compose; {
   # requires a version of chell that is not in the stackage resolver
   system-filepath = dontCheck hprev.system-filepath;
 
+  # circular dep in tests
   tasty = dontCheck hprev.tasty;
 
   tasty-discover =
@@ -261,6 +269,9 @@ hfinal: hprev: with haskell.lib.compose; {
       hprev.tasty-discover;
 
   tasty-expected-failure = dontCheck hprev.tasty-expected-failure;
+
+  # circular dep in tests
+  temporary = dontCheck hprev.temporary;
 
   test-framework = dontCheck hprev.test-framework;
 
