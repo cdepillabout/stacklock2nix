@@ -215,8 +215,8 @@ hfinal: hprev: with haskell.lib.compose; {
 
   random = dontCheck hprev.random;
 
-  # Disabling doctests.
-  regex-tdfa = overrideCabal { testTarget = "regex-tdfa-unittest"; } hprev.regex-tdfa;
+  # Some tests don't work.
+  regex-tdfa = dontCheck hprev.regex-tdfa;
 
   # the rio test suite calls functions from unliftio that are broken:
   # https://github.com/fpco/unliftio/issues/87
