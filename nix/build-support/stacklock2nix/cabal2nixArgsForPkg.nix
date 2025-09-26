@@ -125,7 +125,17 @@ cabal2nixArgsOverrides {
     else
       {};
 
-  "test-framework" = ver: { libxml = pkgs.libxml; };
+  "test-framework" = ver:
+    # All versions of test-framework before 0.8.2.2 required the libxml package,
+    # but 0.8.2.2 and later don't require this.
+    if pkgs.lib.versionAtLeast ver "0.8.2.2" then
+      {}
+    else
+      # TODO: Eh, this isn't quite correct.  test-framework requires the libxml
+      # haskell package, which should be pulling in and propagating the libxml
+      # system package.  I don't know how this was ever working, but it does
+      # seem to work.
+      { libxml = pkgs.libxml; };
 
   "termonad" = ver: { vte_291 = pkgs.vte; gtk3 = pkgs.gtk3; pcre2 = pkgs.pcre2;};
 
