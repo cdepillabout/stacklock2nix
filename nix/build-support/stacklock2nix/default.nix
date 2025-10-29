@@ -520,6 +520,7 @@ let
           mkdir -p "$out"
           cd "$out"
           ${lib.concatMapStrings copyForPkg pkgs}
+          true
         '';
 
   # Similar to callHackage, but instead of internally running cabal2nix, it
