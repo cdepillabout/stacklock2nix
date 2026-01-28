@@ -177,6 +177,9 @@ hfinal: hprev: with haskell.lib.compose; {
 
   HUnit = dontCheck hprev.HUnit;
 
+  # Tests have a dependency on a QuickCheck version that is not in Stackage.
+  integer-logarithms = dontCheck hprev.integer-logarithms;
+
   # Tests try to access internet.
   js-jquery = dontCheck hprev.js-jquery;
 
