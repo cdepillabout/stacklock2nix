@@ -117,7 +117,12 @@ cabal2nixArgsOverrides {
     #
     # However, testu01 is only used on Linux, so we don't need to do anything
     # if this is not Linux.
-    if pkgs.lib.versionAtLeast ver "0.1.0.4" then
+    #
+    # Starting in splitmix-0.1.3.2, the testu01 test suite was removed (moved
+    # to a separate package), so we no longer need to pass testu01 at all.
+    if pkgs.lib.versionAtLeast ver "0.1.3.2" then
+      {}
+    else if pkgs.lib.versionAtLeast ver "0.1.0.4" then
       if pkgs.stdenv.isLinux then
         { testu01 = null; }
       else

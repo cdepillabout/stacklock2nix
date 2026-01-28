@@ -1,4 +1,15 @@
 
+## 5.2.1
+
+*   Handle `splitmix >= 0.1.3.2` no longer having a `testu01` test suite.
+    Starting in splitmix-0.1.3.2, the testu01 test suite was removed and moved
+    to a separate package.
+    [#72](https://github.com/cdepillabout/stacklock2nix/pull/72)
+
+*   Add `dontCheck` for `integer-logarithms`. The test suite requires a version
+    of QuickCheck that is not in Stackage LTS-24.
+    [#72](https://github.com/cdepillabout/stacklock2nix/pull/72)
+
 ## 5.2.0
 
 *   Adds `all-cabal-nixes` argument to stacklock2nix.  This gives an
