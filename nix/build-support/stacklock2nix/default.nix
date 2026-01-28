@@ -520,6 +520,7 @@ let
           mkdir -p "$out"
           cd "$out"
           ${lib.concatMapStrings copyForPkg pkgs}
+          # the derivation must not fail in case the very last `copyForPkg` fails
           true
         '';
 
