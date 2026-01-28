@@ -1,5 +1,5 @@
 
-## 5.2.1
+## 5.2.2
 
 *   Handle `splitmix >= 0.1.3.2` no longer having a `testu01` test suite.
     Starting in splitmix-0.1.3.2, the testu01 test suite was removed and moved
@@ -9,6 +9,26 @@
 *   Add `dontCheck` for `integer-logarithms`. The test suite requires a version
     of QuickCheck that is not in Stackage LTS-24.
     [#72](https://github.com/cdepillabout/stacklock2nix/pull/72)
+
+## 5.2.1
+
+*   Mark several additional packages as `dontCheck` in `suggestedOverlay` due to
+    circular dependencies in their test suites:
+
+    - `call-stack`
+    - `optparse-applicative`
+    - `prettyprinter-ansi-terminal`
+    - `tasty`
+    - `temporary`
+
+    [#69](https://github.com/cdepillabout/stacklock2nix/pull/69)
+
+*   Change `regex-tdfa` to fully disable tests (previously only ran a subset).
+    [#69](https://github.com/cdepillabout/stacklock2nix/pull/69)
+
+*   Fix `test-framework` to only require the `libxml` system dependency for
+    versions before 0.8.2.2. Newer versions no longer need this dependency.
+    [#69](https://github.com/cdepillabout/stacklock2nix/pull/69)
 
 ## 5.2.0
 
