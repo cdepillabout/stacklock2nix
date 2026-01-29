@@ -1,3 +1,10 @@
+## 5.2.3
+
+*   Fix build failure when using `all-cabal-nixes` and the last package in the
+    list is a duplicate. The derivation would fail with exit code 1 due to a
+    shell scripting issue.
+    [#70](https://github.com/cdepillabout/stacklock2nix/pull/70)
+    Thanks [@Mr-Andersen](https://github.com/Mr-Andersen)!
 
 ## 5.2.2
 
