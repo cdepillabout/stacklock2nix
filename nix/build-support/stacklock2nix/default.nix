@@ -257,18 +257,31 @@
 assert stackYaml != null || stackYamlLock != null;
 
 let
+  # Throw a clear error if the path is missing, instead of a bare
+  # `path '...' does not exist` from deep inside the YAML-reading IFD.
+  # assertPathExists :: String -> Path -> Path
+  assertPathExists = fileDesc: path:
+    if builtins.pathExists path then
+      path
+    else
+      throw
+        ("stacklock2nix: ${fileDesc} not found at ${toString path}.  This usually " +
+         "means stacklock2nix is being evaluated without the full repository present " +
+         "(for example, a Docker build that copies only a subset of the source tree).");
+
   stackYamlReal =
     if stackYaml == null then
       builtins.throw
         "ERROR: logic for inferring the stack.yaml path from stack.yaml.lock path has not yet been implemented.  Please send a PR!"
     else
-      stackYaml;
+      assertPathExists "stack.yaml" stackYaml;
 
   stackYamlLockReal =
-    if stackYamlLock == null then
-      stackYaml + ".lock"
-    else
-      stackYamlLock;
+    assertPathExists "stack.yaml.lock"
+      (if stackYamlLock == null then
+        stackYaml + ".lock"
+      else
+        stackYamlLock);
 
   readYAML = callPackage ./read-yaml.nix {};
 
